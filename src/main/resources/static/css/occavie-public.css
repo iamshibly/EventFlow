@@ -462,3 +462,21 @@ body.contact-dashboard-body .contact-hero-copy { margin-bottom: 4px; }
 .ov-pagination[hidden], .ov-event-grid[hidden] { display: none; }
 @media (max-width: 960px) { .ov-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .ov-filters { grid-template-columns: 1fr; } .ov-field-search { grid-column: auto; } }
+
+/* ---------- booking: demo labelling, mobile booking bar, registration status ---------- */
+.ov-demo-banner { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; margin-bottom: 20px; border-radius: var(--radius); background: var(--warning-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent); }
+.ov-demo-banner > i { color: var(--warning); margin-top: 2px; }
+.ov-demo-banner div { display: grid; gap: 2px; font-size: .9rem; }
+.ov-demo-banner span { color: var(--ink-2); }
+.ov-demo-banner.inline { align-items: center; margin: 0 0 16px; text-align: left; }
+.ov-demo-note { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--warning-soft); color: var(--ink-2); font-size: .82rem; font-weight: 600; }
+.ov-demo-note i { color: var(--warning); }
+.ov-booking-panel:focus { outline: none; }
+.ov-booking-panel:target { box-shadow: var(--shadow-lg), 0 0 0 3px var(--teal); }
+.ov-mobile-book { display: none; }
+@media (max-width: 1000px) {
+  .ov-mobile-book { position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -4px 16px rgba(14,27,42,.1); }
+  .ov-mobile-book div { display: grid; line-height: 1.2; } .ov-mobile-book small { color: var(--muted); font-size: .74rem; font-weight: 600; } .ov-mobile-book strong { font-size: 1.15rem; }
+  .ov-booking-panel { order: 0; position: static; scroll-margin-top: 90px; }
+  body.ov-details-page { padding-bottom: 76px; }
+}

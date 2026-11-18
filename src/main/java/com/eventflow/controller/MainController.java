@@ -41,6 +41,7 @@ public class MainController {
     private final EventGalleryService eventGalleryService;
     private final AnalyticsService analyticsService;
     private final ViewFormatter display;
+    private final com.eventflow.service.NotificationService notificationService;
 
 
 
@@ -188,6 +189,12 @@ public class MainController {
         List<Event> dashboardEvents = registeredEvents.stream().filter(eventService::isUpcoming).limit(5).toList();
         model.addAttribute("dashboardEvents", dashboardEvents);
         model.addAttribute("registrationCounts", eventService.registrationCounts(dashboardEvents));
+        // Real data only: this participant's own bookings, completed events and notifications.
+        model.addAttribute("registrationByEvent", registrations.stream()
+                .collect(java.util.stream.Collectors.toMap(Registration::getEventId, r -> r, (a, b) -> a)));
+        model.addAttribute("previousEvents", registeredEvents.stream().filter(eventService::isCompleted)
+                .sorted(java.util.Comparator.comparing(Event::getDate).reversed()).limit(5).toList());
+        model.addAttribute("recentNotifications", notificationService.findRecentForUser(user.getId()).stream().limit(5).toList());
         return "dashboard";
     }
 

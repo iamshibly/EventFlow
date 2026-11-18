@@ -80,8 +80,9 @@
         </section>
       </div>
     </div>
-    <aside class="ov-booking-panel" id="tickets" aria-label="Event tickets and registration">
+    <aside class="ov-booking-panel" id="tickets" tabindex="-1" aria-label="Event tickets and registration">
       <div class="ov-booking-heading"><p class="ov-eyebrow">RESERVE YOUR SPOT</p><h2>Tickets</h2><p>Choose your admission option.</p></div>
+      <p class="ov-demo-note" th:if="${@display.paid(event)}"><i class="bi bi-info-circle" aria-hidden="true"></i> Paid checkout is a demo. No real payment is taken.</p>
       <div class="ov-booking-top"><strong class="ov-starting-price" th:text="${startingPrice}">Free</strong><span th:text="${@display.status(event) == 'COMPLETED' ? 'Event ended' : (registrationCount >= event.capacity ? 'Fully booked' : (event.capacity - registrationCount) + ' spots left')}">Available</span></div>
       <div th:if="${!#lists.isEmpty(ticketTypes)}">
         <article class="ov-ticket" th:each="ticket : ${ticketTypes}">
@@ -124,6 +125,11 @@
     </aside>
   </div>
 </main>
+<div class="ov-mobile-book" th:if="${@display.status(event) != 'COMPLETED'}">
+  <div><small th:text="${isRegistered ? 'Registration status' : 'From'}">From</small><strong th:text="${isRegistered ? 'Registered' : startingPrice}">Free</strong></div>
+  <a class="primary-button" href="#tickets" th:if="${!isRegistered}">Get tickets</a>
+  <a class="secondary-button" th:if="${isRegistered}" th:href="@{/participant/registrations}">My tickets</a>
+</div>
 <div th:replace="~{fragments :: siteFooter}"></div>
 <div class="feedback-modal" id="feedbackModal" aria-hidden="true" th:if="${user != null and user.role == 'PARTICIPANT' and isRegistered and @display.status(event) == 'COMPLETED'}">
     <div class="feedback-modal-card" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">

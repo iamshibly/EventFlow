@@ -71,4 +71,16 @@ class OccavieBrandingTest {
         assertNull(SecurityConfig.safeRedirect("/a/../b"));
         assertNull(SecurityConfig.safeRedirect(null));
     }
+
+    @Test
+    void simulatedPaymentsAreAlwaysLabelledAsDemo() throws IOException {
+        String checkout = Files.readString(RESOURCES.resolve("templates/payment-checkout.html"));
+        assertTrue(checkout.contains("Demo checkout") && checkout.contains("No real payment"));
+        String result = Files.readString(RESOURCES.resolve("templates/payment-result.html"));
+        assertTrue(result.contains("simulated payment"));
+        String dashboard = Files.readString(RESOURCES.resolve("templates/dashboard.html"));
+        assertTrue(dashboard.contains("Simulated ticket value") && dashboard.contains("not revenue"));
+        String service = Files.readString(Path.of("src/main/java/com/eventflow/service/RegistrationDocumentService.java"));
+        assertTrue(service.contains("Demo payment - no real charge") && service.contains("DEMO PAYMENT RECEIPT"));
+    }
 }

@@ -159,6 +159,8 @@ Render supplies `PORT` automatically. MongoDB Atlas stores persistent applicatio
 
 ## Simulated checkout (Occavie student project)
 
+Paid checkout is a **demo**. The checkout page, result page, PDF ticket and receipt are all labelled as demo, and dashboard "ticket value" is shown as *simulated ticket value, not revenue*. Booking rules (duplicate registration, sold-out events and ticket types, coupon limits and discount maths, confirmation) are covered by `BookingFlowTest`.
+
 Free tickets register directly. Paid tickets open `/participant/events/{eventId}/checkout` with the existing bKash, Nagad and Visa logos. Choose a method and optionally apply a valid promo code, then select **Proceed to Payment**. Occavie records a simulated payment and confirms the ticket immediately. No merchant account, real charge, external checkout or callback setup is needed.
 
 The backend recalculates prices and coupon discounts and checks event capacity, ticket availability, duplicate registrations and coupon usage. The confirmed registration and its simulated payment record are saved together in MongoDB, and the participant and organizer are notified. Demo booking cancellation also updates the stored payment status. The project uses the existing MongoDB transaction manager; deploying with MongoDB Atlas supports atomic confirmation.

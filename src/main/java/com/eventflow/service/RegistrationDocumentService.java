@@ -36,12 +36,12 @@ import java.util.Locale;
 /** Generates repeatable, branded PDFs directly from saved registrations; no payment integration. */
 @Service
 public class RegistrationDocumentService {
-    private static final Color NAVY = new Color(23, 18, 58);
-    private static final Color GOLD = new Color(108, 76, 255);
-    private static final Color MUTED = new Color(100, 115, 136);
-    private static final Color LINE = new Color(223, 229, 237);
-    private static final Color GREEN = new Color(17, 132, 81);
-    private static final Color BACKGROUND = new Color(248, 249, 252);
+    private static final Color NAVY = new Color(14, 27, 42);
+    private static final Color GOLD = new Color(11, 127, 126);
+    private static final Color MUTED = new Color(91, 103, 115);
+    private static final Color LINE = new Color(228, 230, 225);
+    private static final Color GREEN = new Color(11, 122, 85);
+    private static final Color BACKGROUND = new Color(250, 250, 247);
     private static final DateTimeFormatter EVENT_DATE = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
     private static final DateTimeFormatter EVENT_TIME = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH);
     private static final DateTimeFormatter PAYMENT_DATE = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a", Locale.ENGLISH);
@@ -64,7 +64,7 @@ public class RegistrationDocumentService {
 
         // Paper shadow, round corners and a two-part ticket stub, matching the approved ticket.
         for (int i = 14; i >= 1; i--) {
-            g.setColor(new Color(16, 29, 56, 2));
+            g.setColor(new Color(14, 27, 42, 2));
             g.fill(new RoundRectangle2D.Double(25 - i / 3.0, 30 + i / 2.0,
                     1350 + 2 * (i / 3.0), 698, 36, 36));
         }
@@ -75,16 +75,16 @@ public class RegistrationDocumentService {
         g.draw(new RoundRectangle2D.Double(25, 24, 1350, 710, 34, 34));
         Shape previousClip = g.getClip();
         g.clipRect(26, 25, 994, 708);
-        g.setColor(new Color(243, 240, 255));
+        g.setColor(new Color(244, 250, 249));
         g.fillOval(885, 323, 315, 290);
         g.setColor(new Color(255, 255, 255));
         g.fillOval(930, 297, 267, 293);
-        g.setColor(new Color(238, 233, 255));
+        g.setColor(new Color(241, 249, 248));
         g.fillOval(783, 456, 225, 250);
         g.setClip(previousClip);
 
         int splitX = 1024;
-        g.setColor(new Color(210, 216, 225));
+        g.setColor(new Color(203, 209, 204));
         g.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,
                 0f, new float[]{9f, 11f}, 0f));
         g.drawLine(splitX, 46, splitX, 713);
@@ -97,7 +97,7 @@ public class RegistrationDocumentService {
         g.drawArc(splitX - 24, 713, 48, 48, 0, 180);
 
         logo(g, 80, 79, 1.0);
-        tracked(g, "EVENT TICKET", 800, 121, new Font("SansSerif", Font.BOLD, 17), MUTED, 4);
+        tracked(g, "EVENT TICKET", 745, 121, new Font("SansSerif", Font.BOLD, 17), MUTED, 4);
         g.setColor(GOLD);
         g.fillRoundRect(969, 106, 28, 3, 3, 3);
 
@@ -145,7 +145,7 @@ public class RegistrationDocumentService {
                 new Font("SansSerif", Font.PLAIN, 20), 13, NAVY);
 
         // Right stub: decorative admission details within the approved perforated layout.
-        g.setColor(new Color(234, 249, 239));
+        g.setColor(new Color(227, 245, 236));
         g.fillRoundRect(1060, 85, 275, 75, 40, 40);
         g.setColor(GREEN);
         g.fillOval(1084, 103, 38, 38);
@@ -153,10 +153,10 @@ public class RegistrationDocumentService {
         g.setStroke(new BasicStroke(4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g.drawLine(1095, 123, 1102, 130);
         g.drawLine(1102, 130, 1115, 113);
-        drawFit(g, "Confirmed", 1145, 136, 180,
+        drawFit(g, bookingStatus(registration), 1145, 136, 180,
                 new Font("Serif", Font.BOLD, 30), 20, NAVY);
         g.setStroke(new BasicStroke(1.2f));
-        g.setColor(new Color(250, 237, 202));
+        g.setColor(new Color(232, 247, 245));
         g.fill(new RoundRectangle2D.Double(1108, 241, 177, 174, 26, 26));
         bigTicketIcon(g, 1148, 284);
         tracked(g, "ENTRY PASS", 1101, 469, new Font("SansSerif", Font.BOLD, 18), GOLD, 3);
@@ -167,6 +167,10 @@ public class RegistrationDocumentService {
                 new Font("SansSerif", Font.BOLD, 16), 11, NAVY);
         drawFit(g, "Present at event entry", 1077, 674, 254,
                 new Font("SansSerif", Font.PLAIN, 17), 13, MUTED);
+        if (isDemoPayment(registration)) {
+            drawFit(g, "Demo payment - no real charge", 1077, 706, 254,
+                    new Font("SansSerif", Font.BOLD, 15), 11, new Color(176, 48, 48));
+        }
 
         g.dispose();
         return image;
@@ -185,7 +189,7 @@ public class RegistrationDocumentService {
         g.setStroke(new BasicStroke(1.4f));
         g.draw(new RoundRectangle2D.Double(34, 32, 932, 1348, 24, 24));
         logo(g, 78, 87, 1.15);
-        tracked(g, "PAYMENT RECEIPT", 650, 141,
+        tracked(g, "DEMO PAYMENT RECEIPT", 540, 141,
                 new Font("SansSerif", Font.BOLD, 15), MUTED, 3);
         g.setColor(LINE);
         g.drawLine(75, 180, 924, 180);
@@ -201,7 +205,7 @@ public class RegistrationDocumentService {
                         + "  |  " + clean(event.getLocation(), "TBA"),
                 87, y + 18, 838, new Font("SansSerif", Font.PLAIN, 19), 15, MUTED);
         int summaryY = Math.max(450, y + 58);
-        g.setColor(new Color(243, 240, 255));
+        g.setColor(new Color(232, 247, 245));
         g.fillRoundRect(80, summaryY, 838, 142, 18, 18);
         tracked(g, "TOTAL AMOUNT", 109, summaryY + 46,
                 new Font("SansSerif", Font.BOLD, 16), MUTED, 2);
@@ -240,7 +244,7 @@ public class RegistrationDocumentService {
 
         g.setColor(LINE);
         g.drawLine(84, 1322, 916, 1322);
-        drawFit(g, "Occavie registration record  -  Make every moment count.", 86, 1353, 800,
+        drawFit(g, "Demo receipt: simulated payment, no real funds were collected.  |  Occavie", 86, 1353, 800,
                 new Font("SansSerif", Font.PLAIN, 17), 13, MUTED);
         g.dispose();
         return image;
@@ -283,6 +287,15 @@ public class RegistrationDocumentService {
         rightAligned(g, value, 905, baseline, new Font("SansSerif", Font.BOLD, 19), 13, NAVY, 575);
     }
 
+    /** Booking status printed on the ticket. */
+    private String bookingStatus(Registration registration) {
+        return "Confirmed";
+    }
+
+    private boolean isDemoPayment(Registration registration) {
+        return registration.getPaymentStatus() != null && registration.getPaymentStatus().startsWith("PAID");
+    }
+
     private String money(BigDecimal value) {
         BigDecimal number = value == null ? BigDecimal.ZERO : value;
         return "BDT " + number.setScale(2, RoundingMode.HALF_UP).toPlainString();
@@ -301,7 +314,7 @@ public class RegistrationDocumentService {
     private String reference(Registration registration) {
         String value = registration.getPaymentReference();
         if (value != null && !value.isBlank()) return value;
-        return registration.getId() == null ? "-" : "EF-" + registration.getId().toUpperCase(Locale.ROOT);
+        return registration.getId() == null ? "-" : "OV-" + registration.getId().toUpperCase(Locale.ROOT);
     }
 
     private String clean(String value, String fallback) {
@@ -421,7 +434,7 @@ public class RegistrationDocumentService {
         g.drawLine(x + 7, y + 18, x + 21, y + 18);
     }
     private void bigTicketIcon(Graphics2D g, int x, int y) {
-        g.setColor(new Color(195, 140, 5));
+        g.setColor(new Color(11, 127, 126));
         g.setStroke(new BasicStroke(7));
         g.drawRoundRect(x, y, 103, 79, 14, 14);
         g.setStroke(new BasicStroke(4f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,

@@ -568,3 +568,15 @@ td.action-cell > *:last-child { margin-right: 0; }
 .progress-track > span { background: var(--teal); }
 .analytics-card-head span, .section-kicker { color: var(--brand); }
 .topbar { background: color-mix(in srgb, var(--canvas) 92%, transparent); }
+
+/* ---------- dashboards: quick actions + activity list ---------- */
+.quick-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.quick-actions a { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font-weight: 600; font-size: .9rem; text-decoration: none; transition: border-color .15s, background .15s; }
+.quick-actions a i { color: var(--brand); }
+.quick-actions a:hover { border-color: var(--teal); background: var(--brand-soft); }
+.activity-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.activity-list li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--radius-sm); }
+.activity-list li > i { color: var(--muted); }
+.activity-list li.is-unread { background: var(--brand-soft); } .activity-list li.is-unread > i { color: var(--brand); }
+.activity-list small { color: var(--muted); white-space: nowrap; }
+.dashboard-content-grid { gap: 20px; }

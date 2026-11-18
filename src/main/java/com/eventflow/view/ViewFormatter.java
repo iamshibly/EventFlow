@@ -75,11 +75,24 @@ public class ViewFormatter {
         BigDecimal price = EventRules.basePrice(event);
         return !EventRules.isPaid(event) || price.signum() <= 0 ? "Free" : bdt(price);
     }
+    private static final java.util.Set<String> COVER_CATEGORIES = java.util.Set.of("technology", "business", "education",
+            "health", "music", "sports", "career", "community", "design");
+
+    /** The event's own photo, or an original category cover (3 variants per category, chosen by event id). */
     public String listingImageUrl(Event event) {
-        if (event == null || event.getImageUrl() == null || event.getImageUrl().isBlank()) {
-            return "/images/event-visual.png";
+        if (event != null && event.getImageUrl() != null && !event.getImageUrl().isBlank()
+                && !"/images/event-visual.png".equals(event.getImageUrl())) {
+            return event.getImageUrl();
         }
-        return event.getImageUrl();
+        return coverFor(event);
+    }
+
+    public static String coverFor(Event event) {
+        String category = event == null || event.getCategory() == null ? "" : event.getCategory().trim().toLowerCase(java.util.Locale.ROOT);
+        String slug = COVER_CATEGORIES.contains(category) ? category : "other";
+        String key = event == null || event.getId() == null ? (event == null || event.getTitle() == null ? "" : event.getTitle()) : event.getId();
+        int variant = Math.floorMod((key + (event == null || event.getTitle() == null ? "" : event.getTitle())).hashCode(), 3) + 1;
+        return "/images/covers/" + slug + "-" + variant + ".webp";
     }
 
     public String ticketPrice(EventTicketType ticket) {

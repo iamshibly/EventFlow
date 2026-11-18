@@ -6,7 +6,9 @@
 <div class="app-shell">
     <div th:replace="~{fragments :: sidebar('dashboard')}"></div>
     <main class="app-main">
-        <section class="page-heading dashboard-heading">
+        <section class="page-heading dashboard-heading dash-photo-hero">
+            <img class="dash-hero-img" alt="" width="1600" height="600" fetchpriority="high"
+                 th:src="${user.role == 'PARTICIPANT' ? '/images/home-conference-hero.webp' : (user.role == 'ORGANIZER' ? '/images/covers/business-2.webp' : '/images/covers/technology-1.webp')}" src="/images/home-conference-hero.webp">
             <div>
                 <span class="role-label" th:text="${user.role}">PARTICIPANT</span>
                 <h1 th:text="'Welcome back, ' + ${user.fullName}">Welcome back</h1>
@@ -40,6 +42,28 @@
             <a th:href="@{/profile}"><i class="bi bi-person-circle"></i><span>Profile &amp; settings</span></a>
             <a th:href="@{/contact}"><i class="bi bi-headset"></i><span>Support</span></a>
         </nav>
+
+        <section class="dash-cards" th:if="${cardEvents != null and !#lists.isEmpty(cardEvents)}" aria-labelledby="dashCardsHeading">
+            <div class="dash-cards-head">
+                <div><span class="section-kicker">EXPLORE</span><h2 id="dashCardsHeading" th:text="${cardHeading}">Recommended for you</h2><p th:text="${cardSubheading}">Subheading</p></div>
+                <a class="secondary-button" th:href="${user.role == 'ADMIN' ? '/admin/events' : (user.role == 'ORGANIZER' ? '/organizer/events' : '/events')}" href="/events">View all <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+            </div>
+            <div class="dash-card-grid">
+                <a class="dash-card" th:each="event : ${cardEvents}" th:href="${user.role == 'PARTICIPANT' ? '/events/' + event.id : (user.role == 'ORGANIZER' ? '/organizer/events/' + event.id + '/participants' : '/events/' + event.id)}" href="/events">
+                    <span class="dash-card-photo" th:with="efCover=${@display.listingImageUrl(event)}">
+                        <img data-event-image th:attr="data-event-category=${event.category}" th:src="${efCover}" src="/images/event-visual.png" th:alt="${event.title + ' cover image'}" alt="Event cover" width="480" height="300" loading="lazy" decoding="async">
+                        <span class="dash-card-tag" th:text="${event.category}">Technology</span>
+                    </span>
+                    <span class="dash-card-body">
+                        <span class="dash-card-date"><i class="bi bi-calendar3" aria-hidden="true"></i> <span th:text="${@display.eventDate(event)}">Date</span></span>
+                        <strong th:text="${event.title}">Event title</strong>
+                        <span class="dash-card-meta"><i class="bi bi-geo-alt" aria-hidden="true"></i> <span th:text="${event.location}">Venue</span></span>
+                        <span class="dash-card-price" th:text="${cardPrices[event.id]}">Free</span>
+                    </span>
+                </a>
+            </div>
+        </section>
+
         <section class="metric-grid" th:classappend="${user.role == 'PARTICIPANT'} ? ' ef-participant-metrics' : ''">
             <article class="metric-card" th:if="${user.role != 'PARTICIPANT'}"><div class="metric-icon"><i class="bi bi-calendar2-event"></i></div><div><span th:text="${metricOneLabel}">Metric</span><strong th:text="${metricOneValue}">0</strong></div></article>
             <article class="metric-card" th:if="${user.role != 'PARTICIPANT'}"><div class="metric-icon"><i class="bi bi-clock-history"></i></div><div><span th:text="${metricTwoLabel}">Metric</span><strong th:text="${metricTwoValue}">0</strong></div></article>

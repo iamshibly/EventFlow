@@ -177,7 +177,7 @@ public class MainController {
     }
 
     private static String cover(Event event) {
-        return event.getImageUrl() != null && event.getImageUrl().startsWith("/event-images/") ? event.getImageUrl() : "/images/og-default.png";
+        return event.getImageUrl() != null && event.getImageUrl().startsWith("/event-images/") ? event.getImageUrl() : com.eventflow.view.ViewFormatter.coverFor(event);
     }
 
     /** schema.org/Event structured data. Every value is JSON-escaped and angle brackets are \\u-escaped so it is safe inside a script tag. */
@@ -284,6 +284,9 @@ public class MainController {
         model.addAttribute("recentNotifications", notificationService.findRecentForUser(user.getId()).stream().limit(5).toList());
         model.addAttribute("savedEvents", savedEventService.savedEvents(user).stream().limit(6).toList());
         model.addAttribute("suggestedEvents", suggestionService.forParticipant(user, 3));
+        List<Event> recommended = events.stream().filter(eventService::isUpcoming)
+                .filter(event -> !ids.contains(event.getId())).limit(8).toList();
+        addPhotoCards(model, "Recommended for you", "Upcoming events you have not booked yet", recommended);
         return "dashboard";
     }
 
@@ -308,6 +311,8 @@ public class MainController {
         model.addAttribute("dashboardEvents", dashboardEvents);
         model.addAttribute("registrationCounts", eventService.registrationCounts(dashboardEvents));
         model.addAttribute("analytics", analyticsService.forEvents(events));
+        addPhotoCards(model, "Your events", "Your upcoming events at a glance",
+                events.stream().filter(eventService::isUpcoming).limit(8).toList());
         return "dashboard";
     }
 
@@ -331,6 +336,15 @@ public class MainController {
         model.addAttribute("registrationCounts", eventService.registrationCounts(dashboardEvents));
         model.addAttribute("recentUsers", userService.findDashboardPreview());
         model.addAttribute("analytics", analyticsService.forEvents(events));
+        addPhotoCards(model, "Upcoming on Occavie", "The next events across the platform",
+                events.stream().filter(eventService::isUpcoming).limit(8).toList());
         return "dashboard";
+    }
+
+    private void addPhotoCards(Model model, String heading, String subheading, List<Event> cards) {
+        model.addAttribute("cardHeading", heading);
+        model.addAttribute("cardSubheading", subheading);
+        model.addAttribute("cardEvents", cards);
+        model.addAttribute("cardPrices", startingPriceLabels(cards));
     }
 }

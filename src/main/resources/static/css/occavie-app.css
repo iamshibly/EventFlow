@@ -651,3 +651,30 @@ td.action-cell > *:last-child { margin-right: 0; }
 .dashboard-content-grid { grid-template-columns: minmax(0, 1fr); }
 .dashboard-content-grid > * { min-width: 0; }
 @media (min-width: 1100px) { .dashboard-content-grid:not(.ef-single-column) { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); } }
+
+/* ---- Photo dashboard hero + event photo cards ---- */
+.dash-photo-hero { isolation: isolate; background: #0E1B2A; box-shadow: 0 20px 50px rgba(14,27,42,.35); min-height: 190px; }
+.dash-photo-hero .dash-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.dash-photo-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(95deg, rgba(14,27,42,.92), rgba(14,27,42,.55) 60%, rgba(14,27,42,.2)); }
+.dash-photo-hero::after { display: none; }
+.dash-photo-hero h1, .dash-photo-hero p { color: #fff; }
+.dash-photo-hero .role-label { background: rgba(255,255,255,.18); color: #fff; }
+.dash-cards { display: grid; gap: 16px; }
+.dash-cards-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+.dash-cards-head h2 { margin: 2px 0 0; }
+.dash-cards-head p { margin: 4px 0 0; color: var(--muted); }
+.dash-card-grid { display: grid; gap: 16px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.dash-card { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; text-decoration: none; color: inherit; box-shadow: var(--shadow-sm); transition: transform .18s, box-shadow .18s; }
+.dash-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.dash-card-photo { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface-2); }
+.dash-card-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+.dash-card:hover .dash-card-photo img { transform: scale(1.06); }
+.dash-card-tag { position: absolute; left: 10px; top: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.94); color: #0E1B2A; font-size: .72rem; font-weight: 800; letter-spacing: .02em; }
+.dash-card-body { display: grid; gap: 6px; padding: 14px 16px 16px; }
+.dash-card-body strong { font-size: 1.02rem; line-height: 1.25; }
+.dash-card-date { color: var(--brand); font-weight: 700; font-size: .82rem; }
+.dash-card-meta { color: var(--muted); font-size: .84rem; }
+.dash-card-price { margin-top: 4px; font-weight: 800; color: var(--ink); }
+@media (max-width: 1280px) { .dash-card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .dash-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .dash-card-grid { grid-template-columns: minmax(0, 1fr); } }

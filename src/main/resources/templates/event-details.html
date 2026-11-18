@@ -13,7 +13,7 @@
     <div class="ov-details-content">
       <section class="ov-details-overview">
         <img class="ov-details-cover" data-event-image th:attr="data-event-category=${event.category}"
-             th:src="${event.imageUrl != null and !#strings.isEmpty(event.imageUrl) ? event.imageUrl : '/images/event-visual.png'}" src="/images/event-visual.png" th:alt="${event.title}" alt="Event image">
+             th:with="efCover=${@display.listingImageUrl(event)}" th:src="${efCover}" src="/images/event-visual.png" th:alt="${event.title}" alt="Event image">
         <div class="ov-details-tags"><span class="ov-card-tag" th:text="${event.category}">Technology</span><span class="ov-status-pill" th:text="${@display.status(event)}">UPCOMING</span></div>
         <h1 th:text="${event.title}">Event title</h1>
         <div class="ov-actions-row" aria-label="Event actions">

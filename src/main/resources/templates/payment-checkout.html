@@ -10,7 +10,7 @@
     <div class="ef-payment-heading"><span>EVENT CHECKOUT</span><h1>Complete Registration</h1>
       <p>Review your ticket and complete your registration.</p></div>
     <div class="ef-checkout-event">
-      <img th:src="${event.imageUrl != null and !event.imageUrl.isBlank() ? event.imageUrl : '/images/event-visual.png'}" src="/images/event-visual.png" alt="Event cover" onerror="this.onerror=null;this.src='/images/event-visual.png'">
+      <img th:with="efCover=${@display.listingImageUrl(event)}" th:src="${efCover}" src="/images/event-visual.png" alt="Event cover" onerror="this.onerror=null;this.src='/images/event-visual.png'">
       <div class="ef-checkout-event-info"><h2 th:text="${event.title}">Event name</h2>
         <p><i class="bi bi-calendar3"></i> <span th:text="${@display.eventDate(event) + ' · ' + @display.eventTime(event)}">Date and time</span></p>
         <p><i class="bi bi-geo-alt"></i> <span th:text="${event.location}">Location</span></p>

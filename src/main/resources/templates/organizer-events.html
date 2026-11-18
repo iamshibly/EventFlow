@@ -46,12 +46,28 @@
                         <div><span>Registrations</span><strong th:text="${registrationCounts[event.id] + ' / ' + event.capacity}">0 / 100</strong></div>
                         <div class="progress-track"><span th:style="|width:${event.capacity > 0 ? (registrationCounts[event.id] * 100 / event.capacity) : 0}%|"></span></div>
                     </div>
-                    <div class="card-actions">
-                        <a class="secondary-button program-manage-button" th:href="@{'/organizer/events/' + ${event.id} + '/program'}"><i class="bi bi-sliders"></i><span th:text="${@display.status(event) == 'COMPLETED' ? 'View Setup' : 'Setup'}">Setup</span></a>
-                        <a class="secondary-button" th:href="@{'/organizer/events/' + ${event.id} + '/participants'}"><i class="bi bi-people"></i>Participants</a>
-                        <a class="secondary-button" th:href="@{/organizer/feedback}"><i class="bi bi-star"></i>Feedback</a>
-                        <a class="secondary-button" th:if="${@display.status(event) != 'COMPLETED'}" th:href="@{'/organizer/events/' + ${event.id} + '/edit'}"><i class="bi bi-pencil"></i>Edit</a>
-                        <form class="inline-form confirm-form" th:if="${@display.status(event) != 'COMPLETED'}" th:action="@{'/organizer/events/' + ${event.id} + '/delete'}" method="post" th:attr="data-confirm-title='Delete ' + ${event.title} + '?',data-confirm='Registered participants will be notified and the event will be removed permanently.',data-confirm-action='Delete Event'">
+                    <div class="card-actions" th:with="st=${@display.status(event)}">
+                        <th:block th:if="${st == 'DRAFT'}">
+                            <a class="primary-button" th:href="@{/organizer/events/{id}/wizard(id=${event.id},step=1)}"><i class="bi bi-pencil-square"></i>Continue editing</a>
+                            <a class="secondary-button" th:href="@{'/events/' + ${event.id}}"><i class="bi bi-eye"></i>Preview</a>
+                        </th:block>
+                        <th:block th:if="${st != 'DRAFT'}">
+                            <a class="secondary-button program-manage-button" th:if="${st != 'CANCELLED'}" th:href="@{'/organizer/events/' + ${event.id} + '/program'}"><i class="bi bi-sliders"></i><span th:text="${st == 'COMPLETED' ? 'View Setup' : 'Setup'}">Setup</span></a>
+                            <a class="secondary-button" th:href="@{'/organizer/events/' + ${event.id} + '/participants'}"><i class="bi bi-people"></i>Participants</a>
+                            <a class="secondary-button" th:if="${st == 'UPCOMING'}" th:href="@{'/organizer/events/' + ${event.id} + '/check-in'}"><i class="bi bi-qr-code-scan"></i>Check-in</a>
+                            <a class="secondary-button" th:if="${st == 'UPCOMING'}" th:href="@{'/organizer/events/' + ${event.id} + '/waitlist'}"><i class="bi bi-hourglass-split"></i>Waitlist</a>
+                            <a class="secondary-button" th:href="@{/organizer/feedback}"><i class="bi bi-star"></i>Feedback</a>
+                            <a class="secondary-button" th:if="${st == 'UPCOMING'}" th:href="@{'/organizer/events/' + ${event.id} + '/edit'}"><i class="bi bi-pencil"></i>Edit &amp; reschedule</a>
+                        </th:block>
+                        <form class="inline-form confirm-form" method="post" th:action="@{'/organizer/events/' + ${event.id} + '/duplicate'}"
+                              data-confirm-title="Duplicate this event?" data-confirm="A private draft copy is created. You choose a new date and time before publishing." data-confirm-action="Duplicate">
+                            <button class="secondary-button" type="submit"><i class="bi bi-copy"></i>Duplicate</button>
+                        </form>
+                        <form class="inline-form confirm-form" th:if="${st == 'UPCOMING'}" method="post" th:action="@{'/organizer/events/' + ${event.id} + '/cancel'}"
+                              th:attr="data-confirm-title='Cancel ' + ${event.title} + '?',data-confirm='Registered participants and the waitlist are notified and the event is closed. This cannot be undone.',data-confirm-action='Cancel Event'">
+                            <button class="danger-button" type="submit"><i class="bi bi-x-octagon"></i>Cancel event</button>
+                        </form>
+                        <form class="inline-form confirm-form" th:if="${st == 'DRAFT' or st == 'UPCOMING'}" th:action="@{'/organizer/events/' + ${event.id} + '/delete'}" method="post" th:attr="data-confirm-title='Delete ' + ${event.title} + '?',data-confirm='The event and its data are removed permanently. Registered participants are notified.',data-confirm-action='Delete Event'">
                             <button class="danger-icon-button" type="submit" title="Delete event"><i class="bi bi-trash3"></i></button>
                         </form>
                     </div>

@@ -29,11 +29,12 @@ public class RegistrationDocumentController {
     private final RegistrationRepository registrationRepository;
     private final EventRepository eventRepository;
     private final RegistrationDocumentService documents;
+    private final com.eventflow.service.RegistrationService registrationService;
 
     @GetMapping("/participant/registrations/{registrationId}/ticket.pdf")
     public ResponseEntity<byte[]> ticket(@PathVariable String registrationId,
                                          Authentication authentication) {
-        Registration registration = ownedRegistration(registrationId, authentication);
+        Registration registration = registrationService.ensureTicketCode(ownedRegistration(registrationId, authentication));
         Event event = activeEvent(registration);
         try {
             return download(documents.ticket(registration, event), "occavie-ticket-", registration);

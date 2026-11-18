@@ -154,6 +154,18 @@ public class AdminController {
         return "redirect:/admin/events";
     }
 
+    @PostMapping("/admin/events/{id}/cancel")
+    public String cancelEvent(@PathVariable String id, @RequestParam(required = false) String reason,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            eventService.cancelAsAdmin(id, reason);
+            redirectAttributes.addFlashAttribute("toastSuccess", "Event cancelled. Registered participants were notified.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("toastError", ex.getMessage());
+        }
+        return "redirect:/admin/events";
+    }
+
     @GetMapping("/admin/past-events")
     public String pastEvents(Model model) {
         List<Event> events = eventService.findCompletedAll();

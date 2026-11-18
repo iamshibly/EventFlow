@@ -55,5 +55,8 @@ public class Event {
     /** Internal write-conflict guard for atomic ticket reservations in MongoDB. */
     private long bookingVersion;
 
+    /** Set when an event is cancelled (status CANCELLED); registrations are kept as history. */
+    private String cancellationReason;
+
 
 }

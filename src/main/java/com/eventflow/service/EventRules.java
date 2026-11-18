@@ -11,6 +11,8 @@ public final class EventRules {
 
     public static String status(Event event) {
         if (event == null) return "UPCOMING";
+        // Lifecycle states take precedence over the date-derived COMPLETED state.
+        if ("CANCELLED".equals(event.getStatus()) || "DRAFT".equals(event.getStatus())) return event.getStatus();
         LocalDate date = event.getDate();
         if (date != null) {
             LocalDate today = LocalDate.now();
@@ -22,6 +24,20 @@ public final class EventRules {
         }
         String status = event.getStatus();
         return status == null || status.isBlank() ? "UPCOMING" : status;
+    }
+
+    /** Visible to the public (drafts are private to their organizer and admins). */
+    public static boolean isPublished(Event event) {
+        return event != null && !"DRAFT".equals(event.getStatus());
+    }
+
+    /** Open for registration: published, not cancelled and not yet finished. */
+    public static boolean bookable(Event event) {
+        return event != null && "UPCOMING".equals(status(event));
+    }
+
+    public static boolean isCancelled(Event event) {
+        return event != null && "CANCELLED".equals(event.getStatus());
     }
 
     public static String pricingType(Event event) {

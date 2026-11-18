@@ -42,13 +42,14 @@ public class MainController {
     private final AnalyticsService analyticsService;
     private final ViewFormatter display;
     private final com.eventflow.service.NotificationService notificationService;
+    private final com.eventflow.service.WaitlistService waitlistService;
 
 
 
     @GetMapping({"/", "/home"})
     public String home(Authentication authentication, Model model) {
         User user = currentUserOrNull(authentication);
-        List<Event> events = eventService.findAllSorted();
+        List<Event> events = eventService.findAllSorted().stream().filter(com.eventflow.service.EventRules::isPublished).toList();
         List<Event> upcomingEvents = events.stream()
                 .filter(eventService::isUpcoming)
                 .limit(6)
@@ -69,7 +70,7 @@ public class MainController {
     @GetMapping("/events")
     public String events(Authentication authentication, Model model) {
         User user = currentUserOrNull(authentication);
-        List<Event> events = eventService.findAllSorted();
+        List<Event> events = eventService.findAllSorted().stream().filter(com.eventflow.service.EventRules::isPublished).toList();
         // Event discovery is shared by every role; organizer-owned events stay visible.
         model.addAttribute("user", user);
         model.addAttribute("isGuest", user == null);
@@ -100,6 +101,14 @@ public class MainController {
         Event event = eventService.findOptional(id)
                 .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
                         org.springframework.http.HttpStatus.NOT_FOUND, "Event not found"));
+        // Drafts are private: only the owning organizer and admins may preview them.
+        boolean draft = !com.eventflow.service.EventRules.isPublished(event);
+        if (draft && !(user != null && ("ADMIN".equals(user.getRole())
+                || ("ORGANIZER".equals(user.getRole()) && user.getId().equals(event.getOrganizerId()))))) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND, "Event not found");
+        }
+        model.addAttribute("isDraftPreview", draft);
         var schedule = eventProgramService.findSchedule(id);
         List<EventSpeaker> speakers = eventProgramService.findSpeakers(id);
         var sponsors = eventProgramService.findSponsors(id);
@@ -125,6 +134,21 @@ public class MainController {
         boolean isRegistered = user != null && "PARTICIPANT".equals(user.getRole())
                 && registrationService.isRegistered(id, user.getId());
         model.addAttribute("isRegistered", isRegistered);
+        // Waitlist: seats held for offered participants count as taken for everyone else.
+        String viewerId = user == null ? null : user.getId();
+        boolean full = !draft && !waitlistService.hasRoom(event, viewerId);
+        var waitlistEntry = user != null && "PARTICIPANT".equals(user.getRole())
+                ? waitlistService.entryFor(id, viewerId).filter(com.eventflow.model.WaitlistEntry::isActive).orElse(null) : null;
+        var offer = waitlistService.validOffer(id, viewerId).orElse(null);
+        model.addAttribute("capacityFull", full);
+        model.addAttribute("waitlistEntry", waitlistEntry);
+        model.addAttribute("waitlistPosition", waitlistEntry == null ? 0 : waitlistService.position(id, viewerId));
+        model.addAttribute("waitlistSize", waitlistService.waitingInOrder(id).size());
+        model.addAttribute("hasOffer", offer != null);
+        model.addAttribute("offerUntil", offer == null ? "" : offer.getOfferExpiresAt()
+                .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, h:mm a")));
+        model.addAttribute("canJoinWaitlist", full && !isRegistered && waitlistEntry == null && user != null
+                && "PARTICIPANT".equals(user.getRole()) && com.eventflow.service.EventRules.bookable(event));
         model.addAttribute("myFeedback", isRegistered
                 ? feedbackService.findByEventAndParticipant(id, user.getId()).orElse(null)
                 : null);

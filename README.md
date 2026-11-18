@@ -157,6 +157,13 @@ Occavie includes a Dockerfile for deployment. In Render:
 
 Render supplies `PORT` automatically. MongoDB Atlas stores persistent application data, so the app does not depend on Render's temporary filesystem.
 
+## QR check-in, event wizard and waitlist
+
+- **QR tickets:** every confirmed registration gets a random 128-bit ticket code (not the database id). The PDF ticket's QR holds `OVT1.<code>.<hmac>`, signed with `OCCAVIE_TICKET_SECRET` (property `occavie.ticket.secret`; falls back to the remember-me key). Set it explicitly in production; changing it invalidates printed tickets.
+- **Check-in:** organizers open *My Events > Check-in* on a phone, scan with the camera (HTTPS required; decoding uses `BarcodeDetector` or jsQR from jsDelivr) or paste the code / search by name. All verification happens server-side: only the owning organizer can check in, the update is a single atomic conditional write (no double check-in), and the page shows masked email only plus checked-in / remaining totals.
+- **Wizard and drafts:** `Create Event` is a six-step wizard saved as a private `DRAFT` after every step. Drafts are hidden from public pages and previewable by their owner and admins. Organizers can publish, duplicate (private copy without date), edit & reschedule (participants are notified of date, time, venue and price changes), and cancel (status `CANCELLED`, registrants and waitlist notified, history kept).
+- **Waitlist:** participants can join a sold-out event once. Position is derived from join time. When a seat frees up the next person is offered it and the seat is held (`occavie.waitlist.offer-hours`, default 24). Held seats count as taken, so registrations never exceed capacity. Expired offers are released by a scheduled job (`occavie.waitlist.expiry-check-ms`, default 60000) and passed on. Seat changes rely on MongoDB transactions (Atlas / replica set).
+
 ## Simulated checkout (Occavie student project)
 
 Paid checkout is a **demo**. The checkout page, result page, PDF ticket and receipt are all labelled as demo, and dashboard "ticket value" is shown as *simulated ticket value, not revenue*. Booking rules (duplicate registration, sold-out events and ticket types, coupon limits and discount maths, confirmation) are covered by `BookingFlowTest`.

@@ -3,7 +3,9 @@
 <head th:replace="~{fragments :: head(${event.title}, 'public')}"></head>
 <body class="ov-page ov-details-page">
 <div th:replace="~{fragments :: siteNav('events')}"></div>
-<main class="ov-container ov-details-main">
+<main class="ov-container ov-details-main" id="main-content">
+  <div class="ov-banner is-draft" th:if="${isDraftPreview}" role="note"><i class="bi bi-eye"></i><div><strong>Draft preview</strong><span>Only you can see this page. Publish the event from the wizard to make it public.</span></div></div>
+  <div class="ov-banner is-cancelled" th:if="${@display.status(event) == 'CANCELLED'}" role="note"><i class="bi bi-slash-circle"></i><div><strong>This event was cancelled</strong><span th:text="${event.cancellationReason != null ? event.cancellationReason : 'Registrations are no longer valid.'}">Reason</span></div></div>
   <a class="ov-back-link" th:href="@{/events}"><i class="bi bi-arrow-left"></i> Back to Explore Events</a>
   <div class="ov-details-columns">
     <div class="ov-details-content">
@@ -83,13 +85,13 @@
     <aside class="ov-booking-panel" id="tickets" tabindex="-1" aria-label="Event tickets and registration">
       <div class="ov-booking-heading"><p class="ov-eyebrow">RESERVE YOUR SPOT</p><h2>Tickets</h2><p>Choose your admission option.</p></div>
       <p class="ov-demo-note" th:if="${@display.paid(event)}"><i class="bi bi-info-circle" aria-hidden="true"></i> Paid checkout is a demo. No real payment is taken.</p>
-      <div class="ov-booking-top"><strong class="ov-starting-price" th:text="${startingPrice}">Free</strong><span th:text="${@display.status(event) == 'COMPLETED' ? 'Event ended' : (registrationCount >= event.capacity ? 'Fully booked' : (event.capacity - registrationCount) + ' spots left')}">Available</span></div>
+      <div class="ov-booking-top"><strong class="ov-starting-price" th:text="${startingPrice}">Free</strong><span th:text="${@display.status(event) == 'COMPLETED' ? 'Event ended' : (@display.status(event) == 'CANCELLED' ? 'Cancelled' : (@display.status(event) == 'DRAFT' ? 'Draft' : (capacityFull ? 'Fully booked' : (event.capacity - registrationCount) + ' spots left')))}">Available</span></div>
       <div th:if="${!#lists.isEmpty(ticketTypes)}">
         <article class="ov-ticket" th:each="ticket : ${ticketTypes}">
-          <div class="ov-ticket-row"><div><h3 th:text="${ticket.name}">General</h3><span class="ov-ticket-state" th:text="${@display.status(event) == 'COMPLETED' ? 'CLOSED' : (registrationCount >= event.capacity or ticketRegistrationCounts[ticket.id] >= ticket.capacity ? 'SOLD OUT' : 'AVAILABLE')}">AVAILABLE</span></div><strong th:text="${@display.ticketPrice(ticket)}">৳500</strong></div>
+          <div class="ov-ticket-row"><div><h3 th:text="${ticket.name}">General</h3><span class="ov-ticket-state" th:text="${@display.status(event) != 'UPCOMING' ? 'CLOSED' : (capacityFull or ticketRegistrationCounts[ticket.id] >= ticket.capacity ? 'SOLD OUT' : 'AVAILABLE')}">AVAILABLE</span></div><strong th:text="${@display.ticketPrice(ticket)}">৳500</strong></div>
           <p th:if="${ticket.description != null and !ticket.description.isBlank()}" th:text="${ticket.description}">Description</p>
           <div class="ov-ticket-left" th:text="${(ticket.capacity - ticketRegistrationCounts[ticket.id]) + ' ticket(s) left'}">Tickets left</div>
-          <form class="ticket-registration-form ov-ticket-form" th:if="${user != null and user.role == 'PARTICIPANT' and !isRegistered and @display.status(event) != 'COMPLETED'}"
+          <form class="ticket-registration-form ov-ticket-form" th:if="${user != null and user.role == 'PARTICIPANT' and !isRegistered and @display.status(event) == 'UPCOMING'}"
                 th:action="${ticket.price != null and ticket.price.signum() > 0 ? '/participant/events/' + event.id + '/checkout' : '/participant/events/' + event.id + '/register'}" th:method="${ticket.price != null and ticket.price.signum() > 0 ? 'get' : 'post'}" method="post" data-loading data-coupon-form
                 th:attr="data-event-id=${event.id},data-ticket-id=${ticket.id}">
             <input type="hidden" name="ticketTypeId" th:value="${ticket.id}">
@@ -99,8 +101,8 @@
               <div class="coupon-preview-result" aria-live="polite"></div>
             </div>
             <button class="ov-gold-button ov-register-action" type="submit"
-                    th:disabled="${registrationCount >= event.capacity or ticketRegistrationCounts[ticket.id] >= ticket.capacity}">
-              <span th:text="${registrationCount >= event.capacity or ticketRegistrationCounts[ticket.id] >= ticket.capacity ? 'Sold Out' : (ticket.price != null and ticket.price.signum() > 0 ? 'Proceed to Payment' : 'Register · ' + ticket.name)}">Reserve Ticket</span>
+                    th:disabled="${capacityFull or ticketRegistrationCounts[ticket.id] >= ticket.capacity}">
+              <span th:text="${capacityFull or ticketRegistrationCounts[ticket.id] >= ticket.capacity ? 'Sold Out' : (ticket.price != null and ticket.price.signum() > 0 ? 'Proceed to Payment' : 'Register · ' + ticket.name)}">Reserve Ticket</span>
             </button>
           </form>
         </article>
@@ -108,16 +110,29 @@
       <div class="ov-ticket ov-general-ticket" th:if="${#lists.isEmpty(ticketTypes) and !hasCustomTicketTypes}">
         <div class="ov-ticket-row"><h3>General Admission</h3><strong th:text="${@display.formattedBasePrice(event)}">Free</strong></div>
         <div class="ov-ticket-left" th:text="${(event.capacity - registrationCount) + ' spots left'}">Available</div>
-        <form class="ticket-registration-form ov-ticket-form" th:if="${user != null and user.role == 'PARTICIPANT' and !isRegistered and @display.status(event) != 'COMPLETED'}"
+        <form class="ticket-registration-form ov-ticket-form" th:if="${user != null and user.role == 'PARTICIPANT' and !isRegistered and @display.status(event) == 'UPCOMING'}"
               th:action="${@display.paid(event) ? '/participant/events/' + event.id + '/checkout' : '/participant/events/' + event.id + '/register'}" th:method="${@display.paid(event) ? 'get' : 'post'}" method="post" data-loading data-coupon-form th:attr="data-event-id=${event.id},data-ticket-id=''">
           <div class="ticket-coupon-box" th:if="${@display.paid(event)}"><label>Promo code (optional)</label><div class="ticket-coupon-row"><div class="ticket-coupon-input"><input class="coupon-code-input" name="couponCode" type="text" maxlength="20" placeholder="Enter coupon code" autocomplete="off"></div><button class="coupon-apply-button" type="button">Apply</button></div><div class="coupon-preview-result" aria-live="polite"></div></div>
-          <button class="ov-gold-button ov-register-action" type="submit" th:disabled="${registrationCount >= event.capacity}" th:text="${@display.paid(event) ? 'Proceed to Payment' : 'Register for Free'}">Reserve Admission</button>
+          <button class="ov-gold-button ov-register-action" type="submit" th:disabled="${capacityFull}" th:text="${@display.paid(event) ? 'Proceed to Payment' : 'Register for Free'}">Reserve Admission</button>
         </form>
       </div>
+      <div class="ov-offer" th:if="${hasOffer}" role="status"><i class="bi bi-stopwatch"></i><div><strong>A seat is reserved for you</strong><span th:text="${'Book before ' + offerUntil + ' to claim it.'}">Book before…</span></div></div>
+      <div class="ov-waitlist" th:if="${canJoinWaitlist or waitlistEntry != null}">
+        <div th:if="${waitlistEntry != null and waitlistEntry.status == 'WAITING'}">
+          <strong th:text="${'You are #' + waitlistPosition + ' on the waitlist'}">You are #1 on the waitlist</strong>
+          <span>We will notify you if a seat opens up. A seat is held for you for a limited time once it does.</span>
+          <form th:action="@{'/participant/events/' + ${event.id} + '/waitlist/leave'}" method="post"><button class="secondary-button" type="submit">Leave waitlist</button></form>
+        </div>
+        <div th:if="${canJoinWaitlist}">
+          <strong>This event is full</strong>
+          <span th:text="${waitlistSize > 0 ? waitlistSize + (waitlistSize == 1 ? ' person is waiting.' : ' people are waiting.') : 'Join the waitlist and we will notify you if a seat opens up.'}">Join the waitlist.</span>
+          <form th:action="@{'/participant/events/' + ${event.id} + '/waitlist'}" method="post"><button class="primary-button" type="submit"><i class="bi bi-hourglass-split"></i>Join waitlist</button></form>
+        </div>
+      </div>
       <div class="ov-booking-note" th:if="${hasCustomTicketTypes and #lists.isEmpty(ticketTypes)}">Ticket booking is temporarily unavailable.</div>
-      <div class="ov-booking-note" th:if="${@display.status(event) == 'COMPLETED'}">Registration for this event has closed.</div>
+      <div class="ov-booking-note" th:if="${@display.status(event) != 'UPCOMING'}" th:text="${@display.status(event) == 'DRAFT' ? 'This draft is not open for registration yet.' : 'Registration for this event has closed.'}">Registration for this event has closed.</div>
       <div class="ov-booking-note" th:if="${isRegistered}"><i class="bi bi-check-circle"></i> You're already registered.</div>
-      <div class="ov-guest-actions" th:if="${isGuest and @display.status(event) != 'COMPLETED' and registrationCount < event.capacity and (!hasCustomTicketTypes or !#lists.isEmpty(ticketTypes))}">
+      <div class="ov-guest-actions" th:if="${isGuest and @display.status(event) == 'UPCOMING' and registrationCount < event.capacity and (!hasCustomTicketTypes or !#lists.isEmpty(ticketTypes))}">
         <p>Sign in to reserve a ticket.</p>
         <a class="ov-gold-button" th:href="@{/login(redirect=${'/events/' + event.id + '#tickets'})}">Login to Register</a>
         <a class="ov-outline-button" th:href="@{/register(redirect=${'/events/' + event.id + '#tickets'})}">Create Account</a>
@@ -125,7 +140,7 @@
     </aside>
   </div>
 </main>
-<div class="ov-mobile-book" th:if="${@display.status(event) != 'COMPLETED'}">
+<div class="ov-mobile-book" th:if="${@display.status(event) == 'UPCOMING'}">
   <div><small th:text="${isRegistered ? 'Registration status' : 'From'}">From</small><strong th:text="${isRegistered ? 'Registered' : startingPrice}">Free</strong></div>
   <a class="primary-button" href="#tickets" th:if="${!isRegistered}">Get tickets</a>
   <a class="secondary-button" th:if="${isRegistered}" th:href="@{/participant/registrations}">My tickets</a>

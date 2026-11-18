@@ -176,6 +176,15 @@ public class TicketTypeService {
         if (changed) ticketTypeRepository.saveAll(types);
     }
 
+    /** Copies ticket types (name, price, capacity, order) to another event; bookings are never copied. */
+    public void copyAll(String fromEventId, String toEventId) {
+        for (EventTicketType type : findByEvent(fromEventId)) {
+            ticketTypeRepository.save(EventTicketType.builder().eventId(toEventId).name(type.getName())
+                    .description(type.getDescription()).price(type.getPrice()).capacity(type.getCapacity())
+                    .active(type.isActive()).sortOrder(type.getSortOrder()).build());
+        }
+    }
+
     public void deleteAllByEvent(String eventId) {
         ticketTypeRepository.deleteAllByEventId(eventId);
     }

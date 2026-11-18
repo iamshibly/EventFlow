@@ -74,7 +74,7 @@ public class PaymentFinalizationService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        String reference = "EF" + UUID.randomUUID().toString().replace("-", "").substring(0, 25).toUpperCase();
+        String reference = "OV" + UUID.randomUUID().toString().replace("-", "").substring(0, 25).toUpperCase();
         registrationRepository.save(Registration.builder()
                 .eventId(event.getId()).participantId(participant.getId())
                 .participantName(participant.getFullName()).participantEmail(participant.getEmail())

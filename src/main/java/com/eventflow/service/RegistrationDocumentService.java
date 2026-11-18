@@ -36,8 +36,8 @@ import java.util.Locale;
 /** Generates repeatable, branded PDFs directly from saved registrations; no payment integration. */
 @Service
 public class RegistrationDocumentService {
-    private static final Color NAVY = new Color(11, 25, 54);
-    private static final Color GOLD = new Color(211, 151, 0);
+    private static final Color NAVY = new Color(23, 18, 58);
+    private static final Color GOLD = new Color(108, 76, 255);
     private static final Color MUTED = new Color(100, 115, 136);
     private static final Color LINE = new Color(223, 229, 237);
     private static final Color GREEN = new Color(17, 132, 81);
@@ -75,11 +75,11 @@ public class RegistrationDocumentService {
         g.draw(new RoundRectangle2D.Double(25, 24, 1350, 710, 34, 34));
         Shape previousClip = g.getClip();
         g.clipRect(26, 25, 994, 708);
-        g.setColor(new Color(255, 249, 230));
+        g.setColor(new Color(243, 240, 255));
         g.fillOval(885, 323, 315, 290);
         g.setColor(new Color(255, 255, 255));
         g.fillOval(930, 297, 267, 293);
-        g.setColor(new Color(254, 247, 229));
+        g.setColor(new Color(238, 233, 255));
         g.fillOval(783, 456, 225, 250);
         g.setClip(previousClip);
 
@@ -201,7 +201,7 @@ public class RegistrationDocumentService {
                         + "  |  " + clean(event.getLocation(), "TBA"),
                 87, y + 18, 838, new Font("SansSerif", Font.PLAIN, 19), 15, MUTED);
         int summaryY = Math.max(450, y + 58);
-        g.setColor(new Color(255, 249, 231));
+        g.setColor(new Color(243, 240, 255));
         g.fillRoundRect(80, summaryY, 838, 142, 18, 18);
         tracked(g, "TOTAL AMOUNT", 109, summaryY + 46,
                 new Font("SansSerif", Font.BOLD, 16), MUTED, 2);
@@ -240,7 +240,7 @@ public class RegistrationDocumentService {
 
         g.setColor(LINE);
         g.drawLine(84, 1322, 916, 1322);
-        drawFit(g, "EventFlow registration record - student project", 86, 1353, 800,
+        drawFit(g, "Occavie registration record  -  Make every moment count.", 86, 1353, 800,
                 new Font("SansSerif", Font.PLAIN, 17), 13, MUTED);
         g.dispose();
         return image;
@@ -256,24 +256,24 @@ public class RegistrationDocumentService {
     }
 
     private void logo(Graphics2D g, int x, int y, double scale) throws IOException {
-        try (InputStream stream = getClass().getResourceAsStream("/static/images/eventflow-logo.png")) {
+        // Occavie mark (square) followed by the wordmark drawn in the document palette.
+        int size = (int) (66 * scale);
+        try (InputStream stream = getClass().getResourceAsStream("/static/images/occavie-mark.png")) {
             if (stream != null) {
-                BufferedImage original = ImageIO.read(stream);
-                if (original != null) {
-                    int ow = original.getWidth(), oh = original.getHeight();
-                    g.drawImage(original, x, y - (int)(12 * scale), x + (int)(75 * scale),
-                            y + (int)(54 * scale), 0, 0, (int)(ow * .28), oh, null);
+                BufferedImage mark = ImageIO.read(stream);
+                if (mark != null) {
+                    g.drawImage(mark, x, y - (int) (14 * scale), size, size, null);
                 }
             }
         }
-        Font font = new Font("Serif", Font.BOLD, (int)(45 * scale));
+        Font font = new Font("SansSerif", Font.BOLD, (int) (42 * scale));
         g.setFont(font);
         g.setColor(NAVY);
-        int wordX = x + (int)(90 * scale);
-        g.drawString("Event", wordX, y + (int)(42 * scale));
-        int flowX = wordX + g.getFontMetrics().stringWidth("Event") - (int)(5 * scale);
+        int wordX = x + size + (int) (16 * scale);
+        g.drawString("Occa", wordX, y + (int) (34 * scale));
+        int tailX = wordX + g.getFontMetrics().stringWidth("Occa");
         g.setColor(GOLD);
-        g.drawString("Flow", flowX, y + (int)(42 * scale));
+        g.drawString("vie", tailX, y + (int) (34 * scale));
     }
 
     private void detailRow(Graphics2D g, String label, String value, int baseline) {
@@ -450,7 +450,7 @@ public class RegistrationDocumentService {
         }
         ByteArrayOutputStream pdf = new ByteArrayOutputStream();
         int[] offsets = new int[6];
-        write(pdf, "%PDF-1.4\n%EventFlow\n");
+        write(pdf, "%PDF-1.4\n%Occavie\n");
         object(pdf, offsets, 1, "<< /Type /Catalog /Pages 2 0 R >>");
         object(pdf, offsets, 2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
         object(pdf, offsets, 3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pageWidth

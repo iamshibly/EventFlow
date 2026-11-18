@@ -1,6 +1,8 @@
-# EventFlow
+# Occavie
 
-EventFlow is a Spring Boot + Thymeleaf + MongoDB event management system with three roles:
+> **Make every moment count.**
+
+Occavie (formerly EventFlow) is a Spring Boot + Thymeleaf + MongoDB event management system with three roles:
 
 - **ADMIN** - manages users, roles, account status, events and registrations.
 - **ORGANIZER** - creates and manages events and sees registered participants.
@@ -54,12 +56,12 @@ The project intentionally avoids unnecessary `ServiceImpl` classes, mapper frame
 - Participant event registration and cancellation.
 - Professional event ticketing: events can be **Free** or **Paid**, with optional ticket types such as General, VIP or Student, separate capacities, prices, active/paused sales, and a booking-time ticket/price snapshot.
 - Coupon management for paid events with percentage/fixed discounts, expiry dates, usage limits, active/paused states, live participant price preview and booking-time discount snapshots.
-- Public Contact Support page with EventFlow support information and a request form. Admins receive notifications and manage requests through New, In Progress and Resolved states with internal notes.
+- Public Contact Support page with Occavie support information and a request form. Admins receive notifications and manage requests through New, In Progress and Resolved states with internal notes.
 - Event sponsors: Organizer/Admin can add Title, Gold, Silver, Bronze or Partner sponsors with logo, website, display order and description. Sponsor logos are stored separately in MongoDB and shown on the public event page.
 - Duplicate-registration, capacity and past-event checks.
 - In-app notifications with unread count and recent notification dropdown.
 - Profile editing with profile-picture upload/remove. Users without a photo use the supplied default avatar. Password change is available for normal accounts; demo-account passwords are fixed so the shared credentials remain available.
-- Responsive dark/gold UI with the supplied EventFlow logo, favicon, validation animation, toasts, loading states and confirmation modals for logout/destructive actions.
+- Responsive light/dark violet-and-coral UI (one design system, theme toggle on every page) with the Occavie logo, favicon, validation animation, toasts, loading states and confirmation modals for logout/destructive actions.
 - Desktop login is compacted to fit the normal viewport without requiring page scrolling; smaller screens remain responsive.
 
 ## Performance improvements in this final build
@@ -89,7 +91,7 @@ The demo users stay enabled and their roles/passwords are protected. Normal regi
 ## Run locally
 
 1. Set your MongoDB Atlas connection in the `MONGODB_URI` environment variable.
-2. Run `EventflowApplication` from IntelliJ.
+2. Run `EventflowApplication` from IntelliJ (or `./mvnw spring-boot:run`).
 3. Open `http://localhost:8080`.
 4. Choose Admin, Organizer or Participant under **Quick Demo Access** and sign in.
 
@@ -97,17 +99,36 @@ The demo users stay enabled and their roles/passwords are protected. Normal regi
 
 - `MONGODB_URI` - required MongoDB Atlas connection string.
 - `MONGODB_DATABASE` - database name. Default: `eventflow`.
-- `EVENTFLOW_REMEMBER_KEY` - secret key for remember-me cookies.
+- `OCCAVIE_REMEMBER_KEY` - secret key for remember-me cookies (the legacy `EVENTFLOW_REMEMBER_KEY` is still read as a fallback).
 - `PORT` - supplied automatically by Render.
 - `THYMELEAF_CACHE` - set to `true` on deployment for faster template rendering.
 
 
 
+## Rebrand compatibility notes
+
+The product was renamed from EventFlow to Occavie. To avoid breaking deployments and stored data, these technical identifiers were intentionally **not** renamed:
+
+- Java package `com.eventflow`, Maven `artifactId` (`eventflow`) and the built jar name.
+- MongoDB database default (`eventflow`), collection names and `_class` type hints.
+- URL routes (`/events`, `/dashboard`, `/organizer/**`, `/admin/**`, ...).
+- The three seeded demo accounts (`*@eventflow.com`), so existing users and bookings keep working.
+- `eventflow.*` property keys still work as a fallback for the new `occavie.*` keys.
+
+## Front-end structure
+
+All pages share a single design system (no per-page CSS overrides):
+
+- `static/css/occavie-core.css` - design tokens (light/dark), base styles, buttons, forms, cards, tables, badges, modals, toasts.
+- `static/css/occavie-public.css` - top navigation, footer, home, explore, event details, auth, checkout.
+- `static/css/occavie-app.css` - dashboard shell (sidebar/topbar) and the Admin/Organizer/Participant workspaces.
+- `static/js/site.js` - shared behaviour (theme, modals, notifications, filtering, charts). Page-specific scripts: `auth-v1.js`, `events-v1.js`, `home-v2.js`, `payment-checkout.js`, `event-image-fallback.js`.
+
 ## Profile images and branding
 
-- `src/main/resources/static/images/eventflow-logo.png` - dark-theme website wordmark based on the supplied EventFlow logo.
-- `src/main/resources/static/images/eventflow-logo-original.png` - untouched supplied logo.
-- `src/main/resources/static/images/favicon.png` and `src/main/resources/static/favicon.ico` - browser-tab icon derived from the EventFlow mark.
+- `src/main/resources/static/images/occavie-mark.svg` / `occavie-mark.png` - the Occavie mark (ring with a spark). The PNG is also used on PDF tickets and receipts.
+- `src/main/resources/static/images/occavie-logo.svg` - mark + wordmark lock-up.
+- `src/main/resources/static/images/occavie-favicon.png` and `src/main/resources/static/favicon.ico` - browser-tab icons.
 - `src/main/resources/static/images/default-avatar.png` - supplied fallback user picture.
 - Uploaded profile pictures are limited to **2 MB**, may be JPG/PNG/WEBP, and are stored in the separate `profile_images` MongoDB collection.
 
@@ -126,19 +147,19 @@ Uploaded images are limited to **2 MB** and may be JPG, PNG or WEBP. They are st
 
 ## Render deployment
 
-EventFlow includes a Dockerfile for deployment. In Render:
+Occavie includes a Dockerfile for deployment. In Render:
 
 1. Create a **Web Service**.
 2. Select **Docker**.
 3. Connect the GitHub repository.
-4. Add `MONGODB_URI` and `EVENTFLOW_REMEMBER_KEY`.
+4. Add `MONGODB_URI` and `OCCAVIE_REMEMBER_KEY`.
 5. Add `THYMELEAF_CACHE=true` for production.
 
 Render supplies `PORT` automatically. MongoDB Atlas stores persistent application data, so the app does not depend on Render's temporary filesystem.
 
-## Simulated checkout (EventFlow student project)
+## Simulated checkout (Occavie student project)
 
-Free tickets register directly. Paid tickets open `/participant/events/{eventId}/checkout` with the existing bKash, Nagad and Visa logos. Choose a method and optionally apply a valid promo code, then select **Proceed to Payment**. EventFlow records a simulated payment and confirms the ticket immediately. No merchant account, real charge, external checkout or callback setup is needed.
+Free tickets register directly. Paid tickets open `/participant/events/{eventId}/checkout` with the existing bKash, Nagad and Visa logos. Choose a method and optionally apply a valid promo code, then select **Proceed to Payment**. Occavie records a simulated payment and confirms the ticket immediately. No merchant account, real charge, external checkout or callback setup is needed.
 
 The backend recalculates prices and coupon discounts and checks event capacity, ticket availability, duplicate registrations and coupon usage. The confirmed registration and its simulated payment record are saved together in MongoDB, and the participant and organizer are notified. Demo booking cancellation also updates the stored payment status. The project uses the existing MongoDB transaction manager; deploying with MongoDB Atlas supports atomic confirmation.
 

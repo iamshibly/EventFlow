@@ -1,71 +1,67 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#ffffff">
-  <title>Explore Events | EventFlow</title>
-  <link rel="icon" type="image/png" th:href="@{/images/eventflow-favicon.png}" href="/images/eventflow-favicon.png">
-  <link rel="stylesheet" th:href="@{/css/v1-public.css(v=20261011full)}" href="/css/v1-public.css?v=20261011full">
-</head>
-<body class="v1-page v1-explore-page">
-<div th:replace="~{fragments :: v1Nav('events')}"></div>
+<head th:replace="~{fragments :: head('Explore Events', 'public')}"></head>
+<body class="ov-page ov-explore-page">
+<div th:replace="~{fragments :: siteNav('events')}"></div>
 <main>
-  <section class="v1-explore-intro">
-    <div class="v1-container">
-      <p class="v1-eyebrow">EVENTS · LEARN · CONNECT</p>
-      <h1>Explore Events</h1>
-      <p>Find your next workshop, conference, meetup or experience.</p>
+  <section class="ov-explore-intro">
+    <div class="ov-container">
+      <p class="ov-eyebrow">EXPLORE</p>
+      <h1>Find your next <em>great</em> moment</h1>
+      <p>Workshops, conferences, concerts and meetups. Search, filter and book in seconds.</p>
     </div>
   </section>
-  <div class="v1-container v1-explore-content">
-    <section class="v1-filter-shell" id="v1-filters" aria-label="Search and filter events">
-      <div class="v1-filters">
-        <label class="v1-field-search" for="eventSearch"><svg class="v1-small-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16.2 16.2 5.1 5.1"/></svg><input id="eventSearch" type="search" placeholder="Search events, topics or locations..." maxlength="120" autocomplete="off"></label>
-        <label class="v1-sr" for="categoryFilter">Category</label>
+  <div class="ov-container ov-explore-content">
+    <section class="ov-filter-shell" id="ov-filters" aria-label="Search and filter events">
+      <div class="ov-filters">
+        <label class="ov-field-search" for="eventSearch"><i class="bi bi-search" aria-hidden="true"></i><input id="eventSearch" type="search" placeholder="Search events, topics or locations..." maxlength="120" autocomplete="off"></label>
+        <label class="ov-sr" for="categoryFilter">Category</label>
         <select id="categoryFilter" aria-label="Category"><option value="ALL">All Categories</option><option th:each="category : ${categories}" th:value="${category}" th:text="${category}">Technology</option></select>
-        <label class="v1-sr" for="pricingFilter">Price</label>
+        <label class="ov-sr" for="pricingFilter">Price</label>
         <select id="pricingFilter" aria-label="Price"><option value="ALL">Free &amp; Paid</option><option value="FREE">Free</option><option value="PAID">Paid</option></select>
-        <label class="v1-sr" for="eventStatusFilter">Status</label>
+        <label class="ov-sr" for="eventStatusFilter">Status</label>
         <select id="eventStatusFilter" aria-label="Event status"><option value="UPCOMING">Upcoming</option><option value="ALL">All Events</option><option value="COMPLETED">Completed</option></select>
-        <button id="v1ApplyFilters" class="v1-gold-button" type="button">Search</button>
+        <button id="v1ApplyFilters" class="ov-gold-button" type="button">Search</button>
       </div>
-      <div class="v1-category-pills" role="group" aria-label="Popular categories">
-        <button class="v1-category-button is-active" type="button" data-category="ALL">All Events</button>
-        <button class="v1-category-button" type="button" data-category="Technology">Technology</button>
-        <button class="v1-category-button" type="button" data-category="Business">Business</button>
-        <button class="v1-category-button" type="button" data-category="Education">Education</button>
-        <button class="v1-category-button" type="button" data-category="Health">Health</button>
-        <button class="v1-category-button" type="button" data-category="Music">Music</button>
-        <button class="v1-category-button" type="button" data-category="Sports">Sports</button>
+      <div class="ov-category-pills" role="group" aria-label="Popular categories">
+        <button class="ov-category-button is-active" type="button" data-category="ALL">All Events</button>
+        <button class="ov-category-button" type="button" data-category="Technology">Technology</button>
+        <button class="ov-category-button" type="button" data-category="Business">Business</button>
+        <button class="ov-category-button" type="button" data-category="Education">Education</button>
+        <button class="ov-category-button" type="button" data-category="Health">Health</button>
+        <button class="ov-category-button" type="button" data-category="Music">Music</button>
+        <button class="ov-category-button" type="button" data-category="Sports">Sports</button>
       </div>
     </section>
-    <div class="v1-list-heading"><h2>Upcoming Events</h2><span id="resultCount" aria-live="polite" th:text="${initialEventCount + ' events'}">Events</span></div>
-    <div class="v1-event-grid" id="v1EventGrid">
-      <article class="v1-event-card" th:each="event : ${events}"
+    <div class="ov-list-heading"><h2>Events</h2><span id="resultCount" aria-live="polite" th:text="${initialEventCount + ' events'}">Events</span></div>
+    <div class="ov-event-grid" id="v1EventGrid">
+      <article class="ov-event-card" th:each="event : ${events}"
                th:with="efPaid=${@display.paid(event)},efStatus=${@display.status(event)}" th:attr="data-category=${event.category},data-pricing=${efPaid ? 'PAID' : 'FREE'},data-status=${efStatus},data-search=${event.title + ' ' + event.location + ' ' + event.description + ' ' + event.category}">
-        <a class="v1-card-photo" th:href="@{'/events/' + ${event.id}}" href="/events" th:aria-label="${'View ' + event.title}">
+        <a class="ov-card-photo" th:href="@{'/events/' + ${event.id}}" href="/events" th:aria-label="${'View ' + event.title}">
           <img data-event-image th:attr="data-event-category=${event.category}"
                th:src="${event.imageUrl != null and !#strings.isEmpty(event.imageUrl) ? event.imageUrl : '/images/event-visual.png'}"
                src="/images/event-visual.png" th:alt="${event.title}" alt="Event image" loading="lazy" decoding="async">
-          <span class="v1-card-tag" th:text="${event.category}">Technology</span>
+          <span class="ov-card-tag" th:text="${event.category}">Technology</span>
         </a>
-        <div class="v1-event-card-body">
-          <span class="v1-event-date"><svg class="v1-small-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 10h18"/></svg><span th:text="${@display.eventDate(event) + ' · ' + @display.eventTime(event)}">Date</span></span>
+        <div class="ov-event-card-body">
+          <span class="ov-event-date"><i class="bi bi-calendar3" aria-hidden="true"></i><span th:text="${@display.eventDate(event) + ' · ' + @display.eventTime(event)}">Date</span></span>
           <h3><a th:href="@{'/events/' + ${event.id}}" th:text="${event.title}">Event title</a></h3>
-          <p class="v1-event-location" th:text="${event.location}">Dhaka, Bangladesh</p>
-          <div class="v1-card-footer">
-            <strong class="v1-card-price" th:classappend="${@display.paid(event)} ? '' : ' is-free'" th:text="${startingPrices[event.id]}">Free</strong>
-            <a class="v1-card-action" th:href="@{'/events/' + ${event.id}}">View Details <span aria-hidden="true">→</span></a>
+          <p class="ov-event-location"><i class="bi bi-geo-alt"></i> <span th:text="${event.location}">Dhaka, Bangladesh</span></p>
+          <div class="ov-card-footer">
+            <strong class="ov-card-price" th:classappend="${@display.paid(event)} ? '' : ' is-free'" th:text="${startingPrices[event.id]}">Free</strong>
+            <a class="ov-card-action" th:href="@{'/events/' + ${event.id}}">View details <i class="bi bi-arrow-right"></i></a>
           </div>
-          <span class="v1-card-availability" th:if="${@display.status(event) == 'COMPLETED' or registrationCounts[event.id] >= event.capacity}"
+          <span class="ov-card-availability" th:if="${@display.status(event) == 'COMPLETED' or registrationCounts[event.id] >= event.capacity}"
                 th:text="${@display.status(event) == 'COMPLETED' ? 'Event ended' : 'Sold out'}">Sold out</span>
         </div>
       </article>
     </div>
-    <div id="v1Empty" class="v1-empty" hidden><h3>No matching events</h3><p>Try a different search, category, or date status.</p><button type="button" id="v1ClearFilters">Clear filters</button></div>
-    <div class="v1-empty" th:if="${#lists.isEmpty(events)}"><h3>No events published yet</h3><p>Please check back soon.</p></div>
+    <div id="v1Empty" class="ov-empty" hidden><h3>No matching events</h3><p>Try a different search, category, or date status.</p><button type="button" id="v1ClearFilters">Clear filters</button></div>
+    <div class="ov-empty" th:if="${#lists.isEmpty(events)}"><h3>No events published yet</h3><p>Please check back soon.</p></div>
   </div>
 </main>
-<div th:replace="~{fragments :: publicFooter}"></div>
-<script th:src="@{/js/events-v1.js(v='20261010v1')}" src="/js/events-v1.js?v=20261010v1"></script>
+<div th:replace="~{fragments :: siteFooter}"></div>
+<script th:src="@{/js/site.js(v='2026.11.1')}" src="/js/site.js"></script>
+<script th:src="@{/js/explore.js(v='2026.11.1')}" src="/js/explore.js"></script>
 </body>
 </html>

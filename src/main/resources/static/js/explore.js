@@ -5,8 +5,8 @@
   const statusSelect = document.getElementById('eventStatusFilter');
   const count = document.getElementById('resultCount');
   const empty = document.getElementById('v1Empty');
-  const cards = Array.from(document.querySelectorAll('.v1-event-card'));
-  const chips = Array.from(document.querySelectorAll('.v1-category-button'));
+  const cards = Array.from(document.querySelectorAll('.ov-event-card'));
+  const chips = Array.from(document.querySelectorAll('.ov-category-button'));
   if (!input || !categorySelect || !priceSelect || !statusSelect) return;
   const params = new URLSearchParams(window.location.search);
   input.value = params.get('q') || '';

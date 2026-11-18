@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#ffffff">
-    <title>EventFlow | Feedback Management</title>
-    <link rel="icon" type="image/png" th:href="@{/images/eventflow-favicon.png(v='20260923feedback2')}" href="/images/eventflow-favicon.png?v=20260923feedback2">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/site.css(v=20261011clean)}" href="/css/site.css?v=20261011clean">
-    <link rel="stylesheet" th:href="@{/css/workspace-final.css(v=20261011full)}" href="/css/workspace-final.css?v=20261011full">
-</head>
+<head th:replace="~{fragments :: head('Feedback Management', 'app')}"></head>
 <body class="ef-workspace">
 <div th:replace="~{fragments :: topbar}"></div>
 <div class="app-shell">
@@ -63,7 +56,7 @@
                             <article class="feedback-review-item admin-review-item" th:each="item : ${reviews}">
                                 <div class="feedback-review-top"><div class="feedback-review-person"><span class="feedback-review-avatar"><i class="bi bi-person"></i></span><div><strong th:text="${item.participantName}">Participant</strong><small th:text="${item.participantEmail}">email@example.com</small></div></div><div class="feedback-review-rating"><div class="display-stars compact"><i class="bi bi-star-fill" th:each="star : ${#numbers.sequence(1,5)}" th:classappend="${star <= item.rating} ? ' active' : ''"></i></div><strong th:text="${item.rating + '/5'}">5/5</strong></div></div>
                                 <p th:if="${item.comment != null and !item.comment.isBlank()}" th:text="${item.comment}">Review comment</p><p class="feedback-no-comment" th:if="${item.comment == null or item.comment.isBlank()}">Rating submitted without a written comment.</p>
-                                <div class="feedback-review-footer admin-feedback-footer"><span><i class="bi bi-clock"></i><span th:text="${@display.feedbackUpdated(item)}">Date</span></span><form class="inline-form confirm-form" th:action="@{'/admin/feedback/' + ${item.id} + '/delete'}" method="post" th:attr="data-confirm-title='Remove this feedback?',data-confirm='This participant review will be permanently removed from EventFlow.',data-confirm-action='Remove Feedback'"><button class="small-danger-text-button" type="submit"><i class="bi bi-trash3"></i>Remove</button></form></div>
+                                <div class="feedback-review-footer admin-feedback-footer"><span><i class="bi bi-clock"></i><span th:text="${@display.feedbackUpdated(item)}">Date</span></span><form class="inline-form confirm-form" th:action="@{'/admin/feedback/' + ${item.id} + '/delete'}" method="post" th:attr="data-confirm-title='Remove this feedback?',data-confirm='This participant review will be permanently removed from Occavie.',data-confirm-action='Remove Feedback'"><button class="small-danger-text-button" type="submit"><i class="bi bi-trash3"></i>Remove</button></form></div>
                             </article>
                         </div>
                     </div>
@@ -74,8 +67,6 @@
         </section>
     </main>
 </div>
-<div th:replace="~{fragments :: toasts}"></div><div th:replace="~{fragments :: confirmModal}"></div><script th:src="@{/js/site.js(v='20260923ratingsort1')}" src="/js/site.js?v=20260923ratingsort1"></script>
-
-<script th:src="@{/js/workspace-final.js(v=20261011clean)}" src="/js/workspace-final.js?v=20261011clean" defer></script>
+<div th:replace="~{fragments :: toasts}"></div><div th:replace="~{fragments :: confirmModal}"></div><script th:src="@{/js/site.js(v='2026.11.1')}" src="/js/site.js"></script>
 </body>
 </html>

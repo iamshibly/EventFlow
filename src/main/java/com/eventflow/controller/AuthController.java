@@ -25,7 +25,7 @@ import java.util.Locale;
 public class AuthController {
     private final UserService users;
 
-    @Value("${eventflow.demo-access.enabled:true}")
+    @Value("${occavie.demo-access.enabled:${eventflow.demo-access.enabled:true}}")
     private boolean demoAccessEnabled;
 
 
@@ -72,7 +72,7 @@ public class AuthController {
         }
     }
 
-    // Original EventFlow recovery flow: check email, then reset in the login dialog.
+    // Original Occavie recovery flow: check email, then reset in the login dialog.
     // This does not require Jakarta Mail or SMTP.
     @GetMapping("/forgot-password")
     public String forgotPasswordEntry() {

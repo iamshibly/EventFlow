@@ -42,7 +42,7 @@ Occavie (formerly EventFlow) is a full-stack event management platform: people d
 
 ## Stack
 
-Java 26 (JDK 21 also builds with `-Djava.version=21`), Spring Boot 4.1.1, Spring MVC, Spring Security, Thymeleaf, Spring Data MongoDB, Caffeine cache, Maven wrapper, Lombok, OpenPDF, ZXing, vanilla JS + CSS (Manrope/Inter, Bootstrap Icons, Chart.js).
+Java 26 (JDK 21 also builds with `-Djava.version=21`), Spring Boot 4.1.1, Spring MVC, Spring Security, Thymeleaf, Spring Data MongoDB, Caffeine cache, Maven wrapper, Lombok, ZXing (QR), vanilla JS + CSS (Manrope/Inter, Bootstrap Icons, Chart.js).
 
 ## Architecture
 

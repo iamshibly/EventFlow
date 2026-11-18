@@ -6,38 +6,30 @@
 <div th:replace="~{fragments :: siteNav('home')}"></div>
 
 <main id="main-content">
-    <!-- Hero -->
-    <section class="ov-hero" aria-labelledby="ovHeroTitle">
-        <div class="ov-hero-glow" aria-hidden="true"></div>
-        <div class="ov-container ov-hero-grid" th:classappend="${#lists.isEmpty(featuredEvents)} ? ' is-single' : ''">
-            <div class="ov-hero-copy">
-                <p class="ov-eyebrow">MAKE EVERY MOMENT COUNT</p>
-                <h1 id="ovHeroTitle">Find your next <em>unforgettable</em> experience.</h1>
-                <p class="ov-hero-sub">Discover conferences, workshops, concerts and meetups. Book your seat in a few clicks, or host an event of your own.</p>
-                <form class="ov-search" th:action="@{/events}" action="/events" method="get" role="search">
-                    <i class="bi bi-search" aria-hidden="true"></i>
-                    <label class="ov-sr" for="ovEventSearch">Search events by title or keyword</label>
-                    <input id="ovEventSearch" name="q" type="search" placeholder="Search events, topics or locations" autocomplete="off" maxlength="120">
-                    <button class="primary-button" type="submit">Search</button>
-                </form>
-                <div class="ov-chip-row" th:if="${!#lists.isEmpty(categories)}" aria-label="Browse by category">
-                    <a class="ov-chip" th:each="category : ${categories}" th:href="@{/events(category=${category})}" th:text="${category}" href="/events">Technology</a>
-                </div>
-            </div>
+    <!-- Hero: full-bleed photo -->
+    <section class="ov-hero ov-hero-photo-bg" aria-labelledby="ovHeroTitle">
+        <img class="ov-hero-bgimg" th:src="@{/images/home-conference-hero.webp}" src="/images/home-conference-hero.webp" alt="" width="1600" height="900" fetchpriority="high">
+        <div class="ov-container ov-hero-inner">
+            <p class="ov-eyebrow">EVENTS · LEARN · CONNECT</p>
+            <h1 id="ovHeroTitle">Find your next <em>unforgettable</em> experience.</h1>
+            <p class="ov-hero-sub">Discover conferences, workshops, concerts and meetups. Book your seat in a few clicks, or host an event of your own.</p>
+            <form class="ov-search" th:action="@{/events}" action="/events" method="get" role="search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <label class="ov-sr" for="ovEventSearch">Search events by title or keyword</label>
+                <input id="ovEventSearch" name="q" type="search" placeholder="Search events, topics or locations" autocomplete="off" maxlength="120">
+                <button class="primary-button" type="submit">Search</button>
+            </form>
+        </div>
+    </section>
 
-            <!-- Real upcoming events only; nothing here is placeholder data. -->
-            <div class="ov-hero-next" th:if="${!#lists.isEmpty(featuredEvents)}" aria-label="Next up">
-                <p class="ov-hero-next-label">Next up</p>
-                <a class="ov-next-card" th:each="event, stat : ${featuredEvents}" th:if="${stat.index lt 3}" th:href="@{'/events/' + ${event.id}}" href="/events">
-                    <img data-event-image th:attr="data-event-category=${event.category}" th:src="${event.imageUrl != null and !#strings.isEmpty(event.imageUrl) ? event.imageUrl : '/images/event-visual.png'}" src="/images/event-visual.png" alt="" width="88" height="88" loading="lazy" decoding="async">
-                    <span class="ov-next-copy">
-                        <span class="ov-event-date"><i class="bi bi-calendar3"></i> <span th:text="${event.formattedDate}">20 May 2026</span></span>
-                        <strong th:text="${event.title}">Event title</strong>
-                        <small><i class="bi bi-geo-alt"></i> <span th:text="${event.location}">Dhaka</span></small>
-                    </span>
-                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                </a>
-            </div>
+    <!-- Category tiles -->
+    <section class="ov-container ov-cat-section" th:if="${!#lists.isEmpty(categories)}" aria-label="Browse by category">
+        <div class="ov-cat-grid">
+            <a class="ov-cat-tile" th:href="@{/events}" href="/events"><i class="bi bi-grid-fill" aria-hidden="true"></i><span>All events</span></a>
+            <a class="ov-cat-tile" th:each="category : ${categories}" th:href="@{/events(category=${category})}" href="/events">
+                <i class="bi" aria-hidden="true" th:classappend="${category == 'Technology' ? 'bi-laptop' : category == 'Business' ? 'bi-briefcase' : category == 'Education' ? 'bi-mortarboard' : category == 'Health' ? 'bi-heart-pulse' : category == 'Music' ? 'bi-music-note-beamed' : category == 'Sports' ? 'bi-trophy' : category == 'Career' ? 'bi-person-workspace' : category == 'Community' ? 'bi-people' : category == 'Design' ? 'bi-palette' : 'bi-stars'}"></i>
+                <span th:text="${category}">Technology</span>
+            </a>
         </div>
     </section>
 

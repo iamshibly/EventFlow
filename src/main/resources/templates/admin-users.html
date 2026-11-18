@@ -17,11 +17,11 @@
         <section class="table-card">
             <div class="table-toolbar">
                 <div class="table-search"><i class="bi bi-search"></i><input id="userSearch" type="search" placeholder="Search by name or email..."></div>
-                <select id="roleFilter" class="toolbar-select"><option value="ALL">All roles</option><option value="ADMIN">Admin</option><option value="ORGANIZER">Organizer</option><option value="PARTICIPANT">Participant</option></select>
-                <select id="statusFilter" class="toolbar-select"><option value="ALL">All status</option><option value="ACTIVE">Active</option><option value="DISABLED">Disabled</option></select>
+                <select id="roleFilter" class="toolbar-select" aria-label="Filter by role"><option value="ALL">All roles</option><option value="ADMIN">Admin</option><option value="ORGANIZER">Organizer</option><option value="PARTICIPANT">Participant</option></select>
+                <select id="statusFilter" class="toolbar-select" aria-label="Filter by status"><option value="ALL">All status</option><option value="ACTIVE">Active</option><option value="DISABLED">Disabled</option></select>
                 <div class="table-count" id="userCount" th:text="${#lists.size(users) + ' users'}">0 users</div>
             </div>
-            <div class="data-table-wrap">
+            <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
                 <table class="data-table" id="userTable">
                     <thead><tr><th>User</th><th>Role</th><th>Status</th><th class="actions-column">Actions</th></tr></thead>
                     <tbody>

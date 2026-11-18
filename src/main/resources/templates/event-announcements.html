@@ -19,7 +19,7 @@
         </form>
         <section class="large-empty" th:unless="${@display.status(event) == 'UPCOMING'}"><div class="empty-icon"><i class="bi bi-megaphone"></i></div><h2>Announcements are closed</h2><p>You can send announcements only for published, upcoming events.</p></section>
         <section class="table-card" th:if="${!#lists.isEmpty(announcements)}">
-            <div class="data-table-wrap"><table class="data-table"><caption class="ov-sr">Sent announcements</caption>
+            <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table"><table class="data-table"><caption class="ov-sr">Sent announcements</caption>
                 <thead><tr><th scope="col">Subject</th><th scope="col">Sent</th><th scope="col">Recipients</th></tr></thead>
                 <tbody><tr th:each="a : ${announcements}"><td><strong th:text="${a.subject}">Subject</strong><small th:text="${a.message}">Message</small></td><td th:text="${#temporals.format(a.createdAt, 'd MMM yyyy, h:mm a')}">Date</td><td th:text="${a.recipientCount}">0</td></tr></tbody>
             </table></div>

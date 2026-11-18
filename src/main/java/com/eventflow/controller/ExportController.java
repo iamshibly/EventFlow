@@ -34,7 +34,12 @@ public class ExportController {
     @GetMapping("/organizer/events/{id}/export/{kind}.csv")
     public ResponseEntity<byte[]> export(@PathVariable String id, @PathVariable String kind, Authentication authentication) {
         User user = userService.currentUser(authentication);
-        Event event = eventService.findOwned(id, user);          // throws when the caller does not own the event
+        Event event;
+        try {
+            event = eventService.findOwned(id, user);            // fails when the event is missing or not owned by the caller
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND).build();   // same answer for both, no probing
+        }
         List<Registration> registrations = registrationService.findByEvent(id);
         StringBuilder csv = new StringBuilder();
         switch (kind) {

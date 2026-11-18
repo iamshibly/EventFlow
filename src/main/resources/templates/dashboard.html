@@ -148,7 +148,7 @@
             </article>
             <article class="surface-card large-surface">
                 <div class="surface-heading"><div><span class="section-kicker">TICKETS</span><h2>Tickets &amp; booking status</h2></div><a th:href="@{/participant/registrations}">All registrations</a></div>
-                <div class="data-table-wrap" th:if="${!#lists.isEmpty(dashboardEvents)}">
+                <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table" th:if="${!#lists.isEmpty(dashboardEvents)}">
                     <table class="data-table">
                         <caption class="ov-sr">Upcoming registered events with booking status and ticket download</caption>
                         <thead><tr><th scope="col">Event</th><th scope="col">Ticket</th><th scope="col">Status</th><th scope="col" class="actions-column">Ticket</th></tr></thead>

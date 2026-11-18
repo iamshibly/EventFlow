@@ -19,7 +19,7 @@
 
         <section class="table-card">
             <div class="table-toolbar"><div><span class="section-kicker">PARTICIPANTS</span><h2>Registration list</h2></div><div class="table-count" th:text="${#lists.size(registrations) + ' people'}">0 people</div></div>
-            <div class="data-table-wrap" th:if="${!#lists.isEmpty(registrations)}">
+            <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table" th:if="${!#lists.isEmpty(registrations)}">
                 <table class="data-table"><thead><tr><th>Participant</th><th>Email</th><th>Ticket</th><th>Registered</th><th>Status</th></tr></thead><tbody>
                 <tr th:each="registration : ${registrations}"><td><div class="table-user"><img loading="lazy" class="avatar avatar-image" th:src="${participantMap[registration.participantId] != null and participantMap[registration.participantId].profileImageUrl != null ? participantMap[registration.participantId].profileImageUrl : '/images/default-avatar.png'}" src="/images/default-avatar.png" alt="Profile picture"><strong th:text="${registration.participantName}">Name</strong></div></td><td th:text="${registration.participantEmail}">email</td><td><div class="booking-ticket-cell"><strong th:text="${@display.ticketName(registration)}">General Admission</strong><small th:text="${@display.ticketPaid(registration)}">Free</small></div></td><td th:text="${@display.registrationTime(registration)}">Date</td><td><span class="status-badge success-status">REGISTERED</span></td></tr>
                 </tbody></table>

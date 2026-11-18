@@ -11,6 +11,8 @@ public final class EventRules {
 
     public static String status(Event event) {
         if (event == null) return "UPCOMING";
+        // Lifecycle states take precedence over the date-derived COMPLETED state.
+        if (isLifecycleState(event.getStatus())) return event.getStatus();
         LocalDate date = event.getDate();
         if (date != null) {
             LocalDate today = LocalDate.now();
@@ -22,6 +24,31 @@ public final class EventRules {
         }
         String status = event.getStatus();
         return status == null || status.isBlank() ? "UPCOMING" : status;
+    }
+
+    /** Draft, pending approval, rejected and cancelled override the date-derived COMPLETED state. */
+    private static boolean isLifecycleState(String status) {
+        return "CANCELLED".equals(status) || "DRAFT".equals(status) || "PENDING_APPROVAL".equals(status) || "REJECTED".equals(status);
+    }
+
+    /** Visible to the public. Drafts, events awaiting approval and rejected events are private to their organizer and admins. */
+    public static boolean isPublished(Event event) {
+        return event != null && !("DRAFT".equals(event.getStatus()) || "PENDING_APPROVAL".equals(event.getStatus())
+                || "REJECTED".equals(event.getStatus()));
+    }
+
+    /** The organizer can still change it step by step (draft or rejected). */
+    public static boolean isEditableDraft(Event event) {
+        return event != null && ("DRAFT".equals(event.getStatus()) || "REJECTED".equals(event.getStatus()));
+    }
+
+    /** Open for registration: published, not cancelled and not yet finished. */
+    public static boolean bookable(Event event) {
+        return event != null && "UPCOMING".equals(status(event));
+    }
+
+    public static boolean isCancelled(Event event) {
+        return event != null && "CANCELLED".equals(event.getStatus());
     }
 
     public static String pricingType(Event event) {

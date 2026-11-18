@@ -41,6 +41,8 @@ public class RegistrationService {
     private final NotificationService notificationService;
     private final TicketTypeService ticketTypeService;
     private final CouponService couponService;
+    private final TicketTokenService ticketTokens;
+    private final WaitlistService waitlistService;
 
 
 
@@ -72,7 +74,8 @@ public class RegistrationService {
         if (registrationRepository.existsByEventIdAndParticipantId(eventId, participant.getId())) {
             throw new IllegalArgumentException("You are already registered for this event.");
         }
-        if (registrationRepository.countByEventId(eventId) >= event.getCapacity()) {
+        // Seats reserved for waitlisted participants count as taken, except for the person they are reserved for.
+        if (!waitlistService.hasRoom(event, participant.getId())) {
             throw new IllegalArgumentException("This event is already full.");
         }
 
@@ -96,19 +99,20 @@ public class RegistrationService {
                     .discountAmount(coupon.discountAmount() == null ? java.math.BigDecimal.ZERO : coupon.discountAmount())
                     .finalPrice(coupon.finalPrice() == null ? ticket.price() : coupon.finalPrice())
                     .paymentStatus("NOT_REQUIRED")
+                    .ticketCode(ticketTokens.newCode())
                     .build());
 
+            waitlistService.consumeOffer(eventId, participant.getId());
             notificationService.notifyUser(
                     event.getOrganizerId(),
                     participant.getFullName() + " registered for " + event.getTitle()
                             + " (" + ticket.ticketTypeName() + ").",
                     "/organizer/events/" + eventId + "/participants"
             );
-            notificationService.notifyUser(
-                    participant.getId(),
-                    "Registration confirmed for " + event.getTitle() + ".",
-                    "/participant/registrations#registration-" + eventId
-            );
+            notificationService.notify(NotificationType.REGISTRATION_CONFIRMED, participant.getId(), eventId, event.getTitle(),
+                    "Your registration for " + event.getTitle() + " is confirmed.",
+                    "/participant/registrations#registration-" + eventId, "REG:" + registration.getId(),
+                    confirmationDetails(event, registration));
             if (coupon.couponCode() != null && !coupon.couponCode().isBlank()) {
                 notificationService.notifyUser(
                         participant.getId(),
@@ -145,6 +149,10 @@ public class RegistrationService {
                     participant.getFullName() + " cancelled registration for " + event.getTitle() + ".",
                     "/organizer/events/" + eventId + "/participants"
             );
+            notificationService.notify(NotificationType.REGISTRATION_CANCELLED, participant.getId(), eventId, event.getTitle(),
+                    "Your registration for " + event.getTitle() + " was cancelled.", "/events/" + eventId,
+                    "REGCANCEL:" + registration.getId(), java.util.List.of("You can register again while seats are available."));
+            waitlistService.promote(eventId);
         }
         return event;
     }
@@ -162,12 +170,11 @@ public class RegistrationService {
         registrationRepository.delete(registration);
         feedbackRepository.deleteByEventIdAndParticipantId(registration.getEventId(), registration.getParticipantId());
 
-        notificationService.notifyUser(
-                registration.getParticipantId(),
-                "An administrator removed your registration"
-                        + (event == null ? "." : " for " + event.getTitle() + "."),
-                event == null ? "/participant/registrations" : "/events/" + event.getId()
-        );
+        notificationService.notify(NotificationType.REGISTRATION_CANCELLED, registration.getParticipantId(),
+                event == null ? null : event.getId(), event == null ? null : event.getTitle(),
+                "An administrator removed your registration" + (event == null ? "." : " for " + event.getTitle() + "."),
+                event == null ? "/participant/registrations" : "/events/" + event.getId(), "REGCANCEL:" + registration.getId(), null);
+        if (event != null) waitlistService.promote(event.getId());
     }
 
     public List<Registration> findByParticipant(String participantId) {
@@ -210,11 +217,33 @@ public class RegistrationService {
         cancelDemoAttempt(registration);
         registrationRepository.delete(registration);
         feedbackRepository.deleteByEventIdAndParticipantId(registration.getEventId(), registration.getParticipantId());
-        notificationService.notifyUser(
-                registration.getParticipantId(),
-                "The organizer removed your registration for " + event.getTitle() + ".",
-                "/events/" + event.getId()
-        );
+        notificationService.notify(NotificationType.REGISTRATION_CANCELLED, registration.getParticipantId(), event.getId(), event.getTitle(),
+                "The organizer removed your registration for " + event.getTitle() + ".", "/events/" + event.getId(),
+                "REGCANCEL:" + registration.getId(), null);
+        waitlistService.promote(event.getId());
+    }
+
+    /** Ticket details included in the confirmation email. */
+    static java.util.List<String> confirmationDetails(Event event, Registration registration) {
+        String code = registration.getTicketCode();
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        lines.add("Event: " + event.getTitle());
+        if (event.getDate() != null) lines.add("When: " + event.getDate() + (event.getTime() == null ? "" : " " + event.getTime()));
+        if (event.getLocation() != null) lines.add("Where: " + event.getLocation());
+        lines.add("Ticket: " + (registration.getTicketTypeName() == null ? "General Admission" : registration.getTicketTypeName()));
+        if (registration.getFinalPrice() != null && registration.getFinalPrice().signum() > 0) {
+            lines.add("Price: " + registration.getFinalPrice().toPlainString() + " BDT (demo checkout, no real payment taken)");
+        }
+        if (code != null) lines.add("Ticket ID: OV-" + code.substring(0, Math.min(8, code.length())).toUpperCase());
+        lines.add("Download your PDF ticket (with QR code) from My Registrations.");
+        return lines;
+    }
+
+    /** Registrations created before QR tickets existed get their code on first use. */
+    public Registration ensureTicketCode(Registration registration) {
+        if (registration.getTicketCode() != null && !registration.getTicketCode().isBlank()) return registration;
+        registration.setTicketCode(ticketTokens.newCode());
+        return registrationRepository.save(registration);
     }
 
     @Cacheable(value = "registrationCount", key = "#eventId")
@@ -270,6 +299,7 @@ public class RegistrationService {
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
         return event.getDate() == null
+                || "CANCELLED".equals(EventRules.status(event)) || "DRAFT".equals(EventRules.status(event))
                 || "COMPLETED".equals(EventRules.status(event))
                 || event.getDate().isBefore(today)
                 || (event.getDate().isEqual(today)

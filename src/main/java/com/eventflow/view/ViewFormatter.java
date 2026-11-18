@@ -45,8 +45,30 @@ public class ViewFormatter {
 
     public String status(Event event) { return EventRules.status(event); }
     public boolean paid(Event event) { return EventRules.isPaid(event); }
+    /** Human-readable status for badges: Draft, Pending approval, Published (upcoming), Rejected, Cancelled, Completed. */
+    public String statusLabel(Event event) {
+        return switch (EventRules.status(event)) {
+            case "PENDING_APPROVAL" -> "Pending approval";
+            case "UPCOMING" -> "Published";
+            case "DRAFT" -> "Draft";
+            case "REJECTED" -> "Rejected";
+            case "CANCELLED" -> "Cancelled";
+            case "COMPLETED" -> "Completed";
+            default -> EventRules.status(event);
+        };
+    }
+
     public String pricingType(Event event) { return EventRules.pricingType(event); }
     public BigDecimal basePrice(Event event) { return EventRules.basePrice(event); }
+    /** Google Maps search link built from the address (or venue name); null when there is nothing to search. */
+    public String mapUrl(Event event) {
+        if (event == null) return null;
+        String query = event.getAddress() != null && !event.getAddress().isBlank()
+                ? event.getLocation() + ", " + event.getAddress() : event.getLocation();
+        if (query == null || query.isBlank()) return null;
+        return "https://www.google.com/maps/search/?api=1&query=" + java.net.URLEncoder.encode(query.trim(), java.nio.charset.StandardCharsets.UTF_8);
+    }
+
     public String eventDate(Event event) { return date(event == null ? null : event.getDate()); }
     public String eventTime(Event event) { return time(event == null ? null : event.getTime()); }
     public String formattedBasePrice(Event event) {
@@ -150,6 +172,26 @@ public class ViewFormatter {
     public String feedbackUpdated(Feedback feedback) {
         return dateTime(feedback == null ? null : feedback.getUpdatedAt());
     }
+    /** "5 min ago", "3 h ago", "2 d ago" or a date; the exact time is available as a tooltip. */
+    public String relativeTime(Notification notice) {
+        java.time.LocalDateTime at = notice == null ? null : notice.getCreatedAt();
+        if (at == null) return "";
+        long minutes = java.time.Duration.between(at, java.time.LocalDateTime.now()).toMinutes();
+        if (minutes < 1) return "Just now";
+        if (minutes < 60) return minutes + " min ago";
+        if (minutes < 24 * 60) return (minutes / 60) + " h ago";
+        if (minutes < 7 * 24 * 60) return (minutes / (24 * 60)) + " d ago";
+        return at.format(java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy"));
+    }
+
+    public String notificationIcon(Notification notice) {
+        return com.eventflow.service.NotificationType.of(notice == null ? null : notice.getType()).icon();
+    }
+
+    public String notificationLabel(Notification notice) {
+        return com.eventflow.service.NotificationType.of(notice == null ? null : notice.getType()).label();
+    }
+
     public String notificationTime(Notification notice) {
         return dateTime(notice == null ? null : notice.getCreatedAt());
     }

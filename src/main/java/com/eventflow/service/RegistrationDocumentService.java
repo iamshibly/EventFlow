@@ -36,6 +36,19 @@ import java.util.Locale;
 /** Generates repeatable, branded PDFs directly from saved registrations; no payment integration. */
 @Service
 public class RegistrationDocumentService {
+
+    private final TicketTokenService tokens;
+
+    /** Without a token service (unit tests) tickets are drawn without a QR code. */
+    public RegistrationDocumentService() {
+        this(null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public RegistrationDocumentService(TicketTokenService tokens) {
+        this.tokens = tokens;
+    }
+
     private static final Color NAVY = new Color(14, 27, 42);
     private static final Color GOLD = new Color(11, 127, 126);
     private static final Color MUTED = new Color(91, 103, 115);
@@ -156,10 +169,16 @@ public class RegistrationDocumentService {
         drawFit(g, bookingStatus(registration), 1145, 136, 180,
                 new Font("Serif", Font.BOLD, 30), 20, NAVY);
         g.setStroke(new BasicStroke(1.2f));
-        g.setColor(new Color(232, 247, 245));
-        g.fill(new RoundRectangle2D.Double(1108, 241, 177, 174, 26, 26));
-        bigTicketIcon(g, 1148, 284);
-        tracked(g, "ENTRY PASS", 1101, 469, new Font("SansSerif", Font.BOLD, 18), GOLD, 3);
+        g.setColor(Color.WHITE);
+        g.fill(new RoundRectangle2D.Double(1098, 228, 197, 197, 22, 22));
+        g.setColor(LINE);
+        g.draw(new RoundRectangle2D.Double(1098, 228, 197, 197, 22, 22));
+        if (!drawQr(g, registration, 1110, 240, 173)) {
+            g.setColor(new Color(232, 247, 245));
+            g.fill(new RoundRectangle2D.Double(1108, 241, 177, 174, 26, 26));
+            bigTicketIcon(g, 1148, 284);
+        }
+        tracked(g, "SCAN AT ENTRY", 1101, 469, new Font("SansSerif", Font.BOLD, 18), GOLD, 3);
         g.setColor(LINE);
         g.drawLine(1063, 542, 1340, 542);
         tracked(g, "REFERENCE", 1077, 579, new Font("SansSerif", Font.BOLD, 14), MUTED, 2);
@@ -250,6 +269,31 @@ public class RegistrationDocumentService {
         return image;
     }
 
+    /** Draws the signed check-in QR code; returns false when the registration has no code yet. */
+    private boolean drawQr(Graphics2D g, Registration registration, int x, int y, int size) {
+        if (tokens == null || registration.getTicketCode() == null || registration.getTicketCode().isBlank()) return false;
+        try {
+            java.util.Map<com.google.zxing.EncodeHintType, Object> hints = new java.util.EnumMap<>(com.google.zxing.EncodeHintType.class);
+            hints.put(com.google.zxing.EncodeHintType.ERROR_CORRECTION, com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.M);
+            hints.put(com.google.zxing.EncodeHintType.MARGIN, 0);
+            com.google.zxing.common.BitMatrix matrix = new com.google.zxing.qrcode.QRCodeWriter().encode(
+                    tokens.tokenFor(registration.getTicketCode()), com.google.zxing.BarcodeFormat.QR_CODE, 1, 1, hints);
+            int modules = matrix.getWidth();
+            double cell = (double) size / modules;
+            g.setColor(NAVY);
+            for (int row = 0; row < modules; row++) {
+                for (int col = 0; col < modules; col++) {
+                    if (matrix.get(col, row)) {
+                        g.fill(new java.awt.geom.Rectangle2D.Double(x + col * cell, y + row * cell, Math.ceil(cell), Math.ceil(cell)));
+                    }
+                }
+            }
+            return true;
+        } catch (com.google.zxing.WriterException ex) {
+            return false;
+        }
+    }
+
     private Graphics2D graphics(BufferedImage image) {
         Graphics2D g = image.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -314,7 +358,9 @@ public class RegistrationDocumentService {
     private String reference(Registration registration) {
         String value = registration.getPaymentReference();
         if (value != null && !value.isBlank()) return value;
-        return registration.getId() == null ? "-" : "OV-" + registration.getId().toUpperCase(Locale.ROOT);
+        // Never print the database id: show the short, opaque part of the ticket code instead.
+        String code = registration.getTicketCode();
+        return code == null || code.isBlank() ? "-" : "OV-" + code.substring(0, Math.min(8, code.length())).toUpperCase(Locale.ROOT);
     }
 
     private String clean(String value, String fallback) {

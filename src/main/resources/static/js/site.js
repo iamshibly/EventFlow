@@ -217,6 +217,27 @@
         if (typeof initAnalyticsCharts === 'function') initAnalyticsCharts();
     }));
 
+
+    // Copy link / native share buttons (event and organizer pages)
+    $$('[data-copy-link]').forEach(button => button.addEventListener('click', async () => {
+        const url = button.dataset.url || window.location.href;
+        const label = button.querySelector('span');
+        const original = label ? label.textContent : '';
+        try {
+            if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(url);
+            else { const field = document.createElement('textarea'); field.value = url; field.setAttribute('readonly', ''); field.style.position = 'fixed'; field.style.opacity = '0'; document.body.appendChild(field); field.select(); document.execCommand('copy'); field.remove(); }
+            if (label) { label.textContent = 'Link copied'; setTimeout(() => { label.textContent = original; }, 2000); }
+        } catch (error) { window.prompt('Copy this link', url); }
+    }));
+    $$('[data-share]').forEach(button => {
+        if (!navigator.share) return;          // hidden until the browser supports native sharing
+        button.hidden = false;
+        button.addEventListener('click', async () => {
+            try { await navigator.share({ title: button.dataset.title || document.title, url: button.dataset.url || window.location.href }); }
+            catch (error) { /* cancelled */ }
+        });
+    });
+
     // Event search/filter
     const eventCards = $$('.event-card');
     const eventSearch = $('#eventSearch');

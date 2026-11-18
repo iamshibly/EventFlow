@@ -34,6 +34,8 @@ public class PaymentFinalizationService {
     private final TicketTypeService ticketTypeService;
     private final CouponService couponService;
     private final NotificationService notificationService;
+    private final TicketTokenService ticketTokens;
+    private final WaitlistService waitlistService;
 
     /** Writes to the event document force concurrent orders to conflict, protecting capacity in Atlas transactions. */
     private Event lockEvent(String eventId) {
@@ -51,11 +53,11 @@ public class PaymentFinalizationService {
         Event event = lockEvent(quote.eventId());
         if (participant == null || !"PARTICIPANT".equals(participant.getRole()))
             throw new IllegalArgumentException("Only participants can book tickets.");
-        if ("COMPLETED".equals(EventRules.status(event)))
+        if (!EventRules.bookable(event))
             throw new IllegalArgumentException("Registration for this event is closed.");
         if (registrationRepository.existsByEventIdAndParticipantId(event.getId(), participant.getId()))
             throw new IllegalArgumentException("You are already registered for this event.");
-        if (registrationRepository.countByEventId(event.getId()) >= event.getCapacity())
+        if (!waitlistService.hasRoom(event, participant.getId()))
             throw new IllegalArgumentException("This event is full.");
 
         var ticket = ticketTypeService.resolveForRegistration(event, quote.ticketTypeId());
@@ -75,13 +77,14 @@ public class PaymentFinalizationService {
 
         LocalDateTime now = LocalDateTime.now();
         String reference = "OV" + UUID.randomUUID().toString().replace("-", "").substring(0, 25).toUpperCase();
-        registrationRepository.save(Registration.builder()
+        Registration saved = registrationRepository.save(Registration.builder()
                 .eventId(event.getId()).participantId(participant.getId())
                 .participantName(participant.getFullName()).participantEmail(participant.getEmail())
                 .ticketTypeId(ticket.ticketTypeId()).ticketTypeName(ticket.ticketTypeName())
                 .ticketPrice(ticket.price()).couponId(coupon.couponId()).couponCode(coupon.couponCode())
                 .discountAmount(coupon.discountAmount()).finalPrice(coupon.finalPrice())
                 .paymentStatus("PAID_DEMO").paymentMethod(method).paymentReference(reference)
+                .ticketCode(ticketTokens.newCode())
                 .build());
         PaymentAttempt attempt = paymentAttemptRepository.save(PaymentAttempt.builder()
                 .transactionId(reference).eventId(event.getId()).participantId(participant.getId())
@@ -91,9 +94,11 @@ public class PaymentFinalizationService {
                 .discountAmount(coupon.discountAmount()).payableAmount(coupon.finalPrice())
                 .preferredMethod(method).status("PAID").createdAt(now).completedAt(now)
                 .build());
-        notificationService.notifyUser(participant.getId(),
-                "Registration confirmed for " + event.getTitle() + ".",
-                "/participant/registrations#registration-" + event.getId());
+        waitlistService.consumeOffer(event.getId(), participant.getId());
+        notificationService.notify(NotificationType.REGISTRATION_CONFIRMED, participant.getId(), event.getId(), event.getTitle(),
+                "Your registration for " + event.getTitle() + " is confirmed.",
+                "/participant/registrations#registration-" + event.getId(), "REG:" + saved.getId(),
+                RegistrationService.confirmationDetails(event, saved));
         notificationService.notifyUser(event.getOrganizerId(),
                 participant.getFullName() + " registered for " + event.getTitle() + ".",
                 "/organizer/events/" + event.getId() + "/participants");

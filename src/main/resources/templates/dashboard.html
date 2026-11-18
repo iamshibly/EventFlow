@@ -116,6 +116,30 @@
 
         <section class="dashboard-content-grid" th:if="${user.role == 'PARTICIPANT'}">
             <article class="surface-card large-surface">
+                <div class="surface-heading"><div><span class="section-kicker">BOOKMARKS</span><h2>Saved events</h2></div><a th:href="@{/events}">Find more</a></div>
+                <div class="dashboard-event-list" th:if="${!#lists.isEmpty(savedEvents)}">
+                    <div class="dashboard-event-row" th:each="event : ${savedEvents}">
+                        <img data-event-image th:attr="data-event-category=${event.category}" th:with="efListingImage=${@display.listingImageUrl(event)}" th:src="${efListingImage}" src="/images/event-visual.png" alt="" loading="lazy" decoding="async">
+                        <div class="dashboard-event-main"><strong th:text="${event.title}">Event</strong><span><i class="bi bi-calendar3"></i><span th:text="${@display.eventDate(event) + ' · ' + @display.eventTime(event)}">Date</span></span><span><i class="bi bi-geo-alt"></i><span th:text="${event.location}">Venue</span></span></div>
+                        <div class="dashboard-event-side"><span class="status-badge" th:text="${@display.status(event)}">UPCOMING</span>
+                            <form th:action="@{'/participant/events/' + ${event.id} + '/unsave'}" method="post"><input type="hidden" name="from" value="dashboard"><button class="text-danger-button" type="submit">Remove</button></form></div>
+                        <a class="ef-event-link" th:href="@{'/events/' + ${event.id}}">View <i class="bi bi-chevron-right"></i></a>
+                    </div>
+                </div>
+                <div class="clean-empty" th:if="${#lists.isEmpty(savedEvents)}"><i class="bi bi-bookmark"></i><h3>No saved events yet</h3><p>Use Save on any event page to keep it here.</p></div>
+            </article>
+            <article class="surface-card large-surface" th:if="${!#lists.isEmpty(suggestedEvents)}">
+                <div class="surface-heading"><div><span class="section-kicker">FOR YOU</span><h2>Suggested events</h2></div><a th:href="@{/events}">Browse all</a></div>
+                <div class="dashboard-event-list">
+                    <div class="dashboard-event-row" th:each="event : ${suggestedEvents}">
+                        <img data-event-image th:attr="data-event-category=${event.category}" th:with="efListingImage=${@display.listingImageUrl(event)}" th:src="${efListingImage}" src="/images/event-visual.png" alt="" loading="lazy" decoding="async">
+                        <div class="dashboard-event-main"><strong th:text="${event.title}">Event</strong><span><i class="bi bi-calendar3"></i><span th:text="${@display.eventDate(event)}">Date</span></span><span><i class="bi bi-tag"></i><span th:text="${event.category}">Category</span></span></div>
+                        <div class="dashboard-event-side"></div>
+                        <a class="ef-event-link" th:href="@{'/events/' + ${event.id}}">View <i class="bi bi-chevron-right"></i></a>
+                    </div>
+                </div>
+            </article>
+            <article class="surface-card large-surface">
                 <div class="surface-heading"><div><span class="section-kicker">TICKETS</span><h2>Tickets &amp; booking status</h2></div><a th:href="@{/participant/registrations}">All registrations</a></div>
                 <div class="data-table-wrap" th:if="${!#lists.isEmpty(dashboardEvents)}">
                     <table class="data-table">

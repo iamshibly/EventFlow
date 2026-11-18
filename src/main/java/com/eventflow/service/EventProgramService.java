@@ -184,6 +184,25 @@ public class EventProgramService {
         return map;
     }
 
+    /** Copies schedule, speakers and sponsors (without uploaded photos/logos) into a new event, e.g. when duplicating. */
+    public void copyProgram(String fromEventId, String toEventId) {
+        Map<String, String> speakerIds = new HashMap<>();
+        for (EventSpeaker speaker : findSpeakers(fromEventId)) {
+            EventSpeaker copy = speakerRepository.save(EventSpeaker.builder().eventId(toEventId).name(speaker.getName())
+                    .designation(speaker.getDesignation()).organization(speaker.getOrganization()).bio(speaker.getBio()).build());
+            speakerIds.put(speaker.getId(), copy.getId());
+        }
+        for (EventScheduleItem item : findSchedule(fromEventId)) {
+            scheduleRepository.save(EventScheduleItem.builder().eventId(toEventId).title(item.getTitle())
+                    .startTime(item.getStartTime()).endTime(item.getEndTime()).location(item.getLocation())
+                    .description(item.getDescription()).speakerId(item.getSpeakerId() == null ? null : speakerIds.get(item.getSpeakerId())).build());
+        }
+        for (EventSponsor sponsor : findSponsors(fromEventId)) {
+            sponsorRepository.save(EventSponsor.builder().eventId(toEventId).name(sponsor.getName()).level(sponsor.getLevel())
+                    .website(sponsor.getWebsite()).description(sponsor.getDescription()).sortOrder(sponsor.getSortOrder()).build());
+        }
+    }
+
     public void deleteAllByEvent(String eventId) {
         for (EventSpeaker speaker : findSpeakers(eventId)) {
             speakerImageRepository.deleteBySpeakerId(speaker.getId());

@@ -28,7 +28,7 @@ public class PaymentService {
             throw new IllegalArgumentException("Sign in as a participant to book tickets.");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found."));
-        if ("COMPLETED".equals(EventRules.status(event)))
+        if (!EventRules.bookable(event))
             throw new IllegalArgumentException("Registration is closed for this event.");
         if (registrationRepository.existsByEventIdAndParticipantId(eventId, participant.getId()))
             throw new IllegalArgumentException("You are already registered for this event.");

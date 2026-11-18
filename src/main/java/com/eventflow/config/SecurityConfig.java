@@ -41,8 +41,9 @@ public class SecurityConfig {
         final String signingKey = effectiveRememberKey;
 
         http
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/internal/jobs/**"))   // token-authenticated machine endpoint
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/login", "/register", "/forgot-password/**", "/forgot-password", "/reset-password", "/contact", "/events", "/events/**", "/event-images/**", "/event-gallery-images/**", "/speaker-images/**", "/sponsor-images/**", "/error", "/favicon.ico", "/site.webmanifest", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/home", "/login", "/register", "/forgot-password/**", "/forgot-password", "/reset-password", "/contact", "/events", "/events/**", "/organizers/**", "/internal/jobs/**", "/event-images/**", "/event-gallery-images/**", "/speaker-images/**", "/sponsor-images/**", "/error", "/favicon.ico", "/site.webmanifest", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers("/participant/**").hasRole("PARTICIPANT")

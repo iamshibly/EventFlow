@@ -56,6 +56,9 @@ class BookingFlowTest {
     @Mock NotificationService notificationService;
     @Mock MongoTemplate mongoTemplate;
 
+    com.eventflow.service.TicketTokenService tokens = new com.eventflow.service.TicketTokenService("test-secret");
+    @Mock com.eventflow.repository.WaitlistRepository waitlistRepository;
+    com.eventflow.service.WaitlistService waitlistService;
     CouponService couponService;
     TicketTypeService ticketTypeService;
     RegistrationService registrationService;
@@ -66,12 +69,13 @@ class BookingFlowTest {
 
     @BeforeEach
     void setUp() {
+        waitlistService = new com.eventflow.service.WaitlistService(waitlistRepository, registrationRepository, eventRepository, notificationService, mongoTemplate);
         couponService = new CouponService(couponRepository, registrationRepository);
         ticketTypeService = new TicketTypeService(ticketTypeRepository, registrationRepository);
         registrationService = new RegistrationService(registrationRepository, paymentAttemptRepository, mongoTemplate,
-                eventRepository, feedbackRepository, notificationService, ticketTypeService, couponService);
+                eventRepository, feedbackRepository, notificationService, ticketTypeService, couponService, tokens, waitlistService);
         paymentFinalization = new PaymentFinalizationService(mongoTemplate, eventRepository, registrationRepository,
-                paymentAttemptRepository, couponRepository, ticketTypeService, couponService, notificationService);
+                paymentAttemptRepository, couponRepository, ticketTypeService, couponService, notificationService, tokens, waitlistService);
 
         freeEvent = Event.builder().id("free1").title("Free Meetup").organizerId("org1")
                 .date(LocalDate.now().plusDays(5)).time(LocalTime.of(10, 0)).status("UPCOMING")
@@ -194,9 +198,10 @@ class BookingFlowTest {
             Registration saved = registrationService.register("free1", participant);
             assertEquals("NOT_REQUIRED", saved.getPaymentStatus());
             assertEquals("p1", saved.getParticipantId());
+            assertNotNull(saved.getTicketCode(), "every confirmed registration gets a QR code");
             assertEquals("General Admission", saved.getTicketTypeName());
             verify(notificationService).notifyUser(org.mockito.ArgumentMatchers.eq("org1"), anyString(), anyString());
-            verify(notificationService).notifyUser(org.mockito.ArgumentMatchers.eq("p1"), org.mockito.ArgumentMatchers.contains("Registration confirmed"), anyString());
+            verify(notificationService).notify(org.mockito.ArgumentMatchers.eq(com.eventflow.service.NotificationType.REGISTRATION_CONFIRMED), org.mockito.ArgumentMatchers.eq("p1"), anyString(), any(), org.mockito.ArgumentMatchers.contains("confirmed"), anyString(), anyString(), any());
         }
 
         @Test

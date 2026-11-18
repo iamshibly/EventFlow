@@ -42,13 +42,17 @@ public class MainController {
     private final AnalyticsService analyticsService;
     private final ViewFormatter display;
     private final com.eventflow.service.NotificationService notificationService;
+    private final com.eventflow.service.WaitlistService waitlistService;
+    private final com.eventflow.service.SavedEventService savedEventService;
+    private final com.eventflow.service.EventSuggestionService suggestionService;
+    private final com.eventflow.service.OrganizerProfileService organizerProfileService;
 
 
 
     @GetMapping({"/", "/home"})
     public String home(Authentication authentication, Model model) {
         User user = currentUserOrNull(authentication);
-        List<Event> events = eventService.findAllSorted();
+        List<Event> events = eventService.findAllSorted().stream().filter(com.eventflow.service.EventRules::isPublished).toList();
         List<Event> upcomingEvents = events.stream()
                 .filter(eventService::isUpcoming)
                 .limit(6)
@@ -69,7 +73,7 @@ public class MainController {
     @GetMapping("/events")
     public String events(Authentication authentication, Model model) {
         User user = currentUserOrNull(authentication);
-        List<Event> events = eventService.findAllSorted();
+        List<Event> events = eventService.findAllSorted().stream().filter(com.eventflow.service.EventRules::isPublished).toList();
         // Event discovery is shared by every role; organizer-owned events stay visible.
         model.addAttribute("user", user);
         model.addAttribute("isGuest", user == null);
@@ -100,6 +104,14 @@ public class MainController {
         Event event = eventService.findOptional(id)
                 .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
                         org.springframework.http.HttpStatus.NOT_FOUND, "Event not found"));
+        // Drafts are private: only the owning organizer and admins may preview them.
+        boolean draft = !com.eventflow.service.EventRules.isPublished(event);
+        if (draft && !(user != null && ("ADMIN".equals(user.getRole())
+                || ("ORGANIZER".equals(user.getRole()) && user.getId().equals(event.getOrganizerId()))))) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND, "Event not found");
+        }
+        model.addAttribute("isDraftPreview", draft);
         var schedule = eventProgramService.findSchedule(id);
         List<EventSpeaker> speakers = eventProgramService.findSpeakers(id);
         var sponsors = eventProgramService.findSponsors(id);
@@ -125,6 +137,38 @@ public class MainController {
         boolean isRegistered = user != null && "PARTICIPANT".equals(user.getRole())
                 && registrationService.isRegistered(id, user.getId());
         model.addAttribute("isRegistered", isRegistered);
+        // Extras: bookmark, organizer page, online link visibility, related events, social preview.
+        boolean manager = user != null && ("ADMIN".equals(user.getRole())
+                || ("ORGANIZER".equals(user.getRole()) && user.getId().equals(event.getOrganizerId())));
+        model.addAttribute("mapUrl", display.mapUrl(event));
+        model.addAttribute("isSaved", savedEventService.isSaved(user, id));
+        model.addAttribute("organizerPublic", organizerProfileService.hasPublicPage(event.getOrganizerId()));
+        model.addAttribute("showOnlineLink", event.getOnlineUrl() != null && !event.getOnlineUrl().isBlank() && (isRegistered || manager));
+        model.addAttribute("relatedEvents", draft ? java.util.List.of() : suggestionService.relatedTo(event, user, 3));
+        String desc = event.getDescription() == null ? "" : event.getDescription().replaceAll("\\s+", " ").trim();
+        if (desc.length() > 160) desc = desc.substring(0, 157) + "...";
+        model.addAttribute("ogType", "article");
+        model.addAttribute("ogTitle", event.getTitle() + " | Occavie");
+        model.addAttribute("ogDescription", (event.getDate() == null ? "" : display.eventDate(event) + " · ")
+                + (event.getLocation() == null ? "" : event.getLocation() + ". ") + desc);
+        String cover = event.getImageUrl();
+        boolean customCover = cover != null && cover.startsWith("/event-images/");
+        model.addAttribute("ogImage", (String) model.getAttribute("siteUrl") + (customCover ? cover : "/images/og-default.png"));
+        // Waitlist: seats held for offered participants count as taken for everyone else.
+        String viewerId = user == null ? null : user.getId();
+        boolean full = !draft && !waitlistService.hasRoom(event, viewerId);
+        var waitlistEntry = user != null && "PARTICIPANT".equals(user.getRole())
+                ? waitlistService.entryFor(id, viewerId).filter(com.eventflow.model.WaitlistEntry::isActive).orElse(null) : null;
+        var offer = waitlistService.validOffer(id, viewerId).orElse(null);
+        model.addAttribute("capacityFull", full);
+        model.addAttribute("waitlistEntry", waitlistEntry);
+        model.addAttribute("waitlistPosition", waitlistEntry == null ? 0 : waitlistService.position(id, viewerId));
+        model.addAttribute("waitlistSize", waitlistService.waitingInOrder(id).size());
+        model.addAttribute("hasOffer", offer != null);
+        model.addAttribute("offerUntil", offer == null ? "" : offer.getOfferExpiresAt()
+                .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, h:mm a")));
+        model.addAttribute("canJoinWaitlist", full && !isRegistered && waitlistEntry == null && user != null
+                && "PARTICIPANT".equals(user.getRole()) && com.eventflow.service.EventRules.bookable(event));
         model.addAttribute("myFeedback", isRegistered
                 ? feedbackService.findByEventAndParticipant(id, user.getId()).orElse(null)
                 : null);
@@ -195,6 +239,8 @@ public class MainController {
         model.addAttribute("previousEvents", registeredEvents.stream().filter(eventService::isCompleted)
                 .sorted(java.util.Comparator.comparing(Event::getDate).reversed()).limit(5).toList());
         model.addAttribute("recentNotifications", notificationService.findRecentForUser(user.getId()).stream().limit(5).toList());
+        model.addAttribute("savedEvents", savedEventService.savedEvents(user).stream().limit(6).toList());
+        model.addAttribute("suggestedEvents", suggestionService.forParticipant(user, 3));
         return "dashboard";
     }
 

@@ -28,11 +28,12 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                            @Value("${eventflow.security.remember-key:eventflow-local-remember-key}") String rememberKey) throws Exception {
+                                            @Value("${occavie.security.remember-key:${eventflow.security.remember-key:occavie-local-remember-key}}") String rememberKey) throws Exception {
         // Keep a stable configured key in deployment. If missing, generate a unique
         // per-start key instead of accepting the predictable development fallback.
         String effectiveRememberKey = rememberKey;
-        if (production() && "eventflow-local-remember-key".equals(rememberKey)) {
+        if (production() && ("occavie-local-remember-key".equals(rememberKey)
+                || "eventflow-local-remember-key".equals(rememberKey))) {
             byte[] entropy = new byte[32];
             new java.security.SecureRandom().nextBytes(entropy);
             effectiveRememberKey = java.util.Base64.getEncoder().encodeToString(entropy);
@@ -41,7 +42,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/login", "/register", "/forgot-password/**", "/forgot-password", "/reset-password", "/contact", "/events", "/events/**", "/event-images/**", "/event-gallery-images/**", "/speaker-images/**", "/sponsor-images/**", "/error", "/favicon.ico", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/home", "/login", "/register", "/forgot-password/**", "/forgot-password", "/reset-password", "/contact", "/events", "/events/**", "/event-images/**", "/event-gallery-images/**", "/speaker-images/**", "/sponsor-images/**", "/error", "/favicon.ico", "/site.webmanifest", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers("/participant/**").hasRole("PARTICIPANT")

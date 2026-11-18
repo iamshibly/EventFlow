@@ -22,11 +22,29 @@
     // Mobile sidebar
     const sidebarToggle = $('#sidebarToggle');
     const sidebar = $('#appSidebar');
-    sidebarToggle?.addEventListener('click', () => sidebar?.classList.toggle('open'));
+    let sidebarBackdrop = null;
+    if (sidebar && sidebarToggle) {
+        sidebarBackdrop = document.createElement('div');
+        sidebarBackdrop.className = 'ef-sidebar-backdrop';
+        sidebarBackdrop.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(sidebarBackdrop);
+    }
+    const syncSidebar = () => {
+        if (!sidebar) return;
+        const open = sidebar.classList.contains('open');
+        sidebarBackdrop?.classList.toggle('open', open);
+        sidebarToggle?.setAttribute('aria-expanded', String(open));
+        sidebarToggle?.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    };
+    sidebarToggle?.addEventListener('click', () => { sidebar?.classList.toggle('open'); syncSidebar(); });
+    sidebarBackdrop?.addEventListener('click', () => { sidebar.classList.remove('open'); syncSidebar(); });
+    $$('.sidebar-nav a').forEach(link => link.addEventListener('click', () => { sidebar?.classList.remove('open'); syncSidebar(); }));
+    window.addEventListener('resize', () => { if (window.innerWidth > 980) { sidebar?.classList.remove('open'); syncSidebar(); } });
     document.addEventListener('click', event => {
         if (!sidebar || !sidebar.classList.contains('open')) return;
         if (sidebar.contains(event.target) || sidebarToggle?.contains(event.target)) return;
         sidebar.classList.remove('open');
+        syncSidebar();
     });
 
     // Notification dropdown
@@ -78,6 +96,14 @@
     });
     notificationPanel?.addEventListener('click', event => event.stopPropagation());
     document.addEventListener('click', () => notificationPanel?.classList.remove('open'));
+
+    if (notificationToggle && notificationPanel) {
+        notificationToggle.setAttribute('aria-haspopup', 'true');
+        notificationToggle.setAttribute('aria-controls', 'notificationPanel');
+        const syncNotificationAria = () => notificationToggle.setAttribute('aria-expanded', String(notificationPanel.classList.contains('open')));
+        new MutationObserver(syncNotificationAria).observe(notificationPanel, { attributes: true, attributeFilter: ['class'] });
+        syncNotificationAria();
+    }
 
     // Toasts
     $$('.app-toast').forEach(toast => {
@@ -168,33 +194,28 @@
         }
     });
 
-    // Public light/dark theme toggle. Regular mode is the default.
-    const publicThemeToggle = $('#publicThemeToggle');
-    const publicThemeRoot = document.documentElement;
-    // V1 public pages deliberately share Home's permanent light theme.
-    let savedPublicTheme = 'light';
-    if (!document.body.classList.contains('v1-page')) {
-        try { savedPublicTheme = localStorage.getItem('eventflowPublicTheme'); }
-        catch (ignored) { savedPublicTheme = 'light'; }
+    // Light/dark theme toggle (every page). The initial theme is applied by an inline
+    // script in the shared <head> fragment to avoid a flash; this wires up the buttons.
+    const themeRoot = document.documentElement;
+    const themeButtons = $$('[data-theme-toggle]');
+    function currentTheme() { return themeRoot.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+    function syncThemeButtons() {
+        const dark = currentTheme() === 'dark';
+        themeButtons.forEach(button => {
+            const icon = button.querySelector('i');
+            if (icon) icon.className = dark ? 'bi bi-sun' : 'bi bi-moon-stars';
+            button.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+            button.title = dark ? 'Light mode' : 'Dark mode';
+        });
     }
-    const initialPublicTheme = savedPublicTheme === 'dark' ? 'dark' : 'light';
-    publicThemeRoot.dataset.publicTheme = initialPublicTheme;
-
-    function syncPublicThemeButton() {
-        if (!publicThemeToggle) return;
-        const dark = publicThemeRoot.dataset.publicTheme === 'dark';
-        const icon = publicThemeToggle.querySelector('i');
-        if (icon) icon.className = dark ? 'bi bi-sun' : 'bi bi-moon-stars';
-        publicThemeToggle.setAttribute('aria-label', dark ? 'Switch to regular mode' : 'Switch to dark mode');
-        publicThemeToggle.title = dark ? 'Regular mode' : 'Dark mode';
-    }
-    syncPublicThemeButton();
-    publicThemeToggle?.addEventListener('click', () => {
-        const next = publicThemeRoot.dataset.publicTheme === 'dark' ? 'light' : 'dark';
-        publicThemeRoot.dataset.publicTheme = next;
-        localStorage.setItem('eventflowPublicTheme', next);
-        syncPublicThemeButton();
-    });
+    syncThemeButtons();
+    themeButtons.forEach(button => button.addEventListener('click', () => {
+        const next = currentTheme() === 'dark' ? 'light' : 'dark';
+        themeRoot.setAttribute('data-theme', next);
+        try { localStorage.setItem('occavieTheme', next); } catch (ignored) { /* storage unavailable */ }
+        syncThemeButtons();
+        if (typeof initAnalyticsCharts === 'function') initAnalyticsCharts();
+    }));
 
     // Event search/filter
     const eventCards = $$('.event-card');
@@ -1479,41 +1500,42 @@
         if (event.target === galleryLightbox) closeGalleryLightbox();
     });
 
-    // Admin / Organizer analytics charts
-    const initAnalyticsCharts = () => {
-        const analytics = window.eventflowAnalytics;
+    // Admin / Organizer analytics charts (re-rendered when the theme changes)
+    const chartInstances = [];
+    function initAnalyticsCharts() {
+        const analytics = window.occavieAnalytics;
         if (!analytics || !window.Chart) return;
+        chartInstances.splice(0).forEach(chart => chart.destroy());
 
-        const text = '#9c9c93';
-        const grid = 'rgba(255,255,255,.055)';
-        const gold = '#ffd817';
-        const goldSoft = 'rgba(255,216,23,.18)';
-        const tooltip = { backgroundColor: '#141410', titleColor: '#f2f2e8', bodyColor: '#b8b8ae', borderColor: 'rgba(255,216,23,.18)', borderWidth: 1 };
+        const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        const text = css('--muted') || '#706b93';
+        const grid = css('--line') || '#e4e1f2';
+        const brand = css('--brand') || '#0EA5A4';
+        const surface = css('--surface') || '#ffffff';
+        const brandSoft = 'rgba(14,165,164,.16)';
+        const tooltip = { backgroundColor: '#0E1B2A', titleColor: '#ffffff', bodyColor: '#e4e1f2', cornerRadius: 10, padding: 10 };
+        const palette = ['#0EA5A4', '#FF6B6B', '#ffc94d', '#12a37a', '#3b6cf4', '#0EA5A4', '#f06292', '#5ad1c4'];
 
         Chart.defaults.color = text;
-        Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+        Chart.defaults.font.family = '"Manrope", system-ui, sans-serif';
 
-        const trend = $('#registrationTrendChart');
-        if (trend) new Chart(trend, {
+        const make = (canvas, config) => { if (canvas) chartInstances.push(new Chart(canvas, config)); };
+        make($('#registrationTrendChart'), {
             type: 'line',
-            data: { labels: analytics.trendLabels, datasets: [{ data: analytics.trendValues, borderColor: gold, backgroundColor: goldSoft, fill: true, tension: .38, borderWidth: 2.2, pointRadius: 3, pointHoverRadius: 5 }] },
+            data: { labels: analytics.trendLabels, datasets: [{ data: analytics.trendValues, borderColor: brand, backgroundColor: brandSoft, fill: true, tension: .4, borderWidth: 2.6, pointRadius: 3.5, pointBackgroundColor: brand, pointHoverRadius: 6 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: grid } } } }
         });
-
-        const category = $('#categoryChart');
-        if (category) new Chart(category, {
+        make($('#categoryChart'), {
             type: 'doughnut',
-            data: { labels: analytics.categoryLabels, datasets: [{ data: analytics.categoryValues, backgroundColor: ['#ffd817','#c7a900','#8e7a18','#675b23','#444333','#2f2f29','#77745e','#b6a95a'], borderColor: '#11110d', borderWidth: 3 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, padding: 14 } }, tooltip } }
+            data: { labels: analytics.categoryLabels, datasets: [{ data: analytics.categoryValues, backgroundColor: palette, borderColor: surface, borderWidth: 3 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '64%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, padding: 14 } }, tooltip } }
         });
-
-        const topEvents = $('#topEventsChart');
-        if (topEvents) new Chart(topEvents, {
+        make($('#topEventsChart'), {
             type: 'bar',
-            data: { labels: analytics.topEventLabels, datasets: [{ data: analytics.topEventValues, backgroundColor: goldSoft, borderColor: gold, borderWidth: 1.3, borderRadius: 8 }] },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip }, scales: { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: grid } }, y: { grid: { display: false }, ticks: { callback: function(value) { const label = this.getLabelForValue(value); return label.length > 22 ? label.slice(0, 22) + '…' : label; } } } } }
+            data: { labels: analytics.topEventLabels, datasets: [{ data: analytics.topEventValues, backgroundColor: brand, borderRadius: 8, borderSkipped: false, barThickness: 16 }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip }, scales: { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: grid } }, y: { grid: { display: false }, ticks: { callback: function(value) { const label = this.getLabelForValue(value); return label.length > 22 ? label.slice(0, 22) + '\u2026' : label; } } } } }
         });
-    };
+    }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAnalyticsCharts, { once: true });
     else setTimeout(initAnalyticsCharts, 0);
 
@@ -1533,5 +1555,6 @@
         if (confirmModal?.classList.contains('open')) closeConfirm();
         notificationPanel?.classList.remove('open');
         sidebar?.classList.remove('open');
+        syncSidebar();
     });
 })();

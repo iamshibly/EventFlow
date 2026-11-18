@@ -1,32 +1,24 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#ffffff">
-    <title>EventFlow | Contact Support</title>
-    <link rel="icon" type="image/png" th:href="@{/images/eventflow-favicon.png(v='20260923couponcontact1')}" href="/images/eventflow-favicon.png?v=20260923couponcontact1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/site.css(v=20261011contactalign2)}" href="/css/site.css?v=20261011clean">
-    <link rel="stylesheet" th:href="@{/css/v1-public.css(v=20261011full)}" href="/css/v1-public.css?v=20261011full">
-    <link rel="stylesheet" th:href="@{/css/workspace-final.css(v=20261011full)}" href="/css/workspace-final.css?v=20261011full">
-</head>
-<body th:class="${signedIn} ? 'ef-workspace contact-dashboard-body' : 'v1-page ef-contact contact-public-body'">
-<th:block th:if="${!signedIn}"><div th:replace="~{fragments :: v1Nav('contact')}"></div></th:block>
+<head th:replace="~{fragments :: head('Contact Support', 'all')}"></head>
+<body th:class="${signedIn} ? 'ef-workspace contact-dashboard-body' : 'ov-page ef-contact contact-public-body'">
+<th:block th:if="${!signedIn}"><div th:replace="~{fragments :: siteNav('contact')}"></div></th:block>
 
 <th:block th:if="${signedIn}"><div th:replace="~{fragments :: topbar}"></div></th:block>
 <div th:class="${signedIn} ? 'app-shell' : 'contact-public-shell'">
     <th:block th:if="${signedIn}"><div th:replace="~{fragments :: sidebar('contact')}"></div></th:block>
     <main th:class="${signedIn} ? 'app-main contact-dashboard-main' : 'contact-public-main'">
     <section class="contact-hero-copy">
-        <span class="section-kicker">EVENTFLOW SUPPORT</span>
+        <span class="section-kicker">OCCAVIE SUPPORT</span>
         <h1>How can we help?</h1>
-        <p>Send a request to EventFlow support for event, registration, organizer or technical assistance.</p>
+        <p>Send a request to Occavie support for event, registration, organizer or technical assistance.</p>
     </section>
 
     <div class="contact-layout">
         <section class="contact-info-card">
             <div class="contact-info-top">
                 <span class="contact-info-icon"><i class="bi bi-headset"></i></span>
-                <div><span class="section-kicker">CONTACT INFORMATION</span><h2>Reach EventFlow</h2><p>Use the form or contact the support representative directly.</p></div>
+                <div><span class="section-kicker">CONTACT INFORMATION</span><h2>Reach Occavie</h2><p>Use the form or contact the support representative directly.</p></div>
             </div>
 
             <div class="contact-person-card">
@@ -51,7 +43,7 @@
                 </div>
             </div>
 
-            <div class="contact-security-note"><i class="bi bi-shield-check"></i><span>Your request is stored securely and is visible only to EventFlow administrators.</span></div>
+            <div class="contact-security-note"><i class="bi bi-shield-check"></i><span>Your request is stored securely and is visible only to Occavie administrators.</span></div>
         </section>
 
         <section class="contact-form-card">
@@ -76,8 +68,6 @@
 </main>
 </div>
 <th:block th:if="${signedIn}"><div th:replace="~{fragments :: toasts}"></div></th:block>
-<script th:src="@{/js/site.js(v='20260923couponcontact1')}" src="/js/site.js?v=20260923couponcontact1"></script>
-
-<script th:src="@{/js/workspace-final.js(v=20261011clean)}" src="/js/workspace-final.js?v=20261011clean" defer></script>
+<script th:src="@{/js/site.js(v='2026.11.1')}" src="/js/site.js"></script>
 </body>
 </html>

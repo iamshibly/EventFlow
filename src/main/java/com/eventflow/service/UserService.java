@@ -185,7 +185,7 @@ public class UserService {
         userRepository.save(user);
         notificationService.notifyUser(
                 user.getId(),
-                "Your EventFlow role was changed to " + cleanRole + ". Sign out and sign in again to apply the new access level.",
+                "Your Occavie role was changed to " + cleanRole + ". Sign out and sign in again to apply the new access level.",
                 "/dashboard"
         );
         return user;
@@ -205,8 +205,8 @@ public class UserService {
         notificationService.notifyUser(
                 user.getId(),
                 user.isEnabled()
-                        ? "Your EventFlow account has been enabled by an administrator."
-                        : "Your EventFlow account has been disabled by an administrator.",
+                        ? "Your Occavie account has been enabled by an administrator."
+                        : "Your Occavie account has been disabled by an administrator.",
                 "/dashboard"
         );
         return user;
@@ -382,7 +382,7 @@ public class UserService {
             );
         }
         if (!user.isEnabled()) {
-            throw new IllegalArgumentException("This account is disabled. Contact the EventFlow administrator.");
+            throw new IllegalArgumentException("This account is disabled. Contact the Occavie administrator.");
         }
     }
 

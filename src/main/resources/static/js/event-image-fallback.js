@@ -1,4 +1,4 @@
-/** If an uploaded image fails, restore the original EventFlow event placeholder. */
+/** If an uploaded image fails, restore the original Occavie event placeholder. */
 (() => {
   if (window.eventflowImageFallbackInstalled) return;
   window.eventflowImageFallbackInstalled = true;

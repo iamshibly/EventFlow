@@ -31,7 +31,7 @@ public class DataInitializer {
                                    FeedbackRepository feedbackRepository,
                                    UserRepository userRepository,
                                    PasswordEncoder passwordEncoder,
-                                   @Value("${eventflow.demo-seed.enabled:true}") boolean demoSeedEnabled) {
+                                   @Value("${occavie.demo-seed.enabled:${eventflow.demo-seed.enabled:true}}") boolean demoSeedEnabled) {
         return args -> {
             if (demoSeedEnabled && eventRepository.count() == 0) {
                 LocalDate today = LocalDate.now();
@@ -46,7 +46,7 @@ public class DataInitializer {
                                 .capacity(450)
                                 .status("UPCOMING")
                                 .featured(true)
-                                .organizerName("EventFlow Team").build(),
+                                .organizerName("Occavie Team").build(),
                         Event.builder()
                                 .title("Creative Design Meetup")
                                 .category("Design")

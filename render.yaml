@@ -4,7 +4,7 @@ services:
   - type: web
     name: occavie
     runtime: docker
-    plan: starter            # free instances sleep and lose in-memory sessions; use at least starter for a real demo
+    plan: free            # free instances sleep and lose in-memory sessions; use at least starter for a real demo
     healthCheckPath: /readyz
     autoDeploy: true
     envVars:

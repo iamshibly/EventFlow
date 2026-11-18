@@ -59,6 +59,9 @@ public class MainController {
                 .map(event -> HomeEventCard.from(event, display)).toList());
         model.addAttribute("registrationCounts", eventService.registrationCounts(upcomingEvents));
         model.addAttribute("startingPrices", startingPriceLabels(upcomingEvents));
+        // Category chips come from real, upcoming events only.
+        model.addAttribute("categories", events.stream().filter(eventService::isUpcoming)
+                .map(Event::getCategory).filter(c -> c != null && !c.isBlank()).distinct().sorted().toList());
         return "home";
     }
 

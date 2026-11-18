@@ -36,7 +36,7 @@ class OccavieBrandingTest {
     void sharedHeadFragmentCarriesTaglineAndFavicons() throws IOException {
         String fragments = Files.readString(RESOURCES.resolve("templates/fragments.html"));
         assertTrue(fragments.contains("Make every moment count"));
-        assertTrue(fragments.contains("occavie-favicon.png"));
+        assertTrue(fragments.contains("favicon-32.png"));
         assertTrue(Files.exists(RESOURCES.resolve("static/favicon.ico")));
         assertTrue(Files.exists(RESOURCES.resolve("static/images/occavie-mark.png")));
     }

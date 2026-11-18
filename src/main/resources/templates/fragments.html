@@ -11,15 +11,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#6c4cff">
+    <meta name="theme-color" content="#0E1B2A">
     <meta name="description" content="Occavie - Make every moment count. Discover, book and manage events in one place.">
     <meta property="og:site_name" content="Occavie">
     <meta property="og:title" th:content="'Occavie | ' + ${title}" content="Occavie">
     <meta property="og:description" content="Make every moment count.">
     <title th:text="'Occavie | ' + ${title}">Occavie</title>
-    <link rel="icon" type="image/svg+xml" th:href="@{/images/occavie-mark.svg}" href="/images/occavie-mark.svg">
-    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/images/occavie-favicon.png}" href="/images/occavie-favicon.png">
-    <link rel="apple-touch-icon" th:href="@{/images/occavie-favicon.png}" href="/images/occavie-favicon.png">
+    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}" href="/images/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/images/favicon-32.png}" href="/images/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/images/favicon-16.png}" href="/images/favicon-16.png">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" th:href="@{/images/apple-touch-icon.png}" href="/images/apple-touch-icon.png">
+    <link rel="manifest" th:href="@{/site.webmanifest}" href="/site.webmanifest">
     <script>
         /* Apply the saved theme before first paint to avoid a light/dark flash. */
         (function () {
@@ -32,11 +35,11 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/occavie-core.css(v='2026.11.1')}" href="/css/occavie-core.css">
-    <link rel="stylesheet" th:if="${#strings.contains(scope, 'public') or #strings.contains(scope, 'all')}" th:href="@{/css/occavie-public.css(v='2026.11.1')}" href="/css/occavie-public.css">
-    <link rel="stylesheet" th:if="${#strings.contains(scope, 'app') or #strings.contains(scope, 'all')}" th:href="@{/css/occavie-app.css(v='2026.11.1')}" href="/css/occavie-app.css">
+    <link rel="stylesheet" th:href="@{/css/occavie-core.css(v='2026.11.2')}" href="/css/occavie-core.css">
+    <link rel="stylesheet" th:if="${#strings.contains(scope, 'public') or #strings.contains(scope, 'all')}" th:href="@{/css/occavie-public.css(v='2026.11.2')}" href="/css/occavie-public.css">
+    <link rel="stylesheet" th:if="${#strings.contains(scope, 'app') or #strings.contains(scope, 'all')}" th:href="@{/css/occavie-app.css(v='2026.11.2')}" href="/css/occavie-app.css">
     <link rel="stylesheet" th:if="${#strings.contains(scope, 'picker')}" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
 </head>
 <body>
@@ -130,7 +133,7 @@
 <div class="toast-stack" th:fragment="toasts">
     <div class="app-toast success" th:if="${toastSuccess}"><i class="bi bi-check-circle-fill"></i><span th:text="${toastSuccess}">Success</span><button type="button" aria-label="Close">×</button></div>
     <div class="app-toast error" th:if="${toastError}"><i class="bi bi-exclamation-circle-fill"></i><span th:text="${toastError}">Error</span><button type="button" aria-label="Close">×</button></div>
-    <script th:src="@{/js/event-image-fallback.js(v='2026.11.1')}" src="/js/event-image-fallback.js"></script>
+    <script th:src="@{/js/event-image-fallback.js(v='2026.11.2')}" src="/js/event-image-fallback.js"></script>
 </div>
 
 <div class="confirm-modal" id="confirmModal" th:fragment="confirmModal">
@@ -156,13 +159,12 @@
             <a th:href="@{/}" href="/" th:classappend="${active == 'home'} ? ' is-active' : ''">Home</a>
             <a th:href="@{/events}" href="/events" th:classappend="${active == 'events'} ? ' is-active' : ''">Explore Events</a>
             <a th:href="@{/home#about}" href="/home#about">About</a>
-            <a th:href="@{/contact}" href="/contact" th:classappend="${active == 'contact'} ? ' is-active' : ''">Support</a>
         </nav>
         <div class="ov-header-actions">
             <button class="ov-icon-button" type="button" data-theme-toggle aria-label="Switch theme" title="Switch theme"><i class="bi bi-moon-stars"></i></button>
             <th:block th:if="${currentUser == null and user == null}">
-                <a class="ov-login" th:href="@{/login}" th:classappend="${active == 'auth'} ? ' is-current' : ''">Log in</a>
-                <a class="ov-signup" th:href="@{/register}">Sign up</a>
+                <a class="ov-login" th:href="@{/login}" th:classappend="${active == 'auth'} ? ' is-current' : ''">Login</a>
+                <a class="ov-signup" th:href="@{/register}">Sign Up</a>
             </th:block>
             <a class="ov-signup" th:if="${currentUser != null or user != null}" th:href="@{/dashboard}"><i class="bi bi-grid-1x2"></i> Dashboard</a>
         </div>
@@ -209,7 +211,7 @@
         <span>© 2026 Occavie. All rights reserved.</span>
         <span>Make every moment count.</span>
     </div>
-    <script th:src="@{/js/event-image-fallback.js(v='2026.11.1')}" src="/js/event-image-fallback.js"></script>
+    <script th:src="@{/js/event-image-fallback.js(v='2026.11.2')}" src="/js/event-image-fallback.js"></script>
 </footer>
 </body>
 </html>

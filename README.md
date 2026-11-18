@@ -61,7 +61,7 @@ The project intentionally avoids unnecessary `ServiceImpl` classes, mapper frame
 - Duplicate-registration, capacity and past-event checks.
 - In-app notifications with unread count and recent notification dropdown.
 - Profile editing with profile-picture upload/remove. Users without a photo use the supplied default avatar. Password change is available for normal accounts; demo-account passwords are fixed so the shared credentials remain available.
-- Responsive light/dark violet-and-coral UI (one design system, theme toggle on every page) with the Occavie logo, favicon, validation animation, toasts, loading states and confirmation modals for logout/destructive actions.
+- Responsive light/dark UI in the Occavie identity (midnight navy, teal, coral) (one design system, theme toggle on every page) with the Occavie logo, favicon, validation animation, toasts, loading states and confirmation modals for logout/destructive actions.
 - Desktop login is compacted to fit the normal viewport without requiring page scrolling; smaller screens remain responsive.
 
 ## Performance improvements in this final build
@@ -119,16 +119,16 @@ The product was renamed from EventFlow to Occavie. To avoid breaking deployments
 
 All pages share a single design system (no per-page CSS overrides):
 
-- `static/css/occavie-core.css` - design tokens (light/dark), base styles, buttons, forms, cards, tables, badges, modals, toasts.
+- `static/css/occavie-core.css` - design tokens (palette: Midnight Navy #0E1B2A, Primary Teal #0EA5A4, Coral #FF6B6B, Off-white #FAFAF7, Light Mint #E8F7F5; Manrope headings, Inter body; light/dark), base styles, buttons, forms, cards, tables, badges, modals, toasts.
 - `static/css/occavie-public.css` - top navigation, footer, home, explore, event details, auth, checkout.
 - `static/css/occavie-app.css` - dashboard shell (sidebar/topbar) and the Admin/Organizer/Participant workspaces.
-- `static/js/site.js` - shared behaviour (theme, modals, notifications, filtering, charts). Page-specific scripts: `auth-v1.js`, `events-v1.js`, `home-v2.js`, `payment-checkout.js`, `event-image-fallback.js`.
+- `static/js/site.js` - shared behaviour (theme, modals, notifications, filtering, charts). Page-specific scripts: `auth.js`, `explore.js` (search, category/date/location/price/status filters, sorting and pagination over the events the server renders), `payment-checkout.js`, `event-image-fallback.js`.
 
 ## Profile images and branding
 
-- `src/main/resources/static/images/occavie-mark.svg` / `occavie-mark.png` - the Occavie mark (ring with a spark). The PNG is also used on PDF tickets and receipts.
-- `src/main/resources/static/images/occavie-logo.svg` - mark + wordmark lock-up.
-- `src/main/resources/static/images/occavie-favicon.png` and `src/main/resources/static/favicon.ico` - browser-tab icons.
+- Mark (ticket with ring and spark): `images/occavie-mark.svg` (light backgrounds), `occavie-mark-dark.svg` (dark backgrounds), `occavie-mark.png` (also used on PDF tickets and receipts).
+- Horizontal logo with outlined Manrope wordmark: `images/occavie-logo.svg` (light) and `occavie-logo-dark.svg` (dark).
+- Browser/mobile icons: `images/favicon.svg`, `favicon-16.png`, `favicon-32.png`, `static/favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, and `static/site.webmanifest`.
 - `src/main/resources/static/images/default-avatar.png` - supplied fallback user picture.
 - Uploaded profile pictures are limited to **2 MB**, may be JPG/PNG/WEBP, and are stored in the separate `profile_images` MongoDB collection.
 

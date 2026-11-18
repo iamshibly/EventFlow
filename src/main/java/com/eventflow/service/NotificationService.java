@@ -6,7 +6,11 @@ import com.eventflow.model.Registration;
 import com.eventflow.repository.EventRepository;
 import com.eventflow.repository.NotificationRepository;
 import com.eventflow.repository.RegistrationRepository;
+import com.eventflow.model.User;
+import com.eventflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,11 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final EventRepository eventRepository;
     private final RegistrationRepository registrationRepository;
+    private final UserRepository userRepository;
+    private final EmailOutboxService emailOutbox;
+
+    @Value("${occavie.public-base-url:http://localhost:8080}")
+    private String publicBaseUrl = "http://localhost:8080";
 
 
 
@@ -33,6 +42,41 @@ public class NotificationService {
         }
         notificationRepository.save(Notification.builder()
                 .userId(userId).message(message).link(link).build());
+    }
+
+    /**
+     * Typed notification: always stored in-app, and also emailed when the type is email-capable and the user's
+     * preferences allow it. The {@code dedupeKey} makes the whole operation idempotent: calling it again with the
+     * same key creates neither a second in-app notification nor a second email.
+     *
+     * @return true when a new notification was created
+     */
+    @CacheEvict(value = "unreadNotificationCounts", key = "#userId")
+    public boolean notify(NotificationType type, String userId, String eventId, String eventTitle,
+                          String message, String link, String dedupeKey, List<String> details) {
+        if (userId == null || userId.isBlank() || message == null) return false;
+        String key = dedupeKey == null || dedupeKey.isBlank() ? type.name() + ":" + userId + ":" + java.util.UUID.randomUUID() : dedupeKey;
+        if (notificationRepository.existsByDedupeKey(key)) return false;
+        try {
+            notificationRepository.save(Notification.builder().userId(userId).message(message).link(link)
+                    .type(type.name()).eventId(eventId).dedupeKey(key).build());
+        } catch (DuplicateKeyException ex) {
+            return false;
+        }
+        sendEmailIfAllowed(type, userId, eventTitle, message, link, key, details);
+        return true;
+    }
+
+    private void sendEmailIfAllowed(NotificationType type, String userId, String eventTitle, String message,
+                                    String link, String key, List<String> details) {
+        if (type.emailKind() == NotificationType.EmailKind.NONE) return;
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null || !user.isEnabled() || user.getEmail() == null) return;
+        if (type.emailKind() == NotificationType.EmailKind.REMINDER && !user.isEmailReminders()) return;
+        if (type.emailKind() == NotificationType.EmailKind.ANNOUNCEMENT && !user.isEmailAnnouncements()) return;
+        String absolute = link == null ? null : (link.startsWith("http") ? link : publicBaseUrl.replaceAll("/+$", "") + link);
+        EmailTemplates.Rendered mail = EmailTemplates.render(type, user.getFullName(), eventTitle, message, absolute, details);
+        emailOutbox.enqueue(type.name(), "mail:" + key, user.getEmail(), user.getFullName(), mail.subject(), mail.text(), mail.html());
     }
 
     public List<Notification> findAllForUser(String userId) {
@@ -55,7 +99,10 @@ public class NotificationService {
             return null;
         }
 
-        String resolvedLink = resolveSpecificLink(notification, userId);
+        // Typed notifications carry an exact link; only older, untyped ones need the message-based guess.
+        String resolvedLink = notification.getType() != null && !"GENERAL".equals(notification.getType())
+                ? (notification.getLink() == null || notification.getLink().isBlank() ? "/notifications" : notification.getLink())
+                : resolveSpecificLink(notification, userId);
         boolean changed = !notification.isRead() || !Objects.equals(notification.getLink(), resolvedLink);
         notification.setRead(true);
         if (!Objects.equals(notification.getLink(), resolvedLink)) {
@@ -137,6 +184,15 @@ public class NotificationService {
                 .filter(registration -> lowerMessage.contains(registration.getCouponCode().toLowerCase(Locale.ROOT)))
                 .findFirst()
                 .orElse(null);
+    }
+
+    /** Marks one notification read without navigating anywhere; only the owner can do this. */
+    @CacheEvict(value = "unreadNotificationCounts", key = "#userId")
+    public void markRead(String notificationId, String userId) {
+        notificationRepository.findById(notificationId).filter(n -> userId.equals(n.getUserId()) && !n.isRead()).ifPresent(n -> {
+            n.setRead(true);
+            notificationRepository.save(n);
+        });
     }
 
     @CacheEvict(value = "unreadNotificationCounts", key = "#userId")

@@ -77,7 +77,7 @@ public class PaymentFinalizationService {
 
         LocalDateTime now = LocalDateTime.now();
         String reference = "OV" + UUID.randomUUID().toString().replace("-", "").substring(0, 25).toUpperCase();
-        registrationRepository.save(Registration.builder()
+        Registration saved = registrationRepository.save(Registration.builder()
                 .eventId(event.getId()).participantId(participant.getId())
                 .participantName(participant.getFullName()).participantEmail(participant.getEmail())
                 .ticketTypeId(ticket.ticketTypeId()).ticketTypeName(ticket.ticketTypeName())
@@ -95,9 +95,10 @@ public class PaymentFinalizationService {
                 .preferredMethod(method).status("PAID").createdAt(now).completedAt(now)
                 .build());
         waitlistService.consumeOffer(event.getId(), participant.getId());
-        notificationService.notifyUser(participant.getId(),
-                "Registration confirmed for " + event.getTitle() + ".",
-                "/participant/registrations#registration-" + event.getId());
+        notificationService.notify(NotificationType.REGISTRATION_CONFIRMED, participant.getId(), event.getId(), event.getTitle(),
+                "Your registration for " + event.getTitle() + " is confirmed.",
+                "/participant/registrations#registration-" + event.getId(), "REG:" + saved.getId(),
+                RegistrationService.confirmationDetails(event, saved));
         notificationService.notifyUser(event.getOrganizerId(),
                 participant.getFullName() + " registered for " + event.getTitle() + ".",
                 "/organizer/events/" + event.getId() + "/participants");

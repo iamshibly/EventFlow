@@ -54,6 +54,10 @@
                         <input id="wTime" name="time" type="time" required th:value="${event?.time}"></div>
                     <div class="field-group full-width"><label for="wLocation">Venue</label>
                         <input id="wLocation" name="location" type="text" minlength="3" maxlength="100" required th:value="${event?.location}" placeholder="Venue name and city"></div>
+                    <div class="field-group full-width"><label for="wAddress">Street address <span class="optional-label">Optional</span></label>
+                        <input id="wAddress" name="address" type="text" maxlength="160" th:value="${event?.address}" placeholder="Used for the map link"></div>
+                    <div class="field-group full-width"><label for="wOnline">Online event link <span class="optional-label">Optional</span></label>
+                        <input id="wOnline" name="onlineUrl" type="url" maxlength="300" th:value="${event?.onlineUrl}" placeholder="https://..."><small>Only shown to registered attendees.</small></div>
                 </div>
             </div>
 
@@ -115,7 +119,7 @@
         </section>
 
         <section class="event-form-card wiz-card" th:if="${step == 6}">
-            <div class="form-section-title"><div class="form-step">6</div><div><h2>Review and publish</h2><p>Check everything, preview the public page, then publish.</p></div></div>
+            <div class="form-section-title"><div class="form-step">6</div><div><h2>Review and publish</h2><p th:text="${approvalRequired ? 'Check everything, preview the page, then submit it for administrator approval.' : 'Check everything, preview the public page, then publish.'}">Check everything.</p></div></div>
             <dl class="wiz-review">
                 <div><dt>Title</dt><dd th:text="${event.title ?: '—'}">—</dd></div>
                 <div><dt>Category</dt><dd th:text="${event.category ?: '—'}">—</dd></div>
@@ -125,6 +129,7 @@
                 <div><dt>Pricing</dt><dd th:text="${@display.paid(event) ? @display.formattedBasePrice(event) + ' (demo checkout)' : 'Free'}">Free</dd></div>
                 <div><dt>Program</dt><dd th:text="${sessionCount + ' sessions · ' + speakerCount + ' speakers · ' + sponsorCount + ' sponsors · ' + #lists.size(ticketTypes) + ' ticket types'}">0</dd></div>
             </dl>
+            <div class="wiz-check is-missing" th:if="${event.approvalNote != null}"><i class="bi bi-exclamation-circle-fill"></i><div><strong>Not approved last time</strong><span th:text="${event.approvalNote}">Reason</span></div></div>
             <div class="wiz-check is-ok" th:if="${#lists.isEmpty(missing)}"><i class="bi bi-check-circle-fill"></i><span>Everything required is filled in.</span></div>
             <div class="wiz-check is-missing" th:if="${!#lists.isEmpty(missing)}"><i class="bi bi-exclamation-circle-fill"></i><div><strong>Still needed before publishing</strong><ul><li th:each="m : ${missing}" th:text="${m}">Title</li></ul></div></div>
             <div class="wiz-nav">
@@ -132,9 +137,13 @@
                 <span class="wiz-spacer"></span>
                 <a class="secondary-button" th:href="@{'/events/' + ${event.id}}" target="_blank" rel="noopener"><i class="bi bi-eye"></i>Preview</a>
                 <a class="secondary-button" th:href="@{/organizer/events}"><i class="bi bi-save"></i>Save draft &amp; exit</a>
-                <form th:action="@{'/organizer/events/' + ${event.id} + '/publish'}" method="post" class="inline-form"
-                      th:attr="data-confirm-title='Publish ' + ${event.title} + '?',data-confirm='The event becomes public and open for registration.',data-confirm-action='Publish'" th:classappend="'confirm-form'">
+                <form th:if="${!approvalRequired}" th:action="@{'/organizer/events/' + ${event.id} + '/publish'}" method="post" class="inline-form confirm-form"
+                      th:attr="data-confirm-title='Publish ' + ${event.title} + '?',data-confirm='The event becomes public and open for registration.',data-confirm-action='Publish'">
                     <button class="primary-button" type="submit" th:disabled="${!#lists.isEmpty(missing)}"><i class="bi bi-rocket-takeoff"></i>Publish event</button>
+                </form>
+                <form th:if="${approvalRequired}" th:action="@{'/organizer/events/' + ${event.id} + '/submit'}" method="post" class="inline-form confirm-form"
+                      th:attr="data-confirm-title='Submit ' + ${event.title} + ' for approval?',data-confirm='An administrator reviews it before it is published. The event is locked while it is under review.',data-confirm-action='Submit'">
+                    <button class="primary-button" type="submit" th:disabled="${!#lists.isEmpty(missing)}"><i class="bi bi-send-check"></i>Submit for approval</button>
                 </form>
             </div>
         </section>

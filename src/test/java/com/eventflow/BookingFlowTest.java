@@ -201,7 +201,7 @@ class BookingFlowTest {
             assertNotNull(saved.getTicketCode(), "every confirmed registration gets a QR code");
             assertEquals("General Admission", saved.getTicketTypeName());
             verify(notificationService).notifyUser(org.mockito.ArgumentMatchers.eq("org1"), anyString(), anyString());
-            verify(notificationService).notifyUser(org.mockito.ArgumentMatchers.eq("p1"), org.mockito.ArgumentMatchers.contains("Registration confirmed"), anyString());
+            verify(notificationService).notify(org.mockito.ArgumentMatchers.eq(com.eventflow.service.NotificationType.REGISTRATION_CONFIRMED), org.mockito.ArgumentMatchers.eq("p1"), anyString(), any(), org.mockito.ArgumentMatchers.contains("confirmed"), anyString(), anyString(), any());
         }
 
         @Test

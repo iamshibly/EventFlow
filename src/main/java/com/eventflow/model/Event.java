@@ -58,5 +58,16 @@ public class Event {
     /** Set when an event is cancelled (status CANCELLED); registrations are kept as history. */
     private String cancellationReason;
 
+    /** Approval workflow (only used when occavie.approval.required=true). */
+    private String approvalNote;
+    private java.time.LocalDateTime submittedAt;
+    private java.time.LocalDateTime reviewedAt;
+    private String reviewedBy;
+
+    /** Optional street address shown next to the venue name; used for the map link. */
+    private String address;
+    /** Optional https link for online or hybrid events; only revealed to registered attendees. */
+    private String onlineUrl;
+
 
 }

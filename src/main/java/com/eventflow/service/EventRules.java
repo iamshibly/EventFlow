@@ -12,7 +12,7 @@ public final class EventRules {
     public static String status(Event event) {
         if (event == null) return "UPCOMING";
         // Lifecycle states take precedence over the date-derived COMPLETED state.
-        if ("CANCELLED".equals(event.getStatus()) || "DRAFT".equals(event.getStatus())) return event.getStatus();
+        if (isLifecycleState(event.getStatus())) return event.getStatus();
         LocalDate date = event.getDate();
         if (date != null) {
             LocalDate today = LocalDate.now();
@@ -26,9 +26,20 @@ public final class EventRules {
         return status == null || status.isBlank() ? "UPCOMING" : status;
     }
 
-    /** Visible to the public (drafts are private to their organizer and admins). */
+    /** Draft, pending approval, rejected and cancelled override the date-derived COMPLETED state. */
+    private static boolean isLifecycleState(String status) {
+        return "CANCELLED".equals(status) || "DRAFT".equals(status) || "PENDING_APPROVAL".equals(status) || "REJECTED".equals(status);
+    }
+
+    /** Visible to the public. Drafts, events awaiting approval and rejected events are private to their organizer and admins. */
     public static boolean isPublished(Event event) {
-        return event != null && !"DRAFT".equals(event.getStatus());
+        return event != null && !("DRAFT".equals(event.getStatus()) || "PENDING_APPROVAL".equals(event.getStatus())
+                || "REJECTED".equals(event.getStatus()));
+    }
+
+    /** The organizer can still change it step by step (draft or rejected). */
+    public static boolean isEditableDraft(Event event) {
+        return event != null && ("DRAFT".equals(event.getStatus()) || "REJECTED".equals(event.getStatus()));
     }
 
     /** Open for registration: published, not cancelled and not yet finished. */

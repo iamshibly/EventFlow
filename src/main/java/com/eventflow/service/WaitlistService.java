@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -169,17 +168,17 @@ public class WaitlistService {
             next.setOfferedAt(now);
             next.setOfferExpiresAt(now.plusHours(offerHours));
             waitlistRepository.save(next);
-            notificationService.notifyUser(next.getParticipantId(),
+            notificationService.notify(NotificationType.WAITLIST_OFFER, next.getParticipantId(), eventId, event.getTitle(),
                     "A seat opened up for " + event.getTitle() + ". It is reserved for you until "
                             + next.getOfferExpiresAt().format(WHEN) + ". Book now to claim it.",
-                    "/events/" + eventId + "#tickets");
+                    "/events/" + eventId + "#tickets", "OFFER:" + next.getId() + ":" + now.toString(),
+                    List.of("The seat is held for you until " + next.getOfferExpiresAt().format(WHEN) + ".", "After that it goes to the next person in line."));
             offered++;
         }
         return offered;
     }
 
     /** Lapsed offers return their seat to the line and the next person is invited. */
-    @Scheduled(fixedDelayString = "${occavie.waitlist.expiry-check-ms:60000}")
     public void expireOffers() {
         List<WaitlistEntry> lapsed = waitlistRepository.findByStatusAndOfferExpiresAtBefore("OFFERED", LocalDateTime.now());
         Set<String> events = new java.util.LinkedHashSet<>();
@@ -211,7 +210,8 @@ public class WaitlistService {
         for (WaitlistEntry entry : waitlistRepository.findByEventIdAndStatusInOrderByJoinedAtAscIdAsc(eventId, List.of("WAITING", "OFFERED"))) {
             entry.setStatus("CANCELLED");
             waitlistRepository.save(entry);
-            notificationService.notifyUser(entry.getParticipantId(), message, "/events/" + eventId);
+            notificationService.notify(NotificationType.EVENT_CANCELLED, entry.getParticipantId(), eventId, null, message,
+                    "/events/" + eventId, "WLCANCEL:" + eventId + ":" + entry.getParticipantId(), null);
         }
     }
 

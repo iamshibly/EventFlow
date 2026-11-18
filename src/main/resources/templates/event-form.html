@@ -38,6 +38,8 @@
                     <small class="field-error" data-error-for="time"></small>
                 </div>
                 <div class="field-group full-width"><label for="location">Location</label><input id="location" name="location" type="text" minlength="3" maxlength="100" required th:value="${event.location}" placeholder="Venue or address"><small class="field-error" data-error-for="location"></small></div>
+                <div class="field-group full-width"><label for="address">Street address <span class="optional-label">Optional</span></label><input id="address" name="address" type="text" maxlength="160" th:value="${event.address}" placeholder="Used for the map link"></div>
+                <div class="field-group full-width"><label for="onlineUrl">Online event link <span class="optional-label">Optional</span></label><input id="onlineUrl" name="onlineUrl" type="url" maxlength="300" th:value="${event.onlineUrl}" placeholder="https://..."><small>Only shown to registered attendees.</small></div>
                 <div class="field-group full-width"><div class="label-row"><label for="description">Description</label><span id="descriptionCounter">0 / 1000</span></div><textarea id="description" name="description" minlength="20" maxlength="1000" rows="6" required placeholder="Describe the event, audience and what participants can expect..." th:text="${event.description}"></textarea><small class="field-error" data-error-for="description"></small></div>
             </div>
 

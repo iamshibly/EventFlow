@@ -12,6 +12,7 @@ import com.eventflow.service.EventGalleryService;
 import com.eventflow.service.EventProgramService;
 import com.eventflow.service.EventService;
 import com.eventflow.service.NotificationService;
+import com.eventflow.service.NotificationType;
 import com.eventflow.service.RegistrationService;
 import com.eventflow.service.TicketTypeService;
 import com.eventflow.service.WaitlistService;
@@ -71,12 +72,12 @@ class EventLifecycleTest {
     }
 
     private EventDraftForm draft(String title, String category, String capacity, String date, String time, String location, String description) {
-        return new EventDraftForm(title, category, capacity, date, time, location, description, null, null, null);
+        return new EventDraftForm(title, category, capacity, date, time, location, description, null, null, null, null, null);
     }
 
     private EventForm edit(String date, String time, String location, int capacity) {
         return new EventForm("Summit", "Technology", location, date, time, "A full-day gathering for technology enthusiasts.",
-                capacity, "FREE", "", null);
+                capacity, "FREE", "", null, null, null);
     }
 
     // ---------------------------------------------------------------- drafts
@@ -152,8 +153,8 @@ class EventLifecycleTest {
         Event cancelled = service.cancelOwned("e1", "Venue unavailable", owner);
         assertEquals("CANCELLED", cancelled.getStatus());
         assertEquals("Venue unavailable", cancelled.getCancellationReason());
-        verify(notifications).notifyUser(eq("p1"), contains("cancelled"), anyString());
-        verify(notifications).notifyUser(eq("p2"), contains("cancelled"), anyString());
+        verify(notifications).notify(eq(NotificationType.EVENT_CANCELLED), eq("p1"), eq("e1"), any(), contains("cancelled"), anyString(), anyString(), any());
+        verify(notifications).notify(eq(NotificationType.EVENT_CANCELLED), eq("p2"), eq("e1"), any(), contains("cancelled"), anyString(), anyString(), any());
         verify(waitlistService).cancelAll(eq("e1"), contains("cancelled"));
         verify(couponService).pauseAllByEvent("e1");
         verify(eventRepository, never()).delete(any());
@@ -179,18 +180,18 @@ class EventLifecycleTest {
     void reschedulingAndVenueChangesNotifyRegisteredParticipants() {
         String newDate = LocalDate.now().plusDays(20).toString();
         service.updateOwned("e1", edit(newDate, "14:00", "Dhaka Hall", 100), owner);
-        verify(notifications).notifyUser(eq("p1"), contains("rescheduled"), anyString());
-        verify(notifications).notifyUser(eq("p2"), contains("rescheduled"), anyString());
+        verify(notifications).notify(eq(NotificationType.EVENT_RESCHEDULED), eq("p1"), eq("e1"), any(), contains("rescheduled"), anyString(), anyString(), any());
+        verify(notifications).notify(eq(NotificationType.EVENT_RESCHEDULED), eq("p2"), eq("e1"), any(), contains("rescheduled"), anyString(), anyString(), any());
 
         clearInvocations(notifications);
         service.updateOwned("e1", edit(newDate, "14:00", "New Venue", 100), owner);
-        verify(notifications, times(2)).notifyUser(anyString(), contains("venue is now New Venue"), anyString());
+        verify(notifications, times(2)).notify(eq(NotificationType.EVENT_RESCHEDULED), anyString(), eq("e1"), any(), contains("venue is now New Venue"), anyString(), anyString(), any());
     }
 
     @Test
     void minorEditsDoNotSpamParticipants() {
         service.updateOwned("e1", edit(published.getDate().toString(), "10:00", "Dhaka Hall", 100), owner);
-        verify(notifications, never()).notifyUser(anyString(), anyString(), anyString());
+        verify(notifications, never()).notify(any(), any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test

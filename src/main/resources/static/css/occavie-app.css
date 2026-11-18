@@ -629,3 +629,19 @@ td.action-cell > *:last-child { margin-right: 0; }
 @media (max-width: 560px) { .wiz-review div { grid-template-columns: 1fr; gap: 2px; } }
 .status-badge.is-cancelled, .status-badge.cancelled { background: var(--danger-soft); color: var(--danger); }
 .status-badge.is-draft { background: var(--warning-soft); color: var(--warning); }
+
+/* ---------- notifications page ---------- */
+.notif-tabs { display: flex; gap: 8px; }
+.notif-tabs a { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); text-decoration: none; font-weight: 700; font-size: .88rem; color: var(--ink-2); }
+.notif-tabs a.is-active { background: var(--navy); border-color: var(--navy); color: #fff; }
+:root[data-theme="dark"] .notif-tabs a.is-active { background: var(--teal); border-color: var(--teal); color: #0E1B2A; }
+.notif-tabs a span { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: #0E1B2A; font-size: .72rem; text-align: center; }
+.notif-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); } .notif-row:last-child { border-bottom: 0; }
+.notif-row .notification-page-item { flex: 1; border-bottom: 0; min-width: 0; }
+.notif-row form { display: grid; place-items: center; padding: 0 16px; margin: 0; }
+.notif-row.unread { background: var(--brand-soft); }
+.notif-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: none; }
+.ci-reason { min-width: 220px; min-height: 36px; padding: 6px 10px; }
+.approval-note { display: flex; gap: 8px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--danger-soft); color: var(--ink); font-size: .86rem; }
+.approval-note i { color: var(--danger); margin-top: 2px; }
+.status-badge.is-pending { background: var(--info-soft); color: var(--info); }

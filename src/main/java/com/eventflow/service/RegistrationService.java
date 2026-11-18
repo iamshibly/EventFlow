@@ -109,11 +109,10 @@ public class RegistrationService {
                             + " (" + ticket.ticketTypeName() + ").",
                     "/organizer/events/" + eventId + "/participants"
             );
-            notificationService.notifyUser(
-                    participant.getId(),
-                    "Registration confirmed for " + event.getTitle() + ".",
-                    "/participant/registrations#registration-" + eventId
-            );
+            notificationService.notify(NotificationType.REGISTRATION_CONFIRMED, participant.getId(), eventId, event.getTitle(),
+                    "Your registration for " + event.getTitle() + " is confirmed.",
+                    "/participant/registrations#registration-" + eventId, "REG:" + registration.getId(),
+                    confirmationDetails(event, registration));
             if (coupon.couponCode() != null && !coupon.couponCode().isBlank()) {
                 notificationService.notifyUser(
                         participant.getId(),
@@ -150,6 +149,9 @@ public class RegistrationService {
                     participant.getFullName() + " cancelled registration for " + event.getTitle() + ".",
                     "/organizer/events/" + eventId + "/participants"
             );
+            notificationService.notify(NotificationType.REGISTRATION_CANCELLED, participant.getId(), eventId, event.getTitle(),
+                    "Your registration for " + event.getTitle() + " was cancelled.", "/events/" + eventId,
+                    "REGCANCEL:" + registration.getId(), java.util.List.of("You can register again while seats are available."));
             waitlistService.promote(eventId);
         }
         return event;
@@ -168,12 +170,10 @@ public class RegistrationService {
         registrationRepository.delete(registration);
         feedbackRepository.deleteByEventIdAndParticipantId(registration.getEventId(), registration.getParticipantId());
 
-        notificationService.notifyUser(
-                registration.getParticipantId(),
-                "An administrator removed your registration"
-                        + (event == null ? "." : " for " + event.getTitle() + "."),
-                event == null ? "/participant/registrations" : "/events/" + event.getId()
-        );
+        notificationService.notify(NotificationType.REGISTRATION_CANCELLED, registration.getParticipantId(),
+                event == null ? null : event.getId(), event == null ? null : event.getTitle(),
+                "An administrator removed your registration" + (event == null ? "." : " for " + event.getTitle() + "."),
+                event == null ? "/participant/registrations" : "/events/" + event.getId(), "REGCANCEL:" + registration.getId(), null);
         if (event != null) waitlistService.promote(event.getId());
     }
 
@@ -217,12 +217,26 @@ public class RegistrationService {
         cancelDemoAttempt(registration);
         registrationRepository.delete(registration);
         feedbackRepository.deleteByEventIdAndParticipantId(registration.getEventId(), registration.getParticipantId());
-        notificationService.notifyUser(
-                registration.getParticipantId(),
-                "The organizer removed your registration for " + event.getTitle() + ".",
-                "/events/" + event.getId()
-        );
+        notificationService.notify(NotificationType.REGISTRATION_CANCELLED, registration.getParticipantId(), event.getId(), event.getTitle(),
+                "The organizer removed your registration for " + event.getTitle() + ".", "/events/" + event.getId(),
+                "REGCANCEL:" + registration.getId(), null);
         waitlistService.promote(event.getId());
+    }
+
+    /** Ticket details included in the confirmation email. */
+    static java.util.List<String> confirmationDetails(Event event, Registration registration) {
+        String code = registration.getTicketCode();
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        lines.add("Event: " + event.getTitle());
+        if (event.getDate() != null) lines.add("When: " + event.getDate() + (event.getTime() == null ? "" : " " + event.getTime()));
+        if (event.getLocation() != null) lines.add("Where: " + event.getLocation());
+        lines.add("Ticket: " + (registration.getTicketTypeName() == null ? "General Admission" : registration.getTicketTypeName()));
+        if (registration.getFinalPrice() != null && registration.getFinalPrice().signum() > 0) {
+            lines.add("Price: " + registration.getFinalPrice().toPlainString() + " BDT (demo checkout, no real payment taken)");
+        }
+        if (code != null) lines.add("Ticket ID: OV-" + code.substring(0, Math.min(8, code.length())).toUpperCase());
+        lines.add("Download your PDF ticket (with QR code) from My Registrations.");
+        return lines;
     }
 
     /** Registrations created before QR tickets existed get their code on first use. */

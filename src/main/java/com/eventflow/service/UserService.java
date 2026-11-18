@@ -259,6 +259,13 @@ public class UserService {
             @CacheEvict(value = "featuredEvents", allEntries = true, beforeInvocation = true),
             @CacheEvict(value = "eventsByOrganizer", allEntries = true, beforeInvocation = true)
     })
+    /** Optional emails only; essential booking emails cannot be switched off. */
+    public User updateNotificationPreferences(User user, boolean emailReminders, boolean emailAnnouncements) {
+        user.setEmailReminders(emailReminders);
+        user.setEmailAnnouncements(emailAnnouncements);
+        return userRepository.save(user);
+    }
+
     public User updateProfile(User user, ProfileUpdateRequest request) {
         if (isDemoAccount(user)) {
             throw new IllegalArgumentException("Demo account profile information is fixed and cannot be changed.");

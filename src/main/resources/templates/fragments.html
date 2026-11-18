@@ -12,10 +12,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#0E1B2A">
-    <meta name="description" content="Occavie - Make every moment count. Discover, book and manage events in one place.">
+    <meta name="description" th:content="${ogDescription ?: 'Occavie - Make every moment count. Discover, book and manage events in one place.'}">
+    <link rel="canonical" th:if="${canonicalUrl != null}" th:href="${canonicalUrl}">
+    <meta property="og:type" th:content="${ogType ?: 'website'}">
     <meta property="og:site_name" content="Occavie">
-    <meta property="og:title" th:content="'Occavie | ' + ${title}" content="Occavie">
-    <meta property="og:description" content="Make every moment count.">
+    <meta property="og:title" th:content="${ogTitle ?: 'Occavie | ' + title}">
+    <meta property="og:description" th:content="${ogDescription ?: 'Make every moment count.'}">
+    <meta property="og:url" th:if="${canonicalUrl != null}" th:content="${canonicalUrl}">
+    <meta property="og:image" th:if="${siteUrl != null}" th:content="${ogImage ?: siteUrl + '/images/og-default.png'}">
+    <meta property="og:image:width" content="1200" th:if="${ogImage == null}">
+    <meta property="og:image:height" content="630" th:if="${ogImage == null}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" th:content="${ogTitle ?: 'Occavie | ' + title}">
+    <meta name="twitter:description" th:content="${ogDescription ?: 'Make every moment count.'}">
+    <meta name="twitter:image" th:if="${siteUrl != null}" th:content="${ogImage ?: siteUrl + '/images/og-default.png'}">
     <title th:text="'Occavie | ' + ${title}">Occavie</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}" href="/images/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" th:href="@{/images/favicon-32.png}" href="/images/favicon-32.png">
@@ -107,6 +117,7 @@
 
         <th:block th:if="${currentUser.role == 'ADMIN'}">
             <a th:href="@{/admin/users}" th:classappend="${active == 'users'} ? ' active' : ''"><i class="bi bi-people"></i><span>Users</span></a>
+            <a th:href="@{/admin/approvals}" th:classappend="${active == 'approvals'} ? ' active' : ''"><i class="bi bi-patch-check"></i><span>Approvals</span><em th:if="${pendingApprovalCount != null and pendingApprovalCount > 0}" th:text="${pendingApprovalCount}">1</em></a>
             <a th:href="@{/admin/events}" th:classappend="${active == 'manage-events'} ? ' active' : ''"><i class="bi bi-calendar-check"></i><span>Manage Events</span></a>
             <a th:href="@{/admin/registrations}" th:classappend="${active == 'bookings'} ? ' active' : ''"><i class="bi bi-ticket-perforated"></i><span>Booking Management</span></a>
             <a th:href="@{/admin/coupons}" th:classappend="${active == 'coupons'} ? ' active' : ''"><i class="bi bi-percent"></i><span>Coupons</span></a>

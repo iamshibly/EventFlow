@@ -72,9 +72,14 @@ public class EventWizardController {
         User organizer = userService.currentUser(authentication);
         try {
             Event event = eventService.findOwned(id, organizer);
-            if (!"DRAFT".equals(event.getStatus())) {
+            if ("PENDING_APPROVAL".equals(event.getStatus())) {
+                flash.addFlashAttribute("toastError", "This event is awaiting approval and is locked. Withdraw it to make changes.");
+                return "redirect:/organizer/events";
+            }
+            if (!com.eventflow.service.EventRules.isEditableDraft(event)) {
                 return "redirect:/organizer/events/" + id + "/edit";
             }
+            model.addAttribute("approvalRequired", eventService.isApprovalRequired());
             model.addAttribute("event", event);
             model.addAttribute("step", Math.max(1, Math.min(LAST_STEP, step)));
             model.addAttribute("today", LocalDate.now());
@@ -126,6 +131,35 @@ public class EventWizardController {
             flash.addFlashAttribute("toastError", ex.getMessage());
             return "redirect:/organizer/events/" + id + "/wizard?step=6";
         }
+    }
+
+    @PostMapping("/organizer/events/{id}/submit")
+    public String submit(@PathVariable String id, Authentication authentication, RedirectAttributes flash) {
+        User organizer = userService.currentUser(authentication);
+        try {
+            Event event = eventService.submitForApproval(id, organizer);
+            for (User admin : userService.findByRole("ADMIN")) {
+                notificationService.notify(com.eventflow.service.NotificationType.APPROVAL_UPDATE, admin.getId(), event.getId(), event.getTitle(),
+                        organizer.getFullName() + " submitted \"" + event.getTitle() + "\" for approval.", "/admin/approvals",
+                        "SUBMITTED:" + event.getId() + ":" + event.getSubmittedAt(), null);
+            }
+            flash.addFlashAttribute("toastSuccess", "Submitted for approval. You will be notified when an administrator reviews it.");
+            return "redirect:/organizer/events";
+        } catch (IllegalArgumentException ex) {
+            flash.addFlashAttribute("toastError", ex.getMessage());
+            return "redirect:/organizer/events/" + id + "/wizard?step=6";
+        }
+    }
+
+    @PostMapping("/organizer/events/{id}/withdraw")
+    public String withdraw(@PathVariable String id, Authentication authentication, RedirectAttributes flash) {
+        try {
+            eventService.withdraw(id, userService.currentUser(authentication));
+            flash.addFlashAttribute("toastSuccess", "Event withdrawn. It is a draft again.");
+        } catch (IllegalArgumentException ex) {
+            flash.addFlashAttribute("toastError", ex.getMessage());
+        }
+        return "redirect:/organizer/events";
     }
 
     @PostMapping("/organizer/events/{id}/duplicate")

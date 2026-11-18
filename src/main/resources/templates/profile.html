@@ -85,7 +85,22 @@
                     </div>
                 </form>
 
-                <form class="surface-card profile-form-card" id="passwordForm" th:if="${!(@display.demoAccount(user))}" th:action="@{/profile/password}" method="post" novalidate data-loading>
+                <form class="surface-card profile-form-card" th:if="${user.role == 'ORGANIZER'}" th:action="@{/profile/organizer}" method="post" data-loading>
+            <div class="surface-heading"><div><span class="section-kicker">PUBLIC PROFILE</span><h2>Organizer page</h2></div><a th:href="@{'/organizers/' + ${user.id}}">View public page</a></div>
+            <p class="field-help">Shown to everyone on your public organizer page. Your account email is never shown; add a separate contact email only if you want one.</p>
+            <div class="field-group"><label for="orgBio">Short description</label><textarea id="orgBio" name="bio" rows="3" maxlength="300" th:text="${user.bio}" placeholder="Who you are and what you host (up to 300 characters)"></textarea></div>
+            <div class="field-group"><label for="orgSite">Website <span class="optional-label">Optional</span></label><input id="orgSite" name="website" type="url" maxlength="200" th:value="${user.website}" placeholder="https://"></div>
+            <div class="field-group"><label for="orgContact">Public contact email <span class="optional-label">Optional</span></label><input id="orgContact" name="publicContactEmail" type="email" maxlength="120" th:value="${user.publicContactEmail}" placeholder="events@example.com"></div>
+            <div class="form-actions-row profile-actions"><button class="primary-button" type="submit"><i class="bi bi-check2"></i><span>Save public profile</span></button></div>
+        </form>
+        <form class="surface-card profile-form-card" th:action="@{/profile/notifications}" method="post" data-loading>
+            <div class="surface-heading"><div><span class="section-kicker">NOTIFICATIONS</span><h2>Email preferences</h2></div></div>
+            <p class="field-help">Booking confirmations, cancellations, schedule changes and waitlist seats are always emailed because they affect your tickets. You can opt out of the rest.</p>
+            <label class="compact-check"><input type="checkbox" name="emailReminders" value="true" th:checked="${user.emailReminders}"><span>Email me event reminders</span></label>
+            <label class="compact-check"><input type="checkbox" name="emailAnnouncements" value="true" th:checked="${user.emailAnnouncements}"><span>Email me organizer announcements</span></label>
+            <div class="form-actions-row profile-actions"><button class="primary-button" type="submit"><i class="bi bi-check2"></i><span>Save preferences</span></button></div>
+        </form>
+        <form class="surface-card profile-form-card" id="passwordForm" th:if="${!(@display.demoAccount(user))}" th:action="@{/profile/password}" method="post" novalidate data-loading>
                     <div class="surface-heading">
                         <div><span class="section-kicker">SECURITY</span><h2>Change password</h2></div>
                     </div>

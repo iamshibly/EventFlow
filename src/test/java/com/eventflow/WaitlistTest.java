@@ -11,6 +11,7 @@ import com.eventflow.repository.RegistrationRepository;
 import com.eventflow.repository.WaitlistRepository;
 import com.eventflow.service.CouponService;
 import com.eventflow.service.NotificationService;
+import com.eventflow.service.NotificationType;
 import com.eventflow.service.RegistrationService;
 import com.eventflow.service.TicketTokenService;
 import com.eventflow.service.TicketTypeService;
@@ -162,7 +163,7 @@ class WaitlistTest {
         assertEquals("OFFERED", first.getStatus());
         assertTrue(first.getOfferExpiresAt().isAfter(LocalDateTime.now()));
         assertEquals("WAITING", store.get(1).getStatus());
-        verify(notifications).notifyUser(eq("ann"), contains("reserved for you"), contains("/events/e1"));
+        verify(notifications).notify(eq(NotificationType.WAITLIST_OFFER), eq("ann"), eq("e1"), any(), contains("reserved for you"), contains("/events/e1"), anyString(), any());
     }
 
     @Test
@@ -208,7 +209,7 @@ class WaitlistTest {
         waitlist.expireOffers();
         assertEquals("EXPIRED", store.get(0).getStatus());
         assertEquals("OFFERED", store.get(1).getStatus());
-        verify(notifications).notifyUser(eq("ben"), contains("reserved for you"), anyString());
+        verify(notifications).notify(eq(NotificationType.WAITLIST_OFFER), eq("ben"), eq("e1"), any(), contains("reserved for you"), anyString(), anyString(), any());
         assertEquals(1, waitlist.activeOffers("e1"));
     }
 
@@ -227,7 +228,7 @@ class WaitlistTest {
         joinInOrder(ann, ben);
         waitlist.cancelAll("e1", "Event cancelled");
         assertTrue(store.stream().allMatch(e -> e.getStatus().equals("CANCELLED")));
-        verify(notifications).notifyUser(eq("ann"), eq("Event cancelled"), anyString());
-        verify(notifications).notifyUser(eq("ben"), eq("Event cancelled"), anyString());
+        verify(notifications).notify(eq(NotificationType.EVENT_CANCELLED), eq("ann"), eq("e1"), any(), eq("Event cancelled"), anyString(), anyString(), any());
+        verify(notifications).notify(eq(NotificationType.EVENT_CANCELLED), eq("ben"), eq("e1"), any(), eq("Event cancelled"), anyString(), anyString(), any());
     }
 }

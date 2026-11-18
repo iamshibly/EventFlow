@@ -63,7 +63,7 @@ public class OrganizerController {
         User organizer = userService.currentUser(authentication);
         try {
             Event event = eventService.findOwned(id, organizer);
-            if ("DRAFT".equals(event.getStatus())) return "redirect:/organizer/events/" + id + "/wizard?step=1";
+            if (!com.eventflow.service.EventRules.isPublished(event)) return "redirect:/organizer/events/" + id + "/wizard?step=1";
             eventService.requireEditable(event);
             model.addAttribute("event", event);
             model.addAttribute("currentRegistrationCount", registrationService.countByEvent(id));

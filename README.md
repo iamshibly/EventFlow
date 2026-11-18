@@ -164,6 +164,44 @@ Render supplies `PORT` automatically. MongoDB Atlas stores persistent applicatio
 - **Wizard and drafts:** `Create Event` is a six-step wizard saved as a private `DRAFT` after every step. Drafts are hidden from public pages and previewable by their owner and admins. Organizers can publish, duplicate (private copy without date), edit & reschedule (participants are notified of date, time, venue and price changes), and cancel (status `CANCELLED`, registrants and waitlist notified, history kept).
 - **Waitlist:** participants can join a sold-out event once. Position is derived from join time. When a seat frees up the next person is offered it and the seat is held (`occavie.waitlist.offer-hours`, default 24). Held seats count as taken, so registrations never exceed capacity. Expired offers are released by a scheduled job (`occavie.waitlist.expiry-check-ms`, default 60000) and passed on. Seat changes rely on MongoDB transactions (Atlas / replica set).
 
+## Notifications, email, reminders and approval
+
+**In-app notifications** are typed (registration, cancellation, reschedule, event cancelled, waitlist seat, reminder, announcement, review result) with a direct link, read/unread state, relative timestamps, an Unread filter and per-item "mark read".
+
+**Email (optional, transactional).** Emails are sent through [Resend](https://resend.com) over HTTPS, which works on hosts that block SMTP (for example Render's free tier). Configure with environment variables only:
+
+| Variable | Purpose |
+| --- | --- |
+| `OCCAVIE_EMAIL_PROVIDER` | `resend` to enable, anything else disables (default) |
+| `RESEND_API_KEY` | Resend API key (never committed) |
+| `OCCAVIE_EMAIL_FROM` | Sender, e.g. `Occavie <events@your-domain>` (domain must be verified in Resend) |
+| `OCCAVIE_PUBLIC_URL` | Public base URL used for links in emails, e.g. `https://occavie.onrender.com` |
+
+Emails sent: registration confirmation (with ticket details), registration cancellation, event rescheduled, event cancelled, waitlist seat available, event reminders and organizer announcements. Booking-related emails are always sent; users can opt out of reminder and announcement emails in *Profile > Email preferences*. Without a provider, emails are recorded as `SKIPPED` and everything still works in-app.
+
+**No duplicates, no lost mail.** Every email is first stored in the `email_outbox` MongoDB collection with a unique dedupe key (for example `REG:<registrationId>`, `REMINDER:<eventId>:<userId>`). Delivery claims rows atomically with a lease, retries transient failures with backoff (max 5 attempts), and sends the dedupe key as Resend's `Idempotency-Key`. The same keys protect in-app notifications.
+
+**Background jobs without in-memory state.** Reminders (default 24 h before start, `OCCAVIE_REMINDER_HOURS`), expired waitlist offers and email delivery run from MongoDB state, so a restart or redeploy loses nothing. An in-process poller (`OCCAVIE_JOBS_POLL_MS`, default 60 s) runs while the app is awake. For hosts that put the app to sleep, set `OCCAVIE_JOBS_TOKEN` and call the job endpoint from an external scheduler (Render Cron Job, cron-job.org, GitHub Actions), which also wakes the app:
+
+```bash
+curl -X POST -H "X-Jobs-Token: $OCCAVIE_JOBS_TOKEN" https://your-app/internal/jobs/run
+```
+
+The endpoint returns 404 when no token is configured and 403 for a wrong token.
+
+**Organizer announcements:** organizers can message only registered attendees of their own published, upcoming events (max 3 per event and 10 per organizer per 24 h).
+
+**Admin approval (off by default).** Set `OCCAVIE_APPROVAL_REQUIRED=true` to require review. Statuses: Draft, Pending approval, Published, Rejected, Cancelled, Completed. Organizers submit from the wizard, admins approve or reject (with a reason) at *Admin > Approvals*, and organizers see the status and reason on My Events. Pending and rejected events are private. With the flag off, organizers publish directly as before.
+
+## Saved events, calendar, sharing, organizer pages, suggestions
+
+- **Saved events:** participants save or unsave from an event page; a unique index prevents duplicates; the dashboard lists them.
+- **Calendar:** `/events/{id}/calendar.ics` downloads an RFC 5545 file with title, description, venue, event URL and UTC start/end converted from `OCCAVIE_EVENT_TIMEZONE` / `occavie.event-timezone` (default `Asia/Dhaka`).
+- **Sharing:** copy-link and native share buttons, Open Graph / Twitter tags (cover image or a branded default).
+- **Organizer pages:** `/organizers/{id}` shows name, photo, optional bio, website and contact email (opt-in, never the account email), upcoming and past published events.
+- **Venue:** optional street address with a Google Maps link and an optional https online link that is shown only to registered attendees, the organizer and admins.
+- **Suggestions:** "You might also like" and "Suggested for you" use plain category/date queries and the participant's own registrations and saved events, no model involved.
+
 ## Simulated checkout (Occavie student project)
 
 Paid checkout is a **demo**. The checkout page, result page, PDF ticket and receipt are all labelled as demo, and dashboard "ticket value" is shown as *simulated ticket value, not revenue*. Booking rules (duplicate registration, sold-out events and ticket types, coupon limits and discount maths, confirmation) are covered by `BookingFlowTest`.

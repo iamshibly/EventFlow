@@ -43,6 +43,9 @@ public class MainController {
     private final ViewFormatter display;
     private final com.eventflow.service.NotificationService notificationService;
     private final com.eventflow.service.WaitlistService waitlistService;
+    private final com.eventflow.service.SavedEventService savedEventService;
+    private final com.eventflow.service.EventSuggestionService suggestionService;
+    private final com.eventflow.service.OrganizerProfileService organizerProfileService;
 
 
 
@@ -134,6 +137,23 @@ public class MainController {
         boolean isRegistered = user != null && "PARTICIPANT".equals(user.getRole())
                 && registrationService.isRegistered(id, user.getId());
         model.addAttribute("isRegistered", isRegistered);
+        // Extras: bookmark, organizer page, online link visibility, related events, social preview.
+        boolean manager = user != null && ("ADMIN".equals(user.getRole())
+                || ("ORGANIZER".equals(user.getRole()) && user.getId().equals(event.getOrganizerId())));
+        model.addAttribute("mapUrl", display.mapUrl(event));
+        model.addAttribute("isSaved", savedEventService.isSaved(user, id));
+        model.addAttribute("organizerPublic", organizerProfileService.hasPublicPage(event.getOrganizerId()));
+        model.addAttribute("showOnlineLink", event.getOnlineUrl() != null && !event.getOnlineUrl().isBlank() && (isRegistered || manager));
+        model.addAttribute("relatedEvents", draft ? java.util.List.of() : suggestionService.relatedTo(event, user, 3));
+        String desc = event.getDescription() == null ? "" : event.getDescription().replaceAll("\\s+", " ").trim();
+        if (desc.length() > 160) desc = desc.substring(0, 157) + "...";
+        model.addAttribute("ogType", "article");
+        model.addAttribute("ogTitle", event.getTitle() + " | Occavie");
+        model.addAttribute("ogDescription", (event.getDate() == null ? "" : display.eventDate(event) + " · ")
+                + (event.getLocation() == null ? "" : event.getLocation() + ". ") + desc);
+        String cover = event.getImageUrl();
+        boolean customCover = cover != null && cover.startsWith("/event-images/");
+        model.addAttribute("ogImage", (String) model.getAttribute("siteUrl") + (customCover ? cover : "/images/og-default.png"));
         // Waitlist: seats held for offered participants count as taken for everyone else.
         String viewerId = user == null ? null : user.getId();
         boolean full = !draft && !waitlistService.hasRoom(event, viewerId);
@@ -219,6 +239,8 @@ public class MainController {
         model.addAttribute("previousEvents", registeredEvents.stream().filter(eventService::isCompleted)
                 .sorted(java.util.Comparator.comparing(Event::getDate).reversed()).limit(5).toList());
         model.addAttribute("recentNotifications", notificationService.findRecentForUser(user.getId()).stream().limit(5).toList());
+        model.addAttribute("savedEvents", savedEventService.savedEvents(user).stream().limit(6).toList());
+        model.addAttribute("suggestedEvents", suggestionService.forParticipant(user, 3));
         return "dashboard";
     }
 

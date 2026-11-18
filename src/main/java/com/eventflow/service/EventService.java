@@ -49,6 +49,10 @@ public class EventService {
     private final EventGalleryService eventGalleryService;
     private final WaitlistService waitlistService;
 
+    /** When true, organizers submit events for administrator approval instead of publishing directly. */
+    @org.springframework.beans.factory.annotation.Value("${occavie.approval.required:false}")
+    private boolean approvalRequired = false;
+
 
 
     @Caching(evict = {
@@ -307,6 +311,9 @@ public class EventService {
 
     @EvictEventCaches
     public Event publish(String eventId, User organizer) {
+        if (approvalRequired) {
+            throw new IllegalArgumentException("Events need administrator approval before they go live. Submit this event for approval.");
+        }
         Event event = findOwned(eventId, organizer);
         requireDraft(event);
         List<String> missing = readiness(event);
@@ -327,6 +334,7 @@ public class EventService {
                 .title(title.length() > 80 ? title.substring(0, 80) : title)
                 .category(source.getCategory()).location(source.getLocation()).description(source.getDescription())
                 .capacity(source.getCapacity()).pricingType(source.getPricingType()).basePrice(source.getBasePrice())
+                .address(source.getAddress()).onlineUrl(source.getOnlineUrl())
                 .imageUrl(DEFAULT_IMAGE).status("DRAFT").build());
         eventImageRepository.findByEventId(source.getId()).ifPresent(image -> {
             EventImage stored = eventImageRepository.save(EventImage.builder().eventId(copy.getId())
@@ -352,7 +360,7 @@ public class EventService {
 
     private Event cancel(Event event, String reason, String by) {
         if (EventRules.isCancelled(event)) throw new IllegalArgumentException("This event is already cancelled.");
-        if ("DRAFT".equals(event.getStatus())) throw new IllegalArgumentException("Drafts are not published. Delete the draft instead.");
+        if (!EventRules.isPublished(event)) throw new IllegalArgumentException("This event is not published. Delete it instead.");
         if (isCompleted(event)) throw new IllegalArgumentException("Completed events cannot be cancelled.");
         String cleanReason = reason == null ? "" : reason.trim();
         if (cleanReason.length() > 200) throw new IllegalArgumentException("Keep the cancellation reason under 200 characters.");
@@ -366,8 +374,86 @@ public class EventService {
         return event;
     }
 
+
+    // ------------------------------------------------------------------ approval workflow
+
+    public boolean isApprovalRequired() {
+        return approvalRequired;
+    }
+
+    /** DRAFT/REJECTED -> PENDING_APPROVAL. The organizer must own the event and everything required must be filled in. */
+    @EvictEventCaches
+    public Event submitForApproval(String eventId, User organizer) {
+        if (!approvalRequired) throw new IllegalArgumentException("Approval is not enabled. Publish the event directly.");
+        Event event = findOwned(eventId, organizer);
+        requireDraft(event);
+        List<String> missing = readiness(event);
+        if (!missing.isEmpty()) throw new IllegalArgumentException("Complete before submitting: " + String.join(", ", missing) + ".");
+        event.setStatus("PENDING_APPROVAL");
+        event.setSubmittedAt(java.time.LocalDateTime.now());
+        event.setApprovalNote(null);
+        return eventRepository.save(event);
+    }
+
+    /** PENDING_APPROVAL -> DRAFT: the organizer takes it back to make changes. */
+    @EvictEventCaches
+    public Event withdraw(String eventId, User organizer) {
+        Event event = findOwned(eventId, organizer);
+        if (!"PENDING_APPROVAL".equals(event.getStatus())) throw new IllegalArgumentException("Only events awaiting approval can be withdrawn.");
+        event.setStatus("DRAFT");
+        return eventRepository.save(event);
+    }
+
+    /** PENDING_APPROVAL -> UPCOMING (published). Administrators only. */
+    @EvictEventCaches
+    public Event approve(String eventId, User admin) {
+        requireAdmin(admin);
+        Event event = findById(eventId);
+        if (!"PENDING_APPROVAL".equals(event.getStatus())) throw new IllegalArgumentException("This event is not awaiting approval.");
+        event.setStatus("UPCOMING");
+        event.setReviewedAt(java.time.LocalDateTime.now());
+        event.setReviewedBy(admin.getId());
+        event.setApprovalNote(null);
+        eventRepository.save(event);
+        notificationService.notify(NotificationType.APPROVAL_UPDATE, event.getOrganizerId(), event.getId(), event.getTitle(),
+                event.getTitle() + " was approved and is now published.", "/events/" + event.getId(),
+                "APPROVED:" + event.getId() + ":" + event.getReviewedAt(), List.of("Participants can now find and register for it."));
+        return event;
+    }
+
+    /** PENDING_APPROVAL -> REJECTED with a reason the organizer can act on. Administrators only. */
+    @EvictEventCaches
+    public Event reject(String eventId, String reason, User admin) {
+        requireAdmin(admin);
+        String note = reason == null ? "" : reason.trim();
+        if (note.length() < 5 || note.length() > 300) throw new IllegalArgumentException("Give a reason between 5 and 300 characters.");
+        Event event = findById(eventId);
+        if (!"PENDING_APPROVAL".equals(event.getStatus())) throw new IllegalArgumentException("This event is not awaiting approval.");
+        event.setStatus("REJECTED");
+        event.setApprovalNote(note);
+        event.setReviewedAt(java.time.LocalDateTime.now());
+        event.setReviewedBy(admin.getId());
+        eventRepository.save(event);
+        notificationService.notify(NotificationType.APPROVAL_UPDATE, event.getOrganizerId(), event.getId(), event.getTitle(),
+                event.getTitle() + " was not approved. Reason: " + note, "/organizer/events",
+                "REJECTED:" + event.getId() + ":" + event.getReviewedAt(), List.of("Reason: " + note, "Edit the event and submit it again when ready."));
+        return event;
+    }
+
+    public List<Event> pendingApprovals() {
+        return eventRepository.findByStatusOrderBySubmittedAtAsc("PENDING_APPROVAL");
+    }
+
+    public long pendingApprovalCount() {
+        return eventRepository.countByStatus("PENDING_APPROVAL");
+    }
+
+    private static void requireAdmin(User user) {
+        if (user == null || !"ADMIN".equals(user.getRole())) throw new IllegalArgumentException("Only administrators can review events.");
+    }
+
     private void requireDraft(Event event) {
-        if (!"DRAFT".equals(event.getStatus())) {
+        if (!EventRules.isEditableDraft(event)) {
             throw new IllegalArgumentException("Only drafts can be edited step by step. Use Edit for published events.");
         }
     }
@@ -437,6 +523,8 @@ public class EventService {
             }
             event.setBasePrice(price);
         }
+        validateVenueExtras(form.address(), form.onlineUrl());
+        applyVenueExtras(event, form.address(), form.onlineUrl());
         validateImage(form.image());
     }
 
@@ -508,6 +596,8 @@ public class EventService {
             throw new IllegalArgumentException("Event date and time cannot be in the past.");
         }
 
+        validateVenueExtras(form.address(), form.onlineUrl());
+
         MultipartFile image = form.image();
         if (image != null && !image.isEmpty()) {
             if (image.getSize() > MAX_IMAGE_SIZE) {
@@ -535,7 +625,28 @@ public class EventService {
         } else {
             event.setBasePrice(BigDecimal.ZERO);
         }
+        applyVenueExtras(event, form.address(), form.onlineUrl());
         event.setStatus("UPCOMING");
+    }
+
+    /** Optional street address (max 160 chars) and online link (https only, max 300 chars). */
+    static void validateVenueExtras(String address, String onlineUrl) {
+        if (address != null && address.trim().length() > 160) throw new IllegalArgumentException("Address must be 160 characters or fewer.");
+        if (onlineUrl != null && !onlineUrl.isBlank()) {
+            String url = onlineUrl.trim();
+            if (url.length() > 300) throw new IllegalArgumentException("Online link is too long.");
+            try {
+                java.net.URI uri = java.net.URI.create(url);
+                if (uri.getHost() == null || !"https".equalsIgnoreCase(uri.getScheme())) throw new IllegalArgumentException();
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException("Online link must be a valid https:// address.");
+            }
+        }
+    }
+
+    private static void applyVenueExtras(Event event, String address, String onlineUrl) {
+        if (address != null) event.setAddress(address.isBlank() ? null : address.trim());
+        if (onlineUrl != null) event.setOnlineUrl(onlineUrl.isBlank() ? null : onlineUrl.trim());
     }
 
     private void saveImage(Event event, MultipartFile image) {
@@ -556,17 +667,17 @@ public class EventService {
         }
     }
 
+    /** Tells every registered participant about a major change or cancellation (in-app and, where allowed, email). */
     private void notifyParticipants(Event event, String message) {
-        boolean cancelled = message != null && message.toLowerCase(Locale.ROOT).contains("cancelled");
-        String link = cancelled
-                ? "/participant/registrations"
-                : "/events/" + event.getId() + ("COMPLETED".equals(EventRules.status(event)) ? "#participant-feedback" : "");
+        boolean cancelled = EventRules.isCancelled(event) || (message != null && message.toLowerCase(Locale.ROOT).contains("cancelled"));
+        NotificationType type = cancelled ? NotificationType.EVENT_CANCELLED : NotificationType.EVENT_RESCHEDULED;
+        String link = cancelled ? "/participant/registrations" : "/events/" + event.getId();
+        // The key includes the content, so repeating the same change never notifies twice but a new change does.
+        String version = Integer.toHexString((message == null ? "" : message).hashCode());
         for (Registration registration : registrationService.findByEvent(event.getId())) {
-            notificationService.notifyUser(
-                    registration.getParticipantId(),
-                    message,
-                    link
-            );
+            notificationService.notify(type, registration.getParticipantId(), event.getId(), event.getTitle(), message, link,
+                    (cancelled ? "EVTCANCEL:" : "EVTCHANGE:") + event.getId() + ":" + (cancelled ? "" : version + ":") + registration.getParticipantId(),
+                    cancelled ? null : List.of("Please review the latest event details."));
         }
     }
 }

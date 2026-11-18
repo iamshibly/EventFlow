@@ -13,5 +13,7 @@ public record EventDraftForm(
         String description,
         String pricingType,
         String basePrice,
-        MultipartFile image
+        MultipartFile image,
+        String address,
+        String onlineUrl
 ) {}

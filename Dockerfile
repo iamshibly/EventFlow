@@ -11,10 +11,9 @@ RUN ./mvnw -q -B -DskipTests package && mv target/eventflow-*.jar app.jar
 
 # ---- runtime stage ---------------------------------------------------------
 FROM amazoncorretto:26-headless
-RUN useradd --system --uid 10001 --no-create-home occavie
 WORKDIR /app
 COPY --from=build /app/app.jar app.jar
-USER occavie
+USER 10001:10001
 ENV SPRING_PROFILES_ACTIVE=prod \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 # Render sets PORT; the app falls back to 8080 locally.

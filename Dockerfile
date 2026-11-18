@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 # ---- build stage -----------------------------------------------------------
 FROM amazoncorretto:26 AS build
+# The Maven wrapper needs archive tools missing from this base image.
+RUN dnf install -y tar gzip unzip && dnf clean all
 WORKDIR /app
 # Resolve dependencies first so source-only changes reuse this layer.
 COPY mvnw pom.xml ./

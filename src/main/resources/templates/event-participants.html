@@ -8,6 +8,12 @@
     <main class="app-main">
         <section class="page-heading">
             <div><a class="back-link" th:href="@{/organizer/events}"><i class="bi bi-arrow-left"></i>My Events</a><h1 th:text="${event.title}">Event title</h1><p><span th:text="${@display.eventDate(event)}">Date</span> · <span th:text="${event.location}">Location</span></p></div>
+            <div class="ov-export-row" role="group" aria-label="Download CSV exports">
+              <a class="secondary-button" th:href="@{'/organizer/events/' + ${event.id} + '/export/participants.csv'}"><i class="bi bi-download" aria-hidden="true"></i> Participants</a>
+              <a class="secondary-button" th:href="@{'/organizer/events/' + ${event.id} + '/export/bookings.csv'}"><i class="bi bi-download" aria-hidden="true"></i> Bookings</a>
+              <a class="secondary-button" th:href="@{'/organizer/events/' + ${event.id} + '/export/checkin.csv'}"><i class="bi bi-download" aria-hidden="true"></i> Check-in</a>
+              <a class="secondary-button" th:href="@{'/organizer/events/' + ${event.id} + '/export/attendance.csv'}"><i class="bi bi-download" aria-hidden="true"></i> Attendance</a>
+            </div>
             <div class="heading-stat"><span>Registered</span><strong th:text="${#lists.size(registrations) + ' / ' + event.capacity}">0 / 100</strong></div>
         </section>
 

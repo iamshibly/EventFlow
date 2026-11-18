@@ -645,3 +645,4 @@ td.action-cell > *:last-child { margin-right: 0; }
 .approval-note { display: flex; gap: 8px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--danger-soft); color: var(--ink); font-size: .86rem; }
 .approval-note i { color: var(--danger); margin-top: 2px; }
 .status-badge.is-pending { background: var(--info-soft); color: var(--info); }
+.ov-export-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}

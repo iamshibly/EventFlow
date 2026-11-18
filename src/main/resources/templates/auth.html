@@ -78,13 +78,14 @@
       <i class="bi bi-x-lg" aria-hidden="true"></i>
     </button>
     <h2 id="v1ForgotTitle">Reset your password</h2>
-    <p class="ov-forgot-description">Enter the email address associated with your account.</p>
+    <p class="ov-forgot-description">Enter the email address associated with your account and we will email you a link to choose a new password.</p>
+    <div class="ov-alert is-error" th:if="${!passwordResetAvailable}" role="note">Password reset by email is not set up on this server. Contact an administrator.</div>
     <div id="v1ForgotError" class="ov-alert is-error" role="alert" hidden></div>
     <div id="v1ForgotEmailStep">
-      <form id="v1ForgotEmailForm" th:action="@{/forgot-password/check}" method="post">
+      <form id="v1ForgotEmailForm" th:action="@{/forgot-password/request}" method="post">
         <label for="v1ForgotEmail">Email address</label>
         <div class="ov-auth-input"><input id="v1ForgotEmail" name="email" type="email" placeholder="you@example.com" autocomplete="email" required th:value="${forgotEmail}"></div>
-        <button type="submit" class="ov-gold-button ov-auth-submit">Check Email</button>
+        <button type="submit" class="ov-gold-button ov-auth-submit" th:disabled="${!passwordResetAvailable}">Send reset link</button>
       </form>
     </div>
     <div id="v1ForgotResetStep" hidden>

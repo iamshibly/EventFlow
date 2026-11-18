@@ -9,10 +9,30 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.eventflow.service.SlidingWindowRateLimiter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 @Configuration
 public class SecurityConfig {
+
+    /**
+     * Allowed sources. 'unsafe-inline' remains for the small inline theme/analytics scripts and Thymeleaf-generated
+     * styles; a nonce-based policy would be stricter. Third-party hosts: jsDelivr (icons, Chart.js, flatpickr, jsQR)
+     * and Google Fonts.
+     */
+    static final String CONTENT_SECURITY_POLICY = "default-src 'self'; "
+            + "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+            + "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+            + "img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self'; "
+            + "manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+
+    @Bean
+    SlidingWindowRateLimiter rateLimiter() {
+        return new SlidingWindowRateLimiter();
+    }
 
     @Bean
     UserDetailsService userDetailsService(UserRepository userRepository) {
@@ -28,7 +48,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                            @Value("${occavie.security.remember-key:${eventflow.security.remember-key:occavie-local-remember-key}}") String rememberKey) throws Exception {
+                                            @Value("${occavie.security.remember-key:${eventflow.security.remember-key:occavie-local-remember-key}}") String rememberKey,
+                                            @Value("${occavie.ratelimit.enabled:true}") boolean rateLimitEnabled) throws Exception {
         // Keep a stable configured key in deployment. If missing, generate a unique
         // per-start key instead of accepting the predictable development fallback.
         String effectiveRememberKey = rememberKey;
@@ -41,9 +62,14 @@ public class SecurityConfig {
         final String signingKey = effectiveRememberKey;
 
         http
+                .addFilterBefore(new RateLimitFilter(rateLimiter(), rateLimitEnabled), UsernamePasswordAuthenticationFilter.class)
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .permissionsPolicyHeader(permissions -> permissions.policy("camera=(self), microphone=(), geolocation=(), payment=()")))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/internal/jobs/**"))   // token-authenticated machine endpoint
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/login", "/register", "/forgot-password/**", "/forgot-password", "/reset-password", "/contact", "/events", "/events/**", "/organizers/**", "/internal/jobs/**", "/event-images/**", "/event-gallery-images/**", "/speaker-images/**", "/sponsor-images/**", "/error", "/favicon.ico", "/site.webmanifest", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/home", "/login", "/register", "/forgot-password/**", "/forgot-password", "/reset-password", "/contact", "/events", "/events/**", "/organizers/**", "/internal/jobs/**", "/robots.txt", "/sitemap.xml", "/healthz", "/readyz", "/sw.js", "/offline.html", "/event-images/**", "/event-gallery-images/**", "/speaker-images/**", "/sponsor-images/**", "/error", "/favicon.ico", "/site.webmanifest", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers("/participant/**").hasRole("PARTICIPANT")

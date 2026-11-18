@@ -55,6 +55,9 @@ public class Event {
     /** Internal write-conflict guard for atomic ticket reservations in MongoDB. */
     private long bookingVersion;
 
+    /** Registrations that were cancelled or removed. Cancelled registrations are deleted, so this counter keeps the history for analytics. */
+    private long cancelledRegistrations;
+
     /** Set when an event is cancelled (status CANCELLED); registrations are kept as history. */
     private String cancellationReason;
 

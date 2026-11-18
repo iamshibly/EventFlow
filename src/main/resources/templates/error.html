@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: head('Something Went Wrong', 'app')}"></head>
+<head th:replace="~{fragments :: head('Page not available', 'app')}"></head>
 <body class="standalone-error-body ef-error">
-<main class="standalone-error-card">
-    <div class="error-symbol"><i class="bi bi-exclamation-triangle"></i></div>
+<main class="standalone-error-card" id="main-content">
+    <div class="error-symbol"><i class="bi" th:classappend="${status == 404} ? 'bi-compass' : 'bi-exclamation-triangle'" aria-hidden="true"></i></div>
     <span class="section-kicker" th:text="${status != null ? status + ' ERROR' : 'OCCAVIE'}">OCCAVIE</span>
-    <h1>Something went wrong.</h1>
-    <p>We could not load this page. Please return to Occavie and try again.</p>
-    <div class="error-actions"><a class="primary-button" th:href="@{/}" href="/">Back to Occavie</a></div>
+    <h1 th:if="${status == 404}">We could not find that page.</h1>
+    <h1 th:if="${status != 404}">Something went wrong.</h1>
+    <p th:if="${status == 404}">The link may be old, or the event may have been removed. Try exploring current events instead.</p>
+    <p th:if="${status != 404}">We could not load this page. Please try again in a moment.</p>
+    <div class="error-actions"><a class="primary-button" th:href="@{/events}" href="/events">Explore events</a><a class="secondary-button" th:href="@{/}" href="/">Back to Occavie</a></div>
 </main>
-
 </body>
 </html>

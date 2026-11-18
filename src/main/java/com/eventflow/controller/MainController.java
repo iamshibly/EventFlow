@@ -147,6 +147,7 @@ public class MainController {
         model.addAttribute("relatedEvents", draft ? java.util.List.of() : suggestionService.relatedTo(event, user, 3));
         String desc = event.getDescription() == null ? "" : event.getDescription().replaceAll("\\s+", " ").trim();
         if (desc.length() > 160) desc = desc.substring(0, 157) + "...";
+        if (!draft) model.addAttribute("eventJsonLd", eventJsonLd(event, (String) model.getAttribute("siteUrl"), cover(event)));
         model.addAttribute("ogType", "article");
         model.addAttribute("ogTitle", event.getTitle() + " | Occavie");
         model.addAttribute("ogDescription", (event.getDate() == null ? "" : display.eventDate(event) + " · ")
@@ -173,6 +174,48 @@ public class MainController {
                 ? feedbackService.findByEventAndParticipant(id, user.getId()).orElse(null)
                 : null);
         return "event-details";
+    }
+
+    private static String cover(Event event) {
+        return event.getImageUrl() != null && event.getImageUrl().startsWith("/event-images/") ? event.getImageUrl() : "/images/og-default.png";
+    }
+
+    /** schema.org/Event structured data. Every value is JSON-escaped and angle brackets are \\u-escaped so it is safe inside a script tag. */
+    static String eventJsonLd(Event event, String siteUrl, String imagePath) {
+        StringBuilder json = new StringBuilder("{\"@context\":\"https://schema.org\",\"@type\":\"Event\"");
+        json.append(",\"name\":").append(jsonString(event.getTitle()));
+        if (event.getDate() != null) {
+            json.append(",\"startDate\":").append(jsonString(event.getDate() + (event.getTime() == null ? "" : "T" + event.getTime())));
+        }
+        json.append(",\"eventStatus\":\"https://schema.org/").append(com.eventflow.service.EventRules.isCancelled(event) ? "EventCancelled" : "EventScheduled").append('"');
+        boolean online = event.getOnlineUrl() != null && !event.getOnlineUrl().isBlank();
+        json.append(",\"eventAttendanceMode\":\"https://schema.org/").append(online ? "MixedEventAttendanceMode" : "OfflineEventAttendanceMode").append('"');
+        json.append(",\"location\":{\"@type\":\"Place\",\"name\":").append(jsonString(event.getLocation()));
+        if (event.getAddress() != null && !event.getAddress().isBlank()) json.append(",\"address\":").append(jsonString(event.getAddress()));
+        json.append('}');
+        if (event.getDescription() != null) json.append(",\"description\":").append(jsonString(event.getDescription()));
+        json.append(",\"image\":").append(jsonString(siteUrl + imagePath));
+        if (event.getOrganizerName() != null) json.append(",\"organizer\":{\"@type\":\"Organization\",\"name\":").append(jsonString(event.getOrganizerName())).append('}');
+        return json.append(",\"url\":").append(jsonString(siteUrl + "/events/" + event.getId())).append('}').toString();
+    }
+
+    static String jsonString(String value) {
+        if (value == null) return "\"\"";
+        StringBuilder out = new StringBuilder("\"");
+        for (char c : value.toCharArray()) {
+            switch (c) {
+                case '"' -> out.append("\\\"");
+                case '\\' -> out.append("\\\\");
+                case '\n' -> out.append("\\n");
+                case '\r' -> out.append("\\r");
+                case '\t' -> out.append("\\t");
+                case '<' -> out.append("\\u003c");
+                case '>' -> out.append("\\u003e");
+                case '&' -> out.append("\\u0026");
+                default -> { if (c < 0x20) out.append(String.format("\\u%04x", (int) c)); else out.append(c); }
+            }
+        }
+        return out.append('"').toString();
     }
 
     private Map<String, String> startingPriceLabels(List<Event> events) {

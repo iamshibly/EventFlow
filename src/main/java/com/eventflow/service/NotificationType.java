@@ -14,6 +14,7 @@ public enum NotificationType {
     EVENT_REMINDER(EmailKind.REMINDER, "bi-alarm", "Event reminder"),
     ANNOUNCEMENT(EmailKind.ANNOUNCEMENT, "bi-megaphone", "Announcement"),
     APPROVAL_UPDATE(EmailKind.ESSENTIAL, "bi-patch-check", "Event review"),
+    PASSWORD_RESET(EmailKind.ESSENTIAL, "bi-key", "Reset your password"),
     GENERAL(EmailKind.NONE, "bi-bell", "Notification");
 
     public enum EmailKind { ESSENTIAL, REMINDER, ANNOUNCEMENT, NONE }

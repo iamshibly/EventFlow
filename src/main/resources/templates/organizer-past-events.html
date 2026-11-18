@@ -22,7 +22,7 @@
                 <select class="toolbar-select compact-toolbar-select" data-table-filter="pricing" aria-label="Filter by pricing"><option value="ALL">Free & Paid</option><option value="FREE">Free</option><option value="PAID">Paid</option></select>
                 <div class="table-count" data-table-count th:text="${#lists.size(events) + ' events'}">0 events</div>
             </div>
-            <div class="data-table-wrap" th:if="${!#lists.isEmpty(events)}">
+            <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table" th:if="${!#lists.isEmpty(events)}">
                 <table class="data-table past-events-table organizer-past-events-table"><thead><tr><th>Event</th><th>Date & Time</th><th>Bookings</th><th>Capacity Used</th><th>Rating</th><th class="actions-column">Actions</th></tr></thead>
                     <tbody data-table-body>
                     <tr th:each="event : ${events}" th:with="summary=${feedbackSummaries[event.id]},bookings=${registrationCounts[event.id]},efPaid=${@display.paid(event)}" th:attr="data-search=${event.title + ' ' + event.location + ' ' + event.category},data-category=${event.category},data-pricing=${efPaid ? 'PAID' : 'FREE'}">
@@ -38,7 +38,7 @@
             </div>
             <div class="clean-empty" th:if="${#lists.isEmpty(events)}"><i class="bi bi-clock-history"></i><h3>No past events yet</h3><p>Completed events will appear here automatically after their date and time pass.</p></div>
             <div class="clean-empty filtered-empty" data-table-empty><i class="bi bi-search"></i><h3>No matching past events</h3><p>Try another search or category.</p></div>
-            <div class="operations-table-footer" th:if="${!#lists.isEmpty(events)}"><div class="table-page-size"><span>Show</span><select data-table-page-size><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="ALL">All</option></select><span>entries</span></div><div class="table-range" data-table-range>Showing 0 of 0</div><div class="table-pagination" data-table-pagination></div></div>
+            <div class="operations-table-footer" th:if="${!#lists.isEmpty(events)}"><div class="table-page-size"><span>Show</span><select data-table-page-size aria-label="Rows per page"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="ALL">All</option></select><span>entries</span></div><div class="table-range" data-table-range>Showing 0 of 0</div><div class="table-pagination" data-table-pagination></div></div>
         </section>
     </main>
 </div>

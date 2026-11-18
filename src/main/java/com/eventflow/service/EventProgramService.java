@@ -312,6 +312,7 @@ public class EventProgramService {
         if (image.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException(label + " must be 2 MB or smaller.");
         String type = image.getContentType() == null ? "" : image.getContentType().toLowerCase(Locale.ROOT);
         if (!IMAGE_TYPES.contains(type)) throw new IllegalArgumentException(label + " must be JPG, PNG or WEBP.");
+        ImageUpload.verify(image, label);
     }
 
     private void saveSpeakerImage(EventSpeaker speaker, MultipartFile photo) {

@@ -533,6 +533,7 @@ public class EventService {
             if (image.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Event image must be 2 MB or smaller.");
             String type = image.getContentType() == null ? "" : image.getContentType().toLowerCase(Locale.ROOT);
             if (!IMAGE_TYPES.contains(type)) throw new IllegalArgumentException("Event image must be JPG, PNG or WEBP.");
+            ImageUpload.verify(image, "Event image");
         }
     }
 
@@ -607,6 +608,7 @@ public class EventService {
             if (!IMAGE_TYPES.contains(type)) {
                 throw new IllegalArgumentException("Event image must be JPG, PNG or WEBP.");
             }
+            ImageUpload.verify(image, "Event image");
         }
     }
 

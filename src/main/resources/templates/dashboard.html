@@ -60,6 +60,13 @@
                 <article class="analytics-kpi"><div class="analytics-kpi-icon"><i class="bi bi-star-fill"></i></div><div><span>Average rating</span><strong th:text="${analytics.totalReviews > 0 ? #numbers.formatDecimal(analytics.averageRating,1,1) + '/5' : '—'}">—</strong><small th:text="${analytics.totalReviews + ' participant review(s)'}">0 reviews</small></div></article>
             </div>
 
+            <div class="analytics-kpi-grid">
+                <article class="analytics-kpi"><div class="analytics-kpi-icon"><i class="bi bi-calendar-event"></i></div><div><span>Events</span><strong th:text="${analytics.totalEvents}">0</strong><small th:text="${analytics.completedEvents + ' completed'}">0 completed</small></div></article>
+                <article class="analytics-kpi"><div class="analytics-kpi-icon"><i class="bi bi-x-circle"></i></div><div><span>Cancelled registrations</span><strong th:text="${analytics.cancelledRegistrations}">0</strong><small>Counted since this feature was added</small></div></article>
+                <article class="analytics-kpi"><div class="analytics-kpi-icon"><i class="bi bi-qr-code-scan"></i></div><div><span>Checked in</span><strong th:text="${analytics.checkedIn}">0</strong><small th:text="${analytics.attendancePercent + '% of bookings attended'}">0%</small></div></article>
+                <article class="analytics-kpi"><div class="analytics-kpi-icon"><i class="bi bi-tags"></i></div><div><span>Ticket categories</span><strong th:text="${#lists.size(analytics.ticketLabels)}">0</strong><small th:text="${#lists.isEmpty(analytics.ticketLabels) ? 'No bookings yet' : #strings.listJoin(analytics.ticketLabels, ', ')}">None</small></div></article>
+            </div>
+
             <div class="analytics-chart-grid">
                 <article class="analytics-chart-card analytics-chart-wide">
                     <div class="analytics-card-head"><div><span>REGISTRATION TREND</span><h3>Bookings over the last 6 months</h3></div><i class="bi bi-graph-up-arrow"></i></div>
@@ -141,7 +148,7 @@
             </article>
             <article class="surface-card large-surface">
                 <div class="surface-heading"><div><span class="section-kicker">TICKETS</span><h2>Tickets &amp; booking status</h2></div><a th:href="@{/participant/registrations}">All registrations</a></div>
-                <div class="data-table-wrap" th:if="${!#lists.isEmpty(dashboardEvents)}">
+                <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table" th:if="${!#lists.isEmpty(dashboardEvents)}">
                     <table class="data-table">
                         <caption class="ov-sr">Upcoming registered events with booking status and ticket download</caption>
                         <thead><tr><th scope="col">Event</th><th scope="col">Ticket</th><th scope="col">Status</th><th scope="col" class="actions-column">Ticket</th></tr></thead>

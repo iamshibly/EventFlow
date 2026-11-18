@@ -2,6 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head(${event.title}, 'public')}"></head>
 <body class="ov-page ov-details-page">
+<script type="application/ld+json" th:if="${eventJsonLd != null}" th:utext="${eventJsonLd}"></script>
+<a class="skip-link" href="#main-content">Skip to content</a>
 <div th:replace="~{fragments :: siteNav('events')}"></div>
 <main class="ov-container ov-details-main" id="main-content">
   <div class="ov-banner is-draft" th:if="${isDraftPreview}" role="note"><i class="bi bi-eye"></i><div><strong>Preview, not public</strong><span th:text="${'Status: ' + @display.statusLabel(event) + '. Only you and administrators can see this page.'}">Only you and administrators can see this page.</span></div></div>

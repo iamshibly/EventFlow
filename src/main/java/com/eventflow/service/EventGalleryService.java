@@ -85,6 +85,7 @@ public class EventGalleryService {
         if (image.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Gallery image must be 2 MB or smaller.");
         String type = image.getContentType() == null ? "" : image.getContentType().toLowerCase(Locale.ROOT);
         if (!IMAGE_TYPES.contains(type)) throw new IllegalArgumentException("Gallery image must be JPG, PNG or WEBP.");
+        ImageUpload.verify(image, "Gallery image");
     }
 
     private String cleanCaption(String caption) {

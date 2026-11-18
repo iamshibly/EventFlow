@@ -21,7 +21,7 @@
             <article class="metric-card"><div class="metric-icon"><i class="bi bi-people"></i></div><div><span>Capacity</span><strong th:text="${event.capacity}">0</strong></div></article>
         </section>
         <section class="table-card" th:if="${!#lists.isEmpty(entries)}">
-            <div class="data-table-wrap"><table class="data-table">
+            <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table"><table class="data-table">
                 <caption class="ov-sr">Participants waiting for a seat, in order</caption>
                 <thead><tr><th scope="col">#</th><th scope="col">Participant</th><th scope="col">Joined</th><th scope="col">Status</th></tr></thead>
                 <tbody>

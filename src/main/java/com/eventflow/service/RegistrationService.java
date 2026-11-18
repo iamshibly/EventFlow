@@ -144,6 +144,8 @@ public class RegistrationService {
         feedbackRepository.deleteByEventIdAndParticipantId(eventId, participant.getId());
 
         if (event != null) {
+            event.setCancelledRegistrations(event.getCancelledRegistrations() + 1);
+            eventRepository.save(event);
             notificationService.notifyUser(
                     event.getOrganizerId(),
                     participant.getFullName() + " cancelled registration for " + event.getTitle() + ".",
@@ -169,6 +171,10 @@ public class RegistrationService {
         cancelDemoAttempt(registration);
         registrationRepository.delete(registration);
         feedbackRepository.deleteByEventIdAndParticipantId(registration.getEventId(), registration.getParticipantId());
+        if (event != null) {
+            event.setCancelledRegistrations(event.getCancelledRegistrations() + 1);
+            eventRepository.save(event);
+        }
 
         notificationService.notify(NotificationType.REGISTRATION_CANCELLED, registration.getParticipantId(),
                 event == null ? null : event.getId(), event == null ? null : event.getTitle(),

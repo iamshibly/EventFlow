@@ -2,212 +2,115 @@
 
 > **Make every moment count.**
 
-Occavie (formerly EventFlow) is a Spring Boot + Thymeleaf + MongoDB event management system with three roles:
+Occavie (formerly EventFlow) is a full-stack event management platform: people discover events and book tickets, organizers build and run events, and admins oversee the platform. It is a Spring Boot + Thymeleaf + MongoDB monolith with three role-based workspaces.
 
-- **ADMIN** - manages users, roles, account status, events and registrations.
-- **ORGANIZER** - creates and manages events and sees registered participants.
-- **PARTICIPANT** - discovers events, registers, cancels registrations and receives event updates.
+![Home page](docs/screenshots/home-desktop.jpg)
+
+| Discover | Event details | Organizer workspace |
+|---|---|---|
+| ![Events](docs/screenshots/events-desktop.jpg) | ![Event details](docs/screenshots/event-details.jpg) | ![Organizer dashboard](docs/screenshots/organizer-dashboard.jpg) |
+
+| Admin (dark mode) | Mobile | Mobile, dark |
+|---|---|---|
+| ![Admin dark](docs/screenshots/admin-dashboard-dark.jpg) | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event dark](docs/screenshots/event-details-mobile-dark.jpg) |
+
+> Screenshots come from a local run with seeded demo data.
+
+## Features
+
+**Implemented**
+
+* **Discovery:** search, category/price/date/status filters, sorting, pagination, saved events, event suggestions, organizer public pages.
+* **Event pages:** programme, speakers, sponsors, gallery, venue details and map link, share/copy link, Open Graph previews, "add to calendar" (.ics).
+* **Booking:** free and ticket-category booking, coupons, capacity enforcement, waitlist with held-seat offers, cancellation of free bookings, PDF tickets with signed QR codes.
+* **Simulated payments:** a demo checkout (bKash/Nagad/card look-alikes). **No real money moves, and demo amounts are never presented as revenue.**
+* **QR check-in:** organizer check-in page (camera or manual code), signed single-use tickets, duplicate-scan detection.
+* **Organizer tools:** event wizard with drafts, preview, duplicate, cancel/reschedule notices, announcements, coupons, participant lists, feedback, CSV exports (participants, bookings, check-in, attendance), analytics (bookings, capacity use, cancellations, check-ins and attendance %, ticket mix, trend, ratings).
+* **Admin tools:** user/role management, event and registration oversight, optional event-approval workflow, platform analytics, contact-request inbox.
+* **Notifications:** in-app notifications with preferences; MongoDB-backed email outbox (Resend over HTTPS) with retries and de-duplication; reminder job.
+* **Accounts:** registration, login, remember-me, token-based password reset by email (one-time, hashed, 30 min).
+* **UI:** original Occavie identity, light/dark themes, responsive layouts, skip links, keyboard-friendly modals, custom 404/403 pages, optional installable PWA shell (static assets only).
+* **Platform:** `/healthz` and `/readyz`, `robots.txt`, dynamic `sitemap.xml`, JSON-LD event data.
+
+**Not implemented / planned**
+
+* Real payment gateway (payments are simulated by design).
+* Shared HTTP sessions for multi-instance scaling (sessions are in memory; run one instance).
+* Real offline use. The service worker only caches static assets; booking needs a connection.
+* Admin-level CSV export of participant data (deliberately organizer-only).
+* Historical cancellation counts before the cancellation counter was introduced.
 
 ## Stack
 
-- Java 26
-- Spring Boot 4.1.1
-- Maven
-- Spring MVC + Thymeleaf
-- Spring Security
-- MongoDB
-- Caffeine cache
-- HTML/CSS/JavaScript
+Java 26 (JDK 21 also builds with `-Djava.version=21`), Spring Boot 4.1.1, Spring MVC, Spring Security, Thymeleaf, Spring Data MongoDB, Caffeine cache, Maven wrapper, Lombok, ZXing (QR), vanilla JS + CSS (Manrope/Inter, Bootstrap Icons, Chart.js).
 
-## Backend structure
+## Architecture
 
 ```text
-Thymeleaf / Browser
-        ↓
-Controller
-        ↓
-Service
-        ↓
-Repository
-        ↓
-MongoDB
+Browser (Thymeleaf pages + small JS modules)
+   ↓
+Controllers  → security: roles, CSRF, rate limits, headers/CSP
+   ↓
+Services     → booking/capacity rules, waitlist, check-in, notifications, email outbox, analytics, exports
+   ↓
+Repositories → MongoDB (events, registrations, users, tickets, outbox, notifications, images…)
 ```
 
-Packages:
-
-- `controller` - routes, model data, redirects and the event-image endpoint.
-- `dto` - form input objects.
-- `service` - validation and business logic.
-- `repository` - MongoDB data access.
-- `model` - MongoDB documents.
-- `config` - security and startup data.
-
-The project intentionally avoids unnecessary `ServiceImpl` classes, mapper frameworks and duplicate interfaces.
-
-## Main features
-
-- Login, logout, remember-me and role-based access.
-- Participant and Organizer self-registration with live JavaScript validation and backend validation.
-- BCrypt password storage.
-- Two-step demo password recovery: check a registered email, then set and confirm a new strong password. Unknown emails show a clear error, while protected demo accounts keep their published passwords.
-- Admin can change another user's role to `PARTICIPANT`, `ORGANIZER` or `ADMIN`.
-- Admin can enable, disable and delete normal users with self-protection. The three public demo accounts are visibly marked **Protected** and cannot be deleted, disabled or have their roles changed.
-- Organizer event CRUD with event-image upload, participant list, browser date restrictions and backend rejection of past event date/time values.
-- Participant event registration and cancellation.
-- Professional event ticketing: events can be **Free** or **Paid**, with optional ticket types such as General, VIP or Student, separate capacities, prices, active/paused sales, and a booking-time ticket/price snapshot.
-- Coupon management for paid events with percentage/fixed discounts, expiry dates, usage limits, active/paused states, live participant price preview and booking-time discount snapshots.
-- Public Contact Support page with Occavie support information and a request form. Admins receive notifications and manage requests through New, In Progress and Resolved states with internal notes.
-- Event sponsors: Organizer/Admin can add Title, Gold, Silver, Bronze or Partner sponsors with logo, website, display order and description. Sponsor logos are stored separately in MongoDB and shown on the public event page.
-- Duplicate-registration, capacity and past-event checks.
-- In-app notifications with unread count and recent notification dropdown.
-- Profile editing with profile-picture upload/remove. Users without a photo use the supplied default avatar. Password change is available for normal accounts; demo-account passwords are fixed so the shared credentials remain available.
-- Responsive light/dark UI in the Occavie identity (midnight navy, teal, coral) (one design system, theme toggle on every page) with the Occavie logo, favicon, validation animation, toasts, loading states and confirmation modals for logout/destructive actions.
-- Desktop login is compacted to fit the normal viewport without requiring page scrolling; smaller screens remain responsive.
-
-## Performance improvements in this final build
-
-- MongoDB indexes on frequently searched fields such as email, role, event date, category, organizer, registration and notification fields.
-- Unique database protection for user email and `eventId + participantId` registration pairs.
-- Caffeine cache for event lists, featured events, organizer event lists and repeated registration counts.
-- Cache is cleared automatically when event or registration data changes.
-- Event images are stored in a separate `event_images` MongoDB collection instead of inside every event document. This keeps event-list queries much smaller and faster.
-- Event images use browser caching and event cards use lazy image loading.
-- Spring response compression is enabled for HTML, CSS, JavaScript and JSON.
-- Browser caching is enabled for static resources.
-- Repositories use ordered database queries instead of loading everything and sorting it in Java where possible.
-- Notification pages load only the latest 50 notifications and the top bar loads only the latest 8.
-- Validation and UI animations remain enabled; performance work is mainly in the database, caching and resource loading.
-
-## Public demo accounts
-
-These three accounts are seeded automatically and are shown directly on the login page. The role buttons fill the login form instantly.
-
-- **ADMIN** - `admin@eventflow.com` / `Admin123!`
-- **ORGANIZER** - `organizer@eventflow.com` / `Organizer123!`
-- **PARTICIPANT** - `participant@eventflow.com` / `Participant123!`
-
-The demo users stay enabled and their roles/passwords are protected. Normal registered users can still be managed by Admin.
+Capacity and waitlist changes run inside MongoDB transactions guarded by a per-event version counter. Background work (email outbox, reminders, offer expiry) runs in-process and can also be triggered by an external scheduler (`POST /internal/jobs/run`).
 
 ## Run locally
 
-1. Set your MongoDB Atlas connection in the `MONGODB_URI` environment variable.
-2. Run `EventflowApplication` from IntelliJ (or `./mvnw spring-boot:run`).
-3. Open `http://localhost:8080`.
-4. Choose Admin, Organizer or Participant under **Quick Demo Access** and sign in.
-
-## Environment variables
-
-- `MONGODB_URI` - required MongoDB Atlas connection string.
-- `MONGODB_DATABASE` - database name. Default: `eventflow`.
-- `OCCAVIE_REMEMBER_KEY` - secret key for remember-me cookies (the legacy `EVENTFLOW_REMEMBER_KEY` is still read as a fallback).
-- `PORT` - supplied automatically by Render.
-- `THYMELEAF_CACHE` - set to `true` on deployment for faster template rendering.
-
-
-
-## Rebrand compatibility notes
-
-The product was renamed from EventFlow to Occavie. To avoid breaking deployments and stored data, these technical identifiers were intentionally **not** renamed:
-
-- Java package `com.eventflow`, Maven `artifactId` (`eventflow`) and the built jar name.
-- MongoDB database default (`eventflow`), collection names and `_class` type hints.
-- URL routes (`/events`, `/dashboard`, `/organizer/**`, `/admin/**`, ...).
-- The three seeded demo accounts (`*@eventflow.com`), so existing users and bookings keep working.
-- `eventflow.*` property keys still work as a fallback for the new `occavie.*` keys.
-
-## Front-end structure
-
-All pages share a single design system (no per-page CSS overrides):
-
-- `static/css/occavie-core.css` - design tokens (palette: Midnight Navy #0E1B2A, Primary Teal #0EA5A4, Coral #FF6B6B, Off-white #FAFAF7, Light Mint #E8F7F5; Manrope headings, Inter body; light/dark), base styles, buttons, forms, cards, tables, badges, modals, toasts.
-- `static/css/occavie-public.css` - top navigation, footer, home, explore, event details, auth, checkout.
-- `static/css/occavie-app.css` - dashboard shell (sidebar/topbar) and the Admin/Organizer/Participant workspaces.
-- `static/js/site.js` - shared behaviour (theme, modals, notifications, filtering, charts). Page-specific scripts: `auth.js`, `explore.js` (search, category/date/location/price/status filters, sorting and pagination over the events the server renders), `payment-checkout.js`, `event-image-fallback.js`.
-
-## Profile images and branding
-
-- Mark (ticket with ring and spark): `images/occavie-mark.svg` (light backgrounds), `occavie-mark-dark.svg` (dark backgrounds), `occavie-mark.png` (also used on PDF tickets and receipts).
-- Horizontal logo with outlined Manrope wordmark: `images/occavie-logo.svg` (light) and `occavie-logo-dark.svg` (dark).
-- Browser/mobile icons: `images/favicon.svg`, `favicon-16.png`, `favicon-32.png`, `static/favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, and `static/site.webmanifest`.
-- `src/main/resources/static/images/default-avatar.png` - supplied fallback user picture.
-- Uploaded profile pictures are limited to **2 MB**, may be JPG/PNG/WEBP, and are stored in the separate `profile_images` MongoDB collection.
-
-## Event images
-
-Uploaded images are limited to **2 MB** and may be JPG, PNG or WEBP. They are stored as binary data in the `event_images` MongoDB collection and served through `/event-images/{eventId}`. The Event document stores only the image URL, so browsing event lists does not pull image bytes from MongoDB until the browser actually requests an image.
-
-## Sponsors and ticketing data
-
-- Sponsor metadata is stored in `event_sponsors`; uploaded sponsor logos are stored in `sponsor_images`.
-- Custom ticket types are stored in `event_ticket_types`. Registrations store the selected ticket type/name and the price at the time of booking.
-- Coupons are stored in `event_coupons`; registrations keep the applied coupon code, discount amount and final booking price.
-- Contact submissions are stored in `contact_requests` and are available only to administrators.
-- Changing an event between Free and Paid keeps ticket configuration consistent; ticket capacities cannot exceed the event capacity.
-- Paid tickets use an instant simulated checkout for this student project; free tickets register immediately.
-
-## Render deployment
-
-Occavie includes a Dockerfile for deployment. In Render:
-
-1. Create a **Web Service**.
-2. Select **Docker**.
-3. Connect the GitHub repository.
-4. Add `MONGODB_URI` and `OCCAVIE_REMEMBER_KEY`.
-5. Add `THYMELEAF_CACHE=true` for production.
-
-Render supplies `PORT` automatically. MongoDB Atlas stores persistent application data, so the app does not depend on Render's temporary filesystem.
-
-## QR check-in, event wizard and waitlist
-
-- **QR tickets:** every confirmed registration gets a random 128-bit ticket code (not the database id). The PDF ticket's QR holds `OVT1.<code>.<hmac>`, signed with `OCCAVIE_TICKET_SECRET` (property `occavie.ticket.secret`; falls back to the remember-me key). Set it explicitly in production; changing it invalidates printed tickets.
-- **Check-in:** organizers open *My Events > Check-in* on a phone, scan with the camera (HTTPS required; decoding uses `BarcodeDetector` or jsQR from jsDelivr) or paste the code / search by name. All verification happens server-side: only the owning organizer can check in, the update is a single atomic conditional write (no double check-in), and the page shows masked email only plus checked-in / remaining totals.
-- **Wizard and drafts:** `Create Event` is a six-step wizard saved as a private `DRAFT` after every step. Drafts are hidden from public pages and previewable by their owner and admins. Organizers can publish, duplicate (private copy without date), edit & reschedule (participants are notified of date, time, venue and price changes), and cancel (status `CANCELLED`, registrants and waitlist notified, history kept).
-- **Waitlist:** participants can join a sold-out event once. Position is derived from join time. When a seat frees up the next person is offered it and the seat is held (`occavie.waitlist.offer-hours`, default 24). Held seats count as taken, so registrations never exceed capacity. Expired offers are released by a scheduled job (`occavie.waitlist.expiry-check-ms`, default 60000) and passed on. Seat changes rely on MongoDB transactions (Atlas / replica set).
-
-## Notifications, email, reminders and approval
-
-**In-app notifications** are typed (registration, cancellation, reschedule, event cancelled, waitlist seat, reminder, announcement, review result) with a direct link, read/unread state, relative timestamps, an Unread filter and per-item "mark read".
-
-**Email (optional, transactional).** Emails are sent through [Resend](https://resend.com) over HTTPS, which works on hosts that block SMTP (for example Render's free tier). Configure with environment variables only:
-
-| Variable | Purpose |
-| --- | --- |
-| `OCCAVIE_EMAIL_PROVIDER` | `resend` to enable, anything else disables (default) |
-| `RESEND_API_KEY` | Resend API key (never committed) |
-| `OCCAVIE_EMAIL_FROM` | Sender, e.g. `Occavie <events@your-domain>` (domain must be verified in Resend) |
-| `OCCAVIE_PUBLIC_URL` | Public base URL used for links in emails, e.g. `https://occavie.onrender.com` |
-
-Emails sent: registration confirmation (with ticket details), registration cancellation, event rescheduled, event cancelled, waitlist seat available, event reminders and organizer announcements. Booking-related emails are always sent; users can opt out of reminder and announcement emails in *Profile > Email preferences*. Without a provider, emails are recorded as `SKIPPED` and everything still works in-app.
-
-**No duplicates, no lost mail.** Every email is first stored in the `email_outbox` MongoDB collection with a unique dedupe key (for example `REG:<registrationId>`, `REMINDER:<eventId>:<userId>`). Delivery claims rows atomically with a lease, retries transient failures with backoff (max 5 attempts), and sends the dedupe key as Resend's `Idempotency-Key`. The same keys protect in-app notifications.
-
-**Background jobs without in-memory state.** Reminders (default 24 h before start, `OCCAVIE_REMINDER_HOURS`), expired waitlist offers and email delivery run from MongoDB state, so a restart or redeploy loses nothing. An in-process poller (`OCCAVIE_JOBS_POLL_MS`, default 60 s) runs while the app is awake. For hosts that put the app to sleep, set `OCCAVIE_JOBS_TOKEN` and call the job endpoint from an external scheduler (Render Cron Job, cron-job.org, GitHub Actions), which also wakes the app:
+Requirements: JDK 21+ and a MongoDB (Atlas free tier or local).
 
 ```bash
-curl -X POST -H "X-Jobs-Token: $OCCAVIE_JOBS_TOKEN" https://your-app/internal/jobs/run
+cp .env.example .env            # then edit; or export the variables directly
+export MONGODB_URI="mongodb://localhost:27017/eventflow"
+./mvnw spring-boot:run          # add -Djava.version=21 if you only have JDK 21
 ```
 
-The endpoint returns 404 when no token is configured and 403 for a wrong token.
+Open http://localhost:8080. Without the `prod` profile the app seeds three **demo accounts** (local development only):
 
-**Organizer announcements:** organizers can message only registered attendees of their own published, upcoming events (max 3 per event and 10 per organizer per 24 h).
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@eventflow.com` | `Admin123!` |
+| Organizer | `organizer@eventflow.com` | `Organizer123!` |
+| Participant | `participant@eventflow.com` | `Participant123!` |
 
-**Admin approval (off by default).** Set `OCCAVIE_APPROVAL_REQUIRED=true` to require review. Statuses: Draft, Pending approval, Published, Rejected, Cancelled, Completed. Organizers submit from the wizard, admins approve or reject (with a reason) at *Admin > Approvals*, and organizers see the status and reason on My Events. Pending and rejected events are private. With the flag off, organizers publish directly as before.
+These credentials are public. In production they are disabled automatically once a real administrator exists (see below).
 
-## Saved events, calendar, sharing, organizer pages, suggestions
+## Configuration
 
-- **Saved events:** participants save or unsave from an event page; a unique index prevents duplicates; the dashboard lists them.
-- **Calendar:** `/events/{id}/calendar.ics` downloads an RFC 5545 file with title, description, venue, event URL and UTC start/end converted from `OCCAVIE_EVENT_TIMEZONE` / `occavie.event-timezone` (default `Asia/Dhaka`).
-- **Sharing:** copy-link and native share buttons, Open Graph / Twitter tags (cover image or a branded default).
-- **Organizer pages:** `/organizers/{id}` shows name, photo, optional bio, website and contact email (opt-in, never the account email), upcoming and past published events.
-- **Venue:** optional street address with a Google Maps link and an optional https online link that is shown only to registered attendees, the organizer and admins.
-- **Suggestions:** "You might also like" and "Suggested for you" use plain category/date queries and the participant's own registrations and saved events, no model involved.
+See [`.env.example`](.env.example) for every variable. Production (`SPRING_PROFILES_ACTIVE=prod`) requires `MONGODB_URI`, `OCCAVIE_PUBLIC_URL` (https), `OCCAVIE_REMEMBER_KEY` and `OCCAVIE_TICKET_SECRET` (24+ random characters each, different from each other) and **will not start** otherwise.
 
-## Simulated checkout (Occavie student project)
+## Tests
 
-Paid checkout is a **demo**. The checkout page, result page, PDF ticket and receipt are all labelled as demo, and dashboard "ticket value" is shown as *simulated ticket value, not revenue*. Booking rules (duplicate registration, sold-out events and ticket types, coupon limits and discount maths, confirmation) are covered by `BookingFlowTest`.
+```bash
+./mvnw test -Djava.version=21 -Dtest='!EventflowApplicationTests'
+```
 
-Free tickets register directly. Paid tickets open `/participant/events/{eventId}/checkout` with the existing bKash, Nagad and Visa logos. Choose a method and optionally apply a valid promo code, then select **Proceed to Payment**. Occavie records a simulated payment and confirms the ticket immediately. No merchant account, real charge, external checkout or callback setup is needed.
+108 unit tests (Mockito, no database needed) cover booking/capacity, coupons, free and simulated-paid booking, cancellation, waitlist, QR check-in, approval workflow, notifications/email, announcements, UX features, security helpers (rate limiter, production secret checks, upload sniffing, CSV injection, JSON-LD escaping). `EventflowApplicationTests` loads the full context and therefore needs a reachable MongoDB (`MONGODB_URI`).
 
-The backend recalculates prices and coupon discounts and checks event capacity, ticket availability, duplicate registrations and coupon usage. The confirmed registration and its simulated payment record are saved together in MongoDB, and the participant and organizer are notified. Demo booking cancellation also updates the stored payment status. The project uses the existing MongoDB transaction manager; deploying with MongoDB Atlas supports atomic confirmation.
+## Deployment
 
-Manual checks: register for a free event, book a paid event using each payment method, apply valid/invalid/expired coupons, verify the final amount and registration history, try booking an already-full event, and test cancellation. No real money is collected.
+See [DEPLOYMENT.md](DEPLOYMENT.md): Render (Docker) is the recommended host; Vercel is explained and not recommended for this architecture. A `Dockerfile` and `render.yaml` are included.
+
+## Security notes
+
+* Role-based route protection (`/admin/**`, `/organizer/**`, `/participant/**`), ownership checks on every organizer action, CSRF on all state-changing requests.
+* BCrypt password hashes; password-reset tokens are random, stored hashed, single-use and expire in 30 minutes; the reset form never reveals whether an email exists.
+* Rate limits on login (per IP and per email), registration, password reset, contact form, coupon preview, booking and check-in. In-memory, so per instance.
+* Uploads accept only JPEG/PNG/WEBP, ≤ 2 MB, verified by file signature, not just by declared type.
+* Tickets use signed codes (HMAC) and atomic check-in to stop double use. Participant data is only visible to the event's own organizer.
+* CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, frame protection; `Secure`/`HttpOnly`/`SameSite=Lax` session cookies in production.
+* No default secrets in production; demo accounts and demo password reset are disabled by the `prod` profile.
+* Known limits: CSP still allows inline scripts (`'unsafe-inline'`); sessions and rate limits are per instance.
+
+## Known limitations
+
+* Payments are simulated. Amounts shown are demo values, not revenue.
+* Deployment instructions are written and the production profile was tested locally, but the app has **not** been deployed or verified on Render/Vercel from this repository, and the Docker image build was not run (no Docker daemon in the build environment).
+* Waitlist and booking transactions are unit-tested with mocks; they have not been exercised against a transaction-capable MongoDB in this release.
+
+## Project history
+
+Rebranded from EventFlow. The Java package (`com.eventflow`), the MongoDB database and collection names, URLs, and the three demo email addresses are unchanged for compatibility.

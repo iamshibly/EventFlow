@@ -11,7 +11,7 @@
                 <p th:text="${approvalRequired ? 'Organizers submit events for review before they are published.' : 'Approval is currently off (OCCAVIE_APPROVAL_REQUIRED=false): organizers publish directly. Any events still waiting are listed here.'}">Review submitted events.</p></div>
         </section>
         <section class="table-card" th:if="${!#lists.isEmpty(pending)}">
-            <div class="data-table-wrap"><table class="data-table">
+            <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table"><table class="data-table">
                 <caption class="ov-sr">Events awaiting approval</caption>
                 <thead><tr><th scope="col">Event</th><th scope="col">Organizer</th><th scope="col">Date</th><th scope="col">Submitted</th><th scope="col" class="actions-column">Decision</th></tr></thead>
                 <tbody>

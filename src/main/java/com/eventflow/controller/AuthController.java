@@ -24,6 +24,11 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService users;
+    private final com.eventflow.service.PasswordResetService passwordResets;
+
+    /** Legacy two-step reset that only needs an email address. Insecure: off unless explicitly enabled for a classroom demo. */
+    @Value("${occavie.password-reset.demo-mode:false}")
+    private boolean demoResetMode;
 
     @Value("${occavie.demo-access.enabled:${eventflow.demo-access.enabled:true}}")
     private boolean demoAccessEnabled;
@@ -42,6 +47,8 @@ public class AuthController {
         model.addAttribute("redirect", SecurityConfig.safeRedirect(redirect));
         model.addAttribute("demoAccessAvailable", demoAvailable(request));
         model.addAttribute("forgotOpen", forgot != null);
+        model.addAttribute("passwordResetAvailable", demoResetMode || passwordResets.isAvailable());
+        model.addAttribute("demoResetMode", demoResetMode);
         return "auth";
     }
 
@@ -79,9 +86,44 @@ public class AuthController {
         return "redirect:/login?forgot=1";
     }
 
+    /** Sends a reset link by email. The response is identical whether or not the account exists. */
+    @PostMapping("/forgot-password/request")
+    public String requestPasswordReset(@RequestParam(defaultValue = "") String email, RedirectAttributes flash) {
+        if (!passwordResets.isAvailable()) {
+            flash.addFlashAttribute("loginError", "Password reset by email is not set up on this server. Contact an administrator.");
+            return "redirect:/login";
+        }
+        passwordResets.request(email);
+        flash.addFlashAttribute("passwordResetSuccess",
+                "If an account exists for that email, we sent a link to reset the password. It works once and expires in 30 minutes.");
+        return "redirect:/login";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPasswordPage(@RequestParam(defaultValue = "") String token, Model model) {
+        model.addAttribute("token", token);
+        model.addAttribute("tokenValid", passwordResets.isValid(token));
+        return "reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestParam(defaultValue = "") String token, @RequestParam(defaultValue = "") String newPassword,
+                                @RequestParam(defaultValue = "") String confirmPassword, RedirectAttributes flash) {
+        try {
+            passwordResets.reset(token, newPassword, confirmPassword);
+            flash.addFlashAttribute("passwordResetSuccess", "Password updated. Sign in with your new password.");
+            return "redirect:/login";
+        } catch (IllegalArgumentException ex) {
+            flash.addFlashAttribute("resetError", ex.getMessage());
+            flash.addAttribute("token", token);
+            return "redirect:/reset-password";
+        }
+    }
+
     @PostMapping("/forgot-password/check")
     public String checkForgotPasswordEmail(@ModelAttribute ForgotPasswordRequest request,
                                             RedirectAttributes flash) {
+        if (!demoResetMode) return "redirect:/login?forgot=1";
         String cleanEmail = request.email() == null
                 ? "" : request.email().trim().toLowerCase(Locale.ROOT);
         flash.addFlashAttribute("forgotEmail", cleanEmail);
@@ -98,6 +140,7 @@ public class AuthController {
     @PostMapping("/forgot-password/reset")
     public String resetForgottenPassword(@ModelAttribute ForgotPasswordRequest request,
                                           RedirectAttributes flash) {
+        if (!demoResetMode) return "redirect:/login?forgot=1";
         String cleanEmail = request.email() == null
                 ? "" : request.email().trim().toLowerCase(Locale.ROOT);
         try {

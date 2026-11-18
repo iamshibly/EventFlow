@@ -13,7 +13,8 @@
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#0E1B2A">
     <meta name="description" th:content="${ogDescription ?: 'Occavie - Make every moment count. Discover, book and manage events in one place.'}">
-    <link rel="canonical" th:if="${canonicalUrl != null}" th:href="${canonicalUrl}">
+    <meta name="robots" content="noindex, nofollow" th:if="${#strings.contains(scope, 'app')}">
+    <link rel="canonical" th:if="${canonicalUrl != null and !#strings.contains(scope, 'app')}" th:href="${canonicalUrl}">
     <meta property="og:type" th:content="${ogType ?: 'website'}">
     <meta property="og:site_name" content="Occavie">
     <meta property="og:title" th:content="${ogTitle ?: 'Occavie | ' + title}">

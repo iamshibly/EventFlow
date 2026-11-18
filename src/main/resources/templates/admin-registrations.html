@@ -31,7 +31,7 @@
                 <div class="table-count" data-table-count th:text="${#lists.size(registrations) + ' bookings'}">0 bookings</div>
             </div>
 
-            <div class="data-table-wrap" th:if="${!#lists.isEmpty(registrations)}">
+            <div class="data-table-wrap" tabindex="0" role="region" aria-label="Scrollable table" th:if="${!#lists.isEmpty(registrations)}">
                 <table class="data-table operations-data-table">
                     <thead><tr><th>Participant</th><th>Event</th><th>Event Date</th><th>Ticket</th><th>Booked On</th><th>Status</th><th class="actions-column">Action</th></tr></thead>
                     <tbody data-table-body>
@@ -52,7 +52,7 @@
             <div class="clean-empty" th:if="${#lists.isEmpty(registrations)}"><i class="bi bi-ticket-perforated"></i><h3>No bookings yet</h3><p>Participant registrations will appear here.</p></div>
             <div class="clean-empty filtered-empty" data-table-empty><i class="bi bi-search"></i><h3>No matching bookings</h3><p>Try a different search or filter.</p></div>
             <div class="operations-table-footer" th:if="${!#lists.isEmpty(registrations)}">
-                <div class="table-page-size"><span>Show</span><select data-table-page-size><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="ALL">All</option></select><span>entries</span></div>
+                <div class="table-page-size"><span>Show</span><select data-table-page-size aria-label="Rows per page"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="ALL">All</option></select><span>entries</span></div>
                 <div class="table-range" data-table-range>Showing 0 of 0</div>
                 <div class="table-pagination" data-table-pagination></div>
             </div>

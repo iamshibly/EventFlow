@@ -322,6 +322,7 @@ public class UserService {
         if (!PROFILE_IMAGE_TYPES.contains(contentType)) {
             throw new IllegalArgumentException("Profile picture must be JPG, PNG or WEBP.");
         }
+        ImageUpload.verify(image, "Profile picture");
 
         try {
             profileImageRepository.deleteByUserId(user.getId());
@@ -391,6 +392,24 @@ public class UserService {
         if (!user.isEnabled()) {
             throw new IllegalArgumentException("This account is disabled. Contact the Occavie administrator.");
         }
+    }
+
+    /** Shared password rules (8+ chars, upper, lower, digit, symbol) and confirmation check. */
+    public void validateNewPassword(String newPassword, String confirmPassword) {
+        String password = newPassword == null ? "" : newPassword;
+        if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            throw new IllegalArgumentException("New password must have 8+ characters, uppercase, lowercase, number and special character.");
+        }
+        if (!password.equals(confirmPassword == null ? "" : confirmPassword)) {
+            throw new IllegalArgumentException("New passwords do not match.");
+        }
+    }
+
+    /** Stores a new password (already validated). Demo accounts keep their published passwords. */
+    public void applyNewPassword(User user, String newPassword) {
+        if (isDemoAccount(user)) throw new IllegalArgumentException("Demo account passwords cannot be changed.");
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     public void resetForgottenPassword(String email, String newPassword, String confirmPassword) {

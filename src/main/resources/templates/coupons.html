@@ -109,11 +109,11 @@
 
             <div class="operations-toolbar">
                 <label class="table-search operations-search"><i class="bi bi-search"></i><input type="search" data-table-search placeholder="Search code, event or discount..."></label>
-                <select class="toolbar-select" data-table-filter="status"><option value="ALL">All statuses</option><option value="ACTIVE">Active</option><option value="PAUSED">Paused</option><option value="EXPIRED">Expired</option></select>
-                <select class="toolbar-select compact-toolbar-select" data-table-page-size><option value="10">10 per page</option><option value="25">25 per page</option><option value="50">50 per page</option><option value="ALL">Show all</option></select>
+                <select class="toolbar-select" data-table-filter="status" aria-label="Filter by status"><option value="ALL">All statuses</option><option value="ACTIVE">Active</option><option value="PAUSED">Paused</option><option value="EXPIRED">Expired</option></select>
+                <select class="toolbar-select compact-toolbar-select" data-table-page-size aria-label="Rows per page"><option value="10">10 per page</option><option value="25">25 per page</option><option value="50">50 per page</option><option value="ALL">Show all</option></select>
             </div>
 
-            <div class="table-scroll">
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table">
                 <table class="data-table coupon-table">
                     <thead><tr><th>Coupon</th><th>Event</th><th>Discount</th><th>Expiry</th><th>Usage</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody data-table-body>

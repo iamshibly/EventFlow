@@ -26,12 +26,12 @@
 
             <div class="operations-toolbar">
                 <label class="table-search operations-search"><i class="bi bi-search"></i><input type="search" data-table-search placeholder="Search name, email, subject or message..."></label>
-                <select class="toolbar-select" data-table-filter="status"><option value="ALL">All statuses</option><option value="NEW">New</option><option value="IN_PROGRESS">In Progress</option><option value="RESOLVED">Resolved</option></select>
-                <select class="toolbar-select event-filter-select" data-table-filter="type"><option value="ALL">All request types</option><option value="GENERAL_INQUIRY">General Inquiry</option><option value="EVENT_SUPPORT">Event Support</option><option value="REGISTRATION_ISSUE">Registration Issue</option><option value="COUPON_PRICING_ISSUE">Coupon / Pricing Issue</option><option value="ORGANIZER_SUPPORT">Organizer Support</option><option value="TECHNICAL_PROBLEM">Technical Problem</option><option value="OTHER">Other</option></select>
-                <select class="toolbar-select compact-toolbar-select" data-table-page-size><option value="10">10 per page</option><option value="25">25 per page</option><option value="50">50 per page</option><option value="ALL">Show all</option></select>
+                <select class="toolbar-select" data-table-filter="status" aria-label="Filter by status"><option value="ALL">All statuses</option><option value="NEW">New</option><option value="IN_PROGRESS">In Progress</option><option value="RESOLVED">Resolved</option></select>
+                <select class="toolbar-select event-filter-select" data-table-filter="type" aria-label="Filter by type"><option value="ALL">All request types</option><option value="GENERAL_INQUIRY">General Inquiry</option><option value="EVENT_SUPPORT">Event Support</option><option value="REGISTRATION_ISSUE">Registration Issue</option><option value="COUPON_PRICING_ISSUE">Coupon / Pricing Issue</option><option value="ORGANIZER_SUPPORT">Organizer Support</option><option value="TECHNICAL_PROBLEM">Technical Problem</option><option value="OTHER">Other</option></select>
+                <select class="toolbar-select compact-toolbar-select" data-table-page-size aria-label="Rows per page"><option value="10">10 per page</option><option value="25">25 per page</option><option value="50">50 per page</option><option value="ALL">Show all</option></select>
             </div>
 
-            <div class="table-scroll">
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table">
                 <table class="data-table contact-request-table">
                     <thead><tr><th>Sender</th><th>Request</th><th>Type</th><th>Status</th><th>Submitted</th><th>Review</th></tr></thead>
                     <tbody data-table-body>

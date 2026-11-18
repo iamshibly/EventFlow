@@ -46,7 +46,7 @@
         <div class="ov-event-grid" th:if="${!#lists.isEmpty(featuredEvents)}">
             <article class="ov-event-card" th:each="event : ${featuredEvents}">
                 <a class="ov-card-photo" th:href="@{'/events/' + ${event.id}}" href="/events" th:aria-label="${'View details for ' + event.title}" tabindex="-1">
-                    <img data-event-image th:attr="data-event-category=${event.category}" th:src="${event.imageUrl != null and !#strings.isEmpty(event.imageUrl) ? event.imageUrl : '/images/event-visual.png'}"
+                    <img data-event-image th:attr="data-event-category=${event.category}" th:src="${event.imageUrl}"
                          src="/images/event-visual.png" th:alt="${event.title + ' cover image'}" alt="Event cover" width="600" height="375" loading="lazy" decoding="async">
                     <span class="ov-card-tag" th:text="${event.category}">Technology</span>
                 </a>

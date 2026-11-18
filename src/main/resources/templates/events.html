@@ -58,7 +58,7 @@
                th:attr="data-category=${event.category},data-pricing=${efPaid ? 'PAID' : 'FREE'},data-status=${efStatus},data-date=${event.date},data-title=${event.title},data-location=${event.location},data-price=${startingPrices[event.id]},data-search=${event.title + ' ' + event.location + ' ' + event.description + ' ' + event.category + ' ' + event.organizerName}">
         <a class="ov-card-photo" th:href="@{'/events/' + ${event.id}}" href="/events" th:aria-label="${'View ' + event.title}" tabindex="-1">
           <img data-event-image th:attr="data-event-category=${event.category}"
-               th:src="${event.imageUrl != null and !#strings.isEmpty(event.imageUrl) ? event.imageUrl : '/images/event-visual.png'}"
+               th:with="efCover=${@display.listingImageUrl(event)}" th:src="${efCover}"
                src="/images/event-visual.png" th:alt="${event.title + ' cover image'}" alt="Event cover" width="600" height="375" loading="lazy" decoding="async">
           <span class="ov-card-tag" th:text="${event.category}">Technology</span>
         </a>

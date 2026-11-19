@@ -714,3 +714,40 @@ body.has-compare-tray .ov-concierge { bottom: 104px; }
   .ov-concierge.is-open .ov-concierge-launch { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .ov-concierge-launch, .ov-concierge-log { transition: none; scroll-behavior: auto; } }
+
+/* ---- Login: living photo backdrop ---- */
+.ov-auth-scene { background: #0B1530; }
+.ov-auth-scene::before { z-index: 1; background: linear-gradient(100deg, rgba(8,14,36,.92) 0%, rgba(8,14,36,.72) 45%, rgba(8,14,36,.45) 100%), radial-gradient(45% 55% at 12% 90%, rgba(229,173,28,.28), transparent 70%); }
+:root[data-theme="dark"] .ov-auth-scene::before { background: linear-gradient(100deg, rgba(5,9,24,.94) 0%, rgba(5,9,24,.78) 45%, rgba(5,9,24,.55) 100%), radial-gradient(45% 55% at 12% 90%, rgba(229,173,28,.22), transparent 70%); }
+.ov-auth-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.ov-auth-bg span { position: absolute; inset: -4%; background-size: cover; background-position: center; opacity: 0; animation: ovSlide 30s infinite, ovZoom 30s infinite; }
+.ov-auth-bg .s1 { background-image: url(/images/event-photos/music-and-cultural-festival.webp); animation-delay: 0s; }
+.ov-auth-bg .s2 { background-image: url(/images/event-photos/startup-pitch-day.webp); animation-delay: 6s; }
+.ov-auth-bg .s3 { background-image: url(/images/event-photos/inter-university-football-tournament.webp); animation-delay: 12s; }
+.ov-auth-bg .s4 { background-image: url(/images/event-photos/women-in-leadership-summit.webp); animation-delay: 18s; }
+.ov-auth-bg .s5 { background-image: url(/images/event-photos/cloud-native-meetup.webp); animation-delay: 24s; }
+@keyframes ovSlide { 0% { opacity: 0; } 4% { opacity: 1; } 20% { opacity: 1; } 26% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes ovZoom { 0% { transform: scale(1); } 26% { transform: scale(1.09) translate(-1%, -1%); } 100% { transform: scale(1.09); } }
+.ov-auth-bg .orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .5; animation: ovDrift 14s ease-in-out infinite alternate; }
+.ov-auth-bg .o1 { width: 340px; height: 340px; left: -80px; top: 10%; background: #E5AD1C; }
+.ov-auth-bg .o2 { width: 300px; height: 300px; right: 5%; bottom: -80px; background: #3B5BDB; animation-delay: -6s; }
+@keyframes ovDrift { to { transform: translate(60px, -40px) scale(1.15); } }
+.ov-auth-main { z-index: 2; }
+.ov-auth-hero { color: #fff; }
+.ov-auth-hero h1 { color: #fff; }
+.ov-auth-hero h1 em { color: #F2C14E; background: none; }
+.ov-auth-hero p { color: rgba(255,255,255,.88); }
+.ov-auth-hero .ov-eyebrow { color: #F2C14E; }
+.ov-auth-points li { color: #fff; }
+.ov-auth-points i { background: rgba(255,255,255,.14); color: #F2C14E; backdrop-filter: blur(6px); }
+.ov-auth-floats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.ov-auth-floats span { display: inline-flex; gap: 8px; align-items: center; padding: 9px 14px; border-radius: 999px; font-size: .85rem; font-weight: 700; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(10px); animation: ovFloat 5s ease-in-out infinite alternate; }
+.ov-auth-floats i { color: #F2C14E; }
+.ov-auth-floats .f2 { animation-delay: -1.7s; } .ov-auth-floats .f3 { animation-delay: -3.2s; }
+@keyframes ovFloat { to { transform: translateY(-8px); } }
+.ov-auth-panel { background: rgba(255,255,255,.97); border-color: rgba(255,255,255,.5); }
+:root[data-theme="dark"] .ov-auth-panel { background: rgba(14,22,48,.94); }
+@media (prefers-reduced-motion: reduce) {
+  .ov-auth-bg span, .ov-auth-bg .orb, .ov-auth-floats span { animation: none; }
+  .ov-auth-bg .s1 { opacity: 1; transform: none; }
+}

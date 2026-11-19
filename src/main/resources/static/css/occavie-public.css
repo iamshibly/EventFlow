@@ -960,3 +960,51 @@ body.contact-public-body .contact-submit-button { min-height: 50px; padding: 0 2
 .ov-ed-main .ov-banner { margin-bottom: 14px; }
 @media (max-width: 1000px) { .ov-ed-main .ov-booking-panel { margin-top: 0; } .ov-ed-hero { padding-bottom: 96px; } }
 @media (prefers-reduced-motion: reduce) { .ov-ed-hero-img { animation: none; } }
+
+/* ---- Checkout and payment result ---- */
+.ov-co-hero { min-height: 280px; padding: 48px 0 110px; align-items: center; }
+.ov-co-hero-inner { position: relative; z-index: 2; display: grid; gap: 14px; justify-items: start; color: #fff; }
+.ov-co-hero .ov-eyebrow { color: #F2C14E; letter-spacing: .24em; }
+.ov-co-hero h1 { font-family: var(--font-display); font-size: clamp(2.2rem, 5.4vw, 3.8rem); line-height: 1.04; color: #fff; }
+.ov-co-hero h1 em { font-style: normal; color: #F2C14E; }
+.ov-co-steps { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.ov-co-steps li { display: inline-flex; gap: 10px; align-items: center; padding: 6px 16px 6px 6px; border-radius: 999px; font-weight: 700; font-size: .9rem; color: rgba(255,255,255,.8); background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(8px); }
+.ov-co-steps b { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.16); font-weight: 400; }
+.ov-co-steps .is-now { color: #fff; border-color: #F2C14E; } .ov-co-steps .is-now b { background: var(--gradient); color: #0B1530; }
+.ov-co-steps .is-done b { background: #10B981; color: #fff; } .ov-co-steps .is-fail b { background: #EF4444; color: #fff; }
+.ov-co-main { position: relative; z-index: 3; margin-top: -72px; padding-bottom: 24px; }
+.ov-co-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.ov-co-card { background: var(--surface); border: 1px solid var(--line); border-radius: 26px; box-shadow: 0 22px 56px rgba(11,21,48,.2); padding: clamp(20px, 3vw, 32px); }
+.ov-co-left { display: grid; gap: 14px; }
+.ov-co-summary { position: sticky; top: 92px; display: grid; gap: 16px; border-top: 5px solid #E5AD1C; }
+.ov-co-num { display: inline-grid; place-items: center; width: 30px; height: 30px; margin-right: 8px; border-radius: 50%; background: var(--gradient); color: #0B1530; font-size: .9rem; font-weight: 800; }
+.ov-co-event { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; }
+.ov-co-event img { width: 96px; height: 80px; object-fit: cover; border-radius: 16px; }
+.ov-co-event h2 { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.2; margin-top: 6px; }
+.ov-co-chip { display: inline-block; padding: 3px 12px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-weight: 800; font-size: .78rem; }
+.ov-co-facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; color: var(--ink-2); font-size: .92rem; }
+.ov-co-facts i { color: var(--brand); margin-right: 6px; }
+.ov-co-secure { text-align: center; font-size: .8rem; color: var(--muted); margin: 0; } .ov-co-secure i { color: var(--success); }
+.ov-co-summary .ef-price-list { margin: 0; }
+.ef-method-tile { border-radius: 18px; transition: transform .15s, border-color .15s, box-shadow .15s; }
+.ef-method-option:hover .ef-method-tile { transform: translateY(-3px); }
+.ef-method-option input:checked + .ef-method-tile { border-color: var(--gold-2, #D19208); background: var(--brand-soft); box-shadow: 0 0 0 3px rgba(229,173,28,.3); }
+.ef-method-option input:checked + .ef-method-tile .ef-method-check { color: #059669; }
+.ov-co-result { display: grid; place-items: center; }
+.ov-co-ticket { width: min(560px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 28px; box-shadow: 0 24px 60px rgba(11,21,48,.25); position: relative; overflow: hidden; animation: ovRise .5s ease both; }
+.ov-co-ticket-top { display: grid; gap: 10px; justify-items: center; text-align: center; padding: 32px 28px 24px; }
+.ov-co-ticket-top h2 { font-family: var(--font-display); font-size: 1.7rem; } .ov-co-ticket-top p { color: var(--ink-2); }
+.ov-co-ticket .ef-result-icon { width: 84px; height: 84px; display: grid; place-items: center; border-radius: 50%; font-size: 2.6rem; margin: 0; }
+.ov-co-ticket .ef-result-ok { background: linear-gradient(135deg, #34D399, #059669); color: #fff; box-shadow: 0 0 0 10px rgba(16,185,129,.16); animation: ovPop .6s cubic-bezier(.2,1.4,.4,1) both; }
+.ov-co-ticket .ef-result-wait { background: linear-gradient(135deg, #FBBF24, #D97706); color: #fff; box-shadow: 0 0 0 10px rgba(245,158,11,.18); }
+@keyframes ovPop { from { transform: scale(.3); opacity: 0; } }
+.ov-co-ticket-cut { position: relative; height: 0; border-top: 2px dashed var(--line-strong); margin: 0 22px; }
+.ov-co-ticket-cut::before, .ov-co-ticket-cut::after { content: ""; position: absolute; top: -14px; width: 26px; height: 26px; border-radius: 50%; background: var(--canvas, #F7F9FE); border: 1px solid var(--line); }
+.ov-co-ticket-cut::before { left: -36px; } .ov-co-ticket-cut::after { right: -36px; }
+.ov-co-facts-list { margin: 0; border: 0; border-radius: 0; padding: 8px 28px; }
+.ov-co-ticket .ef-result-actions { padding: 8px 28px 30px; flex-direction: column; align-items: stretch; }
+.ov-co-ticket .ef-result-actions a { justify-content: center; text-align: center; }
+.ov-co-page .ov-demo-banner.inline { text-align: left; }
+@media (max-width: 900px) { .ov-co-grid { grid-template-columns: 1fr; } .ov-co-summary { position: static; order: -1; } .ov-co-hero { padding-bottom: 96px; } }
+@media (max-width: 520px) { .ef-payment-methods { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .ov-co-ticket, .ov-co-ticket .ef-result-ok { animation: none; } }

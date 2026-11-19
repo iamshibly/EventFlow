@@ -26,7 +26,7 @@
                 <div><small>Support Representative</small><strong th:text="${devName}">Occavie team</strong></div>
             </div>
 
-            <div class="contact-channel-list" th:with="cMail=${@site.contactEmail},cWa=${@site.contactWhatsapp},cAddr=${@site.contactAddress}">
+            <div class="contact-channel-list" th:with="cMail=${@site.contactEmail},cWa=${@site.contactWhatsapp},cAddr=${@site.contactAddress},cFb=${@site.facebookUrl},cLi=${@site.linkedinUrl}">
                 <a class="contact-channel" th:if="${!#strings.isEmpty(cMail)}" th:href="${'mailto:' + cMail}">
                     <span class="gmail-contact-mark"><img src="/images/gmail-logo.svg" th:src="@{/images/gmail-logo.svg}" alt="" width="26" height="26"></span>
                     <div><small>Email</small><strong th:text="${cMail}">email</strong></div>
@@ -35,6 +35,16 @@
                 <a class="contact-channel whatsapp" th:if="${!#strings.isEmpty(cWa)}" th:href="${'https://wa.me/' + cWa}" target="_blank" rel="noopener">
                     <span><i class="bi bi-whatsapp"></i></span>
                     <div><small>WhatsApp</small><strong th:text="${'+' + cWa}">number</strong></div>
+                    <i class="bi bi-arrow-up-right"></i>
+                </a>
+                <a class="contact-channel" th:if="${!#strings.isEmpty(cFb)}" th:href="${cFb}" target="_blank" rel="noopener noreferrer">
+                    <span><i class="bi bi-facebook"></i></span>
+                    <div><small>Facebook</small><strong>Message on Facebook</strong></div>
+                    <i class="bi bi-arrow-up-right"></i>
+                </a>
+                <a class="contact-channel" th:if="${!#strings.isEmpty(cLi)}" th:href="${cLi}" target="_blank" rel="noopener noreferrer">
+                    <span><i class="bi bi-linkedin"></i></span>
+                    <div><small>LinkedIn</small><strong>iamshibly</strong></div>
                     <i class="bi bi-arrow-up-right"></i>
                 </a>
                 <div class="contact-channel static" th:if="${!#strings.isEmpty(cAddr)}">

@@ -207,12 +207,14 @@
             <a th:href="@{/register}" href="/register">Create account</a>
             <a th:href="@{/contact}" href="/contact">Contact support</a>
         </nav>
-        <div class="ov-footer-col ov-footer-dev" th:with="devName=${@site.developerName},devUrl=${@site.developerUrl},devMail=${@site.contactEmail},devWa=${@site.contactWhatsapp}">
+        <div class="ov-footer-col ov-footer-dev" th:with="devName=${@site.developerName},devUrl=${@site.developerUrl},devMail=${@site.contactEmail},devWa=${@site.contactWhatsapp},devFb=${@site.facebookUrl},devLi=${@site.linkedinUrl}">
             <h3>Developed by</h3>
             <strong th:text="${devName}">Developer</strong>
             <div class="ov-footer-social">
                 <a th:href="${devUrl}" href="https://github.com/iamshibly" target="_blank" rel="noopener noreferrer" aria-label="Developer on GitHub" title="GitHub"><i class="bi bi-github"></i></a>
                 <a th:if="${!#strings.isEmpty(devWa)}" th:href="${'https://wa.me/' + devWa}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                <a th:if="${!#strings.isEmpty(devFb)}" th:href="${devFb}" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><i class="bi bi-facebook"></i></a>
+                <a th:if="${!#strings.isEmpty(devLi)}" th:href="${devLi}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
                 <a th:if="${!#strings.isEmpty(devMail)}" th:href="${'mailto:' + devMail}" aria-label="Email" title="Email"><i class="bi bi-envelope-fill"></i></a>
             </div>
         </div>

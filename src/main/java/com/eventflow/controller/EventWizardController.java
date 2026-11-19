@@ -33,7 +33,7 @@ public class EventWizardController {
     private static final java.util.List<String> STEP_LABELS =
             java.util.List.of("Basics", "Date & venue", "Cover & description", "Program", "Tickets", "Review");
     private static final java.util.List<String> CATEGORIES = java.util.List.of(
-            "Technology", "Business", "Education", "Health", "Design", "Music", "Career", "Sports", "Community", "Other");
+            "Technology", "Business", "Education", "Health", "Design", "Music", "Career", "Sports", "Community", "Arts", "Science", "Food", "Charity", "Other");
 
     private final UserService userService;
     private final EventService eventService;

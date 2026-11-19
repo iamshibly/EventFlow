@@ -1531,11 +1531,11 @@
         const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         const text = css('--muted') || '#706b93';
         const grid = css('--line') || '#e4e1f2';
-        const brand = css('--brand') || '#0EA5A4';
+        const brand = css('--brand') || '#E5AD1C';
         const surface = css('--surface') || '#ffffff';
         const brandSoft = 'rgba(14,165,164,.16)';
-        const tooltip = { backgroundColor: '#0E1B2A', titleColor: '#ffffff', bodyColor: '#e4e1f2', cornerRadius: 10, padding: 10 };
-        const palette = ['#0EA5A4', '#FF6B6B', '#ffc94d', '#12a37a', '#3b6cf4', '#0EA5A4', '#f06292', '#5ad1c4'];
+        const tooltip = { backgroundColor: '#0B1530', titleColor: '#ffffff', bodyColor: '#e4e1f2', cornerRadius: 10, padding: 10 };
+        const palette = ['#E5AD1C', '#FF6B6B', '#ffc94d', '#12a37a', '#3b6cf4', '#E5AD1C', '#f06292', '#5ad1c4'];
 
         Chart.defaults.color = text;
         Chart.defaults.font.family = '"Manrope", system-ui, sans-serif';

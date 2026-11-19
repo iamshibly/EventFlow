@@ -5,40 +5,42 @@
    ========================================================================== */
 
 :root {
-  /* palette (brand) */
-  --navy: #0E1B2A;
-  --teal: #0EA5A4;
-  --coral: #FF6B6B;
-  --offwhite: #FAFAF7;
-  --mint: #E8F7F5;
+  /* palette: navy ink + gold */
+  --navy: #0B1530;
+  --teal: #E5AD1C;          /* legacy name: now the gold fill */
+  --gold: #E5AD1C;
+  --gold-2: #D19208;
+  --coral: #E5533D;
+  --offwhite: #F7F9FE;
+  --mint: #FFF6DC;
 
-  /* roles: --brand is the accessible teal for text/buttons (>= 4.5:1 on white); --teal is for fills/accents */
-  --brand: #0A7877;
-  --brand-strong: #096B6A;
-  --brand-soft: #E8F7F5;
-  --on-brand: #ffffff;
-  --accent: #FF6B6B;
-  --amber: #F5B83D;
-  --gradient: var(--brand);
-  --gradient-soft: var(--mint);
+  /* --brand = accessible dark gold for TEXT/links/outlines; buttons use --gradient (gold fill) with --on-brand (navy) */
+  --brand: #875900;
+  --brand-strong: #6B4600;
+  --brand-soft: #FFF6DC;
+  --on-brand: #0B1530;
+  --accent: #D64550;
+  --amber: #E5AD1C;
+  --gradient: linear-gradient(110deg, #E5AD1C, #D19208);
+  --gradient-soft: #FFF6DC;
 
   /* surfaces + text */
-  --canvas: #FAFAF7;
+  --canvas: #F7F9FE;
   --surface: #ffffff;
-  --surface-2: #F3F4F0;
-  --surface-3: #E7E9E4;
-  --ink: #0E1B2A;
-  --ink-2: #3B4856;
-  --muted: #5B6773;
-  --line: #E4E6E1;
-  --line-strong: #CBD1CC;
+  --surface-2: #F1F4FA;
+  --surface-3: #E4E9F3;
+  --ink: #0B1530;
+  --ink-2: #33415C;
+  --muted: #53617A;
+  --line: #E8EBF1;
+  --line-strong: #CBD3E2;
 
   /* semantic */
   --success: #0B7A55;
   --success-soft: #E3F5EC;
   --danger: #C23535;
   --danger-soft: #FDEBEB;
-  --warning: #9A6200;
+  --warning: #8A5B00;
   --warning-soft: #FFF4DB;
   --info: #1F6FB5;
   --info-soft: #E6F1FA;
@@ -48,13 +50,13 @@
   --radius-sm: 10px;
   --radius: 14px;
   --radius-lg: 20px;
-  --shadow-sm: 0 1px 2px rgba(14,27,42,.06);
-  --shadow: 0 4px 14px rgba(14,27,42,.07);
-  --shadow-lg: 0 12px 32px rgba(14,27,42,.12);
-  --ring: 0 0 0 3px rgba(14,165,164,.35);
+  --shadow-sm: 0 1px 2px rgba(11,21,48,.06);
+  --shadow: 0 6px 18px rgba(11,21,48,.08);
+  --shadow-lg: 0 14px 36px rgba(11,21,48,.14);
+  --ring: 0 0 0 3px rgba(209,146,8,.35);
 
   --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --font-display: "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
 
   --sidebar-w: 264px;
   --topbar-h: 68px;
@@ -62,33 +64,33 @@
 }
 
 :root[data-theme="dark"] {
-  --brand: #3CC7C5;
-  --brand-strong: #6EDAD8;
-  --brand-soft: rgba(14,165,164,.16);
-  --gradient-soft: rgba(14,165,164,.16);
-  --on-brand: #0E1B2A;
-  --accent: #FF8585;
-  --canvas: #0A1520;
-  --surface: #0E1B2A;
-  --surface-2: #14283A;
-  --surface-3: #1C3347;
-  --ink: #F2F5F4;
-  --ink-2: #C9D3D8;
-  --muted: #94A3AE;
-  --line: #1E3346;
-  --line-strong: #2C4760;
+  --brand: #F2C14E;
+  --brand-strong: #FFD978;
+  --brand-soft: rgba(229,173,28,.14);
+  --gradient-soft: rgba(229,173,28,.14);
+  --on-brand: #0B1530;
+  --accent: #FF8A93;
+  --canvas: #070D20;
+  --surface: #0B1530;
+  --surface-2: #111C3B;
+  --surface-3: #1A2750;
+  --ink: #F4F6FB;
+  --ink-2: #CBD3E6;
+  --muted: #9AA7C2;
+  --line: #1C2A4F;
+  --line-strong: #2C3E6B;
   --success: #4BD6A0;
   --success-soft: rgba(75,214,160,.14);
   --danger: #FF8585;
   --danger-soft: rgba(255,133,133,.14);
-  --warning: #F5B83D;
-  --warning-soft: rgba(245,184,61,.14);
+  --warning: #F2C14E;
+  --warning-soft: rgba(242,193,78,.14);
   --info: #6DB4EE;
   --info-soft: rgba(109,180,238,.14);
   --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
   --shadow: 0 4px 14px rgba(0,0,0,.35);
   --shadow-lg: 0 12px 32px rgba(0,0,0,.5);
-  --ring: 0 0 0 3px rgba(60,199,197,.45);
+  --ring: 0 0 0 3px rgba(242,193,78,.45);
   color-scheme: dark;
 }
 
@@ -114,7 +116,7 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; letter-spacing: -.02em; font-weigh
 p { margin: 0; }
 [hidden] { display: none !important; }
 :focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
-::selection { background: var(--brand); color: var(--brand-ink); }
+::selection { background: var(--gradient); color: var(--brand-ink); }
 .ef-sr-only, .ov-sr, .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .hidden { display: none !important; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
@@ -122,7 +124,7 @@ p { margin: 0; }
 /* ---------- brand ---------- */
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
 .brand-mark { width: 38px; height: 38px; border-radius: 11px; flex: none; }
-.brand-word { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; color: var(--ink); }
+.brand-word { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; letter-spacing: -.012em; color: var(--ink); }
 
 /* ---------- buttons ---------- */
 .primary-button, .secondary-button, .danger-button, .ov-btn, .ov-gold-button, .ov-outline-button, .ov-auth-submit {
@@ -322,7 +324,7 @@ input.invalid, select.invalid, textarea.invalid { border-color: var(--danger); }
 /* ---------- modal / dialogs ---------- */
 .confirm-modal, .feedback-modal, .gallery-lightbox {
   position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px;
-  background: rgba(14,27,42,.6); backdrop-filter: blur(6px);
+  background: rgba(11,21,48,.6); backdrop-filter: blur(6px);
 }
 .confirm-modal.open, .feedback-modal.open, .gallery-lightbox.open { display: flex; animation: ov-fade .18s ease; }
 .confirm-card, .feedback-modal-card {
@@ -382,7 +384,7 @@ body.modal-open { overflow: hidden; }
 .ov-icon-button:hover { color: var(--brand); border-color: var(--brand); background: var(--brand-soft); transform: translateY(-1px); }
 
 /* ---------- refinement layer: keep depth subtle, focus visible, ink-first typography ---------- */
-.primary-button, .ov-gold-button, .ov-auth-submit { background: var(--brand); color: var(--on-brand); box-shadow: none; }
+.primary-button, .ov-gold-button, .ov-auth-submit { background: var(--gradient); color: var(--on-brand); box-shadow: none; }
 .primary-button:hover, .ov-gold-button:hover, .ov-auth-submit:hover { box-shadow: var(--shadow-sm); }
 .status-badge, .role-chip, .coupon-status, .ticket-state, .ov-status-pill, .contact-status-badge, .contact-type-badge,
 .program-count-badge, .pricing-badge, .ov-card-tag, .category-label, .event-price-badge { letter-spacing: .04em; }
@@ -392,3 +394,10 @@ body.modal-open { overflow: hidden; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
 a.skip-link { position: absolute; left: 12px; top: -48px; z-index: 500; padding: 10px 16px; border-radius: 10px; background: var(--navy); color: #fff; font-weight: 700; }
 a.skip-link:focus { top: 12px; }
+
+/* ---- gold wordmark ---- */
+.brand-word { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; letter-spacing: -.01em; }
+.brand-word em { font-style: normal; color: var(--brand); }
+.sidebar-brand .brand-word em, .ov-footer .brand-word em, footer .brand-word em, .ov-hero-photo-bg .brand-word em { color: #F2C14E; }
+.brand-mark { width: 42px; height: 42px; border-radius: 12px; }
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: -.01em; }

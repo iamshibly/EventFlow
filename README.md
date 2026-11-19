@@ -23,6 +23,7 @@ Occavie (formerly EventFlow) is a full-stack event management platform: people d
 * **Discovery:** search, category/price/date/status filters, sorting, pagination, saved events, event suggestions, organizer public pages.
 * **Event pages:** programme, speakers, sponsors, gallery, venue details and map link, share/copy link, Open Graph previews, "add to calendar" (.ics).
 * **Booking:** free and ticket-category booking, coupons, capacity enforcement, waitlist with held-seat offers, cancellation of free bookings, PDF tickets with signed QR codes.
+* **Demo coupons:** by default any entered coupon code is accepted for a flat 10% demo discount (real coupons keep their own rules). Set `OCCAVIE_COUPON_ACCEPT_ANY=false` for strict mode.
 * **Simulated payments:** a demo checkout (bKash/Nagad/card look-alikes). **No real money moves, and demo amounts are never presented as revenue.**
 * **QR check-in:** organizer check-in page (camera or manual code), signed single-use tickets, duplicate-scan detection.
 * **Organizer tools:** event wizard with drafts, preview, duplicate, cancel/reschedule notices, announcements, coupons, participant lists, feedback, CSV exports (participants, bookings, check-in, attendance), analytics (bookings, capacity use, cancellations, check-ins and attendance %, ticket mix, trend, ratings).

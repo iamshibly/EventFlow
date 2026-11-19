@@ -8,7 +8,7 @@
     <main class="app-main">
         <section class="page-heading dashboard-heading dash-photo-hero">
             <img class="dash-hero-img" alt="" width="1600" height="600" fetchpriority="high"
-                 th:src="${user.role == 'PARTICIPANT' ? '/images/home-conference-hero.webp' : (user.role == 'ORGANIZER' ? '/images/covers/business-2.webp' : '/images/covers/technology-1.webp')}" src="/images/home-conference-hero.webp">
+                 th:src="${user.role == 'PARTICIPANT' ? '/images/home-conference-hero.webp' : (user.role == 'ORGANIZER' ? '/images/photos/networking.webp' : '/images/photos/conference.webp')}" src="/images/home-conference-hero.webp">
             <div>
                 <span class="role-label" th:text="${user.role}">PARTICIPANT</span>
                 <h1 th:text="'Welcome back, ' + ${user.fullName}">Welcome back</h1>

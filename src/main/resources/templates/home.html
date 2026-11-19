@@ -27,7 +27,7 @@
         <div class="ov-cat-grid">
             <a class="ov-cat-tile" th:href="@{/events}" href="/events"><i class="bi bi-grid-fill" aria-hidden="true"></i><span>All events</span></a>
             <a class="ov-cat-tile" th:each="category : ${categories}" th:href="@{/events(category=${category})}" href="/events">
-                <i class="bi" aria-hidden="true" th:classappend="${category == 'Technology' ? 'bi-laptop' : category == 'Business' ? 'bi-briefcase' : category == 'Education' ? 'bi-mortarboard' : category == 'Health' ? 'bi-heart-pulse' : category == 'Music' ? 'bi-music-note-beamed' : category == 'Sports' ? 'bi-trophy' : category == 'Career' ? 'bi-person-workspace' : category == 'Community' ? 'bi-people' : category == 'Design' ? 'bi-palette' : 'bi-stars'}"></i>
+                <i class="bi" aria-hidden="true" th:classappend="${category == 'Technology' ? 'bi-laptop' : category == 'Business' ? 'bi-briefcase' : category == 'Education' ? 'bi-mortarboard' : category == 'Health' ? 'bi-heart-pulse' : category == 'Music' ? 'bi-music-note-beamed' : category == 'Sports' ? 'bi-trophy' : category == 'Career' ? 'bi-person-workspace' : category == 'Community' ? 'bi-people' : category == 'Design' ? 'bi-palette' : category == 'Arts' ? 'bi-brush' : category == 'Science' ? 'bi-radioactive' : category == 'Food' ? 'bi-cup-hot' : category == 'Charity' ? 'bi-heart' : 'bi-stars'}"></i>
                 <span th:text="${category}">Technology</span>
             </a>
         </div>

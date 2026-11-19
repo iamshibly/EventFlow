@@ -32,6 +32,15 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final RegistrationRepository registrationRepository;
 
+    /**
+     * Demo mode (payments are simulated anyway): any non-blank code that is not a real coupon for the event is accepted
+     * and gives a flat 10% demo discount. Real coupons still win and keep their own rules. Turn off with
+     * OCCAVIE_COUPON_ACCEPT_ANY=false.
+     */
+    @org.springframework.beans.factory.annotation.Value("${occavie.coupon.accept-any:true}")
+    private boolean acceptAnyCode;
+    private static final BigDecimal DEMO_DISCOUNT_PERCENT = new BigDecimal("10");
+
 
 
     public List<Coupon> findAll() {
@@ -107,8 +116,15 @@ public class CouponService {
             throw new IllegalArgumentException("Coupon codes apply to paid tickets only.");
         }
 
-        Coupon coupon = couponRepository.findByEventIdAndCodeIgnoreCase(event.getId(), cleanCode)
-                .orElseThrow(() -> new IllegalArgumentException("Coupon code is invalid for this event."));
+        java.util.Optional<Coupon> found = couponRepository.findByEventIdAndCodeIgnoreCase(event.getId(), cleanCode);
+        if (found.isEmpty() && acceptAnyCode) {
+            String demoCode = cleanCode.length() > 30 ? cleanCode.substring(0, 30) : cleanCode;
+            BigDecimal demoDiscount = original.multiply(DEMO_DISCOUNT_PERCENT)
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+            return new AppliedCoupon(null, demoCode, demoDiscount,
+                    original.subtract(demoDiscount).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP));
+        }
+        Coupon coupon = found.orElseThrow(() -> new IllegalArgumentException("Coupon code is invalid for this event."));
 
         validateUsable(coupon);
 

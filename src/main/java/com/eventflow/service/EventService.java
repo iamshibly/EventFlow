@@ -34,7 +34,7 @@ public class EventService {
 
     private static final Set<String> IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
     private static final Set<String> EVENT_CATEGORIES = Set.of(
-            "Technology", "Business", "Education", "Music", "Career", "Sports", "Community", "Other", "Health", "Design"
+            "Technology", "Business", "Education", "Music", "Career", "Sports", "Community", "Arts", "Science", "Food", "Charity", "Other", "Health", "Design"
     );
     private static final long MAX_IMAGE_SIZE = 2 * 1024 * 1024;
     private static final String DEFAULT_IMAGE = "/images/event-visual.png";

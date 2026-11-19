@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('Log in or Sign up', 'public')}"></head><body class="ov-page ov-auth-page" th:classappend="${activeTab == 'register'} ? ' ov-register-open' : ''" th:attr="data-forgot-open=${forgotOpen},data-forgot-step=${forgotStep},data-forgot-email=${forgotEmail},data-forgot-error=${forgotError}">
+<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('Log in or Sign up', 'public')}"></head><body class="ov-page ov-auth-page" th:classappend="${activeTab == 'register'} ? ' ov-register-open' : ''" th:attr="data-forgot-open=${forgotOpen},data-forgot-step=${forgotStep},data-forgot-email=${forgotEmail},data-forgot-error=${forgotError},data-demo-reset=${demoResetMode}">
 <div th:replace="~{fragments :: siteNav('auth')}"></div>
 <main class="ov-auth-scene">
   <div class="ov-auth-bg" aria-hidden="true">

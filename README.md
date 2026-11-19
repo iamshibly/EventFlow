@@ -22,9 +22,9 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|---|
 | ![Explore](docs/screenshots/events-desktop.jpg) | ![Event details](docs/screenshots/event-details.jpg) | ![Admin dark](docs/screenshots/admin-dashboard-dark.jpg) |
 
-| Register | |
+| Register | Forgot password |
 |---|---|
-| ![Register](docs/screenshots/register.jpg) | |
+| ![Register](docs/screenshots/register.jpg) | ![Forgot password](docs/screenshots/forgot-password.jpg) |
 
 | Mobile | Mobile, dark mode |
 |---|---|

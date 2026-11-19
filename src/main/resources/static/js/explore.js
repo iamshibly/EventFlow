@@ -42,6 +42,13 @@
   if (sorts.includes(params.get('sort'))) sortSelect.value = params.get('sort');
   page = Math.max(1, parseInt(params.get('page') || '1', 10) || 1);
 
+  // ---- Smart search state (see smart-search.js). Empty when the user filters by hand.
+  const Smart = window.OccavieSmart;
+  const smartForm = $('ovSmartForm'), smartInput = $('ovSmartInput'), smartChips = $('ovSmartChips'), smartNote = $('ovSmartNote');
+  const smart = { ask: '', groups: [], regexes: [], maxPrice: null, cityFallback: false, chips: [] };
+  const cardText = new Map(cards.map(c => [c, ((c.dataset.search || '') + ' ' + (c.dataset.category || '')).toLocaleLowerCase()]));
+  const locationsOnPage = Array.from(new Set(cards.map(c => c.dataset.location || '').filter(Boolean)));
+
   const comparators = {
     'date-asc': (a, b) => (a.dataset.date || '').localeCompare(b.dataset.date || ''),
     'date-desc': (a, b) => (b.dataset.date || '').localeCompare(a.dataset.date || ''),
@@ -85,7 +92,10 @@
     const matches = cards.filter(card => {
       const date = card.dataset.date || '';
       return (!search || (card.dataset.search || '').toLocaleLowerCase().includes(search))
-        && (!place || (card.dataset.location || '').toLocaleLowerCase().includes(place))
+        && (!place || (card.dataset.location || '').toLocaleLowerCase().includes(place)
+            || (smart.cityFallback && !(card.dataset.location || '').includes(',')))
+        && (smart.maxPrice === null || priceOf(card) <= smart.maxPrice)
+        && smart.regexes.every(re => re.test(cardText.get(card)))
         && (cat === 'all' || (card.dataset.category || '').toLocaleLowerCase() === cat)
         && (pricing === 'ALL' || card.dataset.pricing === pricing)
         && (status === 'ALL' || card.dataset.status === status)
@@ -112,25 +122,35 @@
     });
 
     const next = new URLSearchParams();
-    if (input.value.trim()) next.set('q', input.value.trim());
-    if (location_.value.trim()) next.set('location', location_.value.trim());
-    if (categorySelect.value !== 'ALL') next.set('category', categorySelect.value);
-    if (pricing !== 'ALL') next.set('pricing', pricing);
-    if (status !== 'UPCOMING') next.set('status', status);
-    if (from) next.set('from', from);
-    if (to) next.set('to', to);
-    if (sortSelect.value !== 'date-asc') next.set('sort', sortSelect.value);
+    if (smart.ask) next.set('ask', smart.ask);
+    if (!smart.ask && input.value.trim()) next.set('q', input.value.trim());
+    if (!smart.ask) {
+      if (location_.value.trim()) next.set('location', location_.value.trim());
+      if (categorySelect.value !== 'ALL') next.set('category', categorySelect.value);
+      if (pricing !== 'ALL') next.set('pricing', pricing);
+      if (status !== 'UPCOMING') next.set('status', status);
+      if (from) next.set('from', from);
+      if (to) next.set('to', to);
+      if (sortSelect.value !== 'date-asc') next.set('sort', sortSelect.value);
+    }
     if (page > 1) next.set('page', String(page));
     history.replaceState(null, '', `${window.location.pathname}${next.size ? '?' + next : ''}`);
     if (scroll) document.getElementById('resultsHeading')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return matches.length;
   }
 
+  const clearSmart = () => {
+    smart.ask = ''; smart.groups = []; smart.regexes = []; smart.maxPrice = null; smart.cityFallback = false; smart.chips = [];
+    if (smartChips) smartChips.replaceChildren();
+    if (smartNote) { smartNote.textContent = ''; smartNote.hidden = true; }
+  };
   const reset = () => {
+    clearSmart(); if (smartInput) smartInput.value = '';
     input.value = ''; location_.value = ''; categorySelect.value = 'ALL'; priceSelect.value = 'ALL';
     statusSelect.value = 'UPCOMING'; dateFrom.value = ''; dateTo.value = ''; sortSelect.value = 'date-asc';
     page = 1; apply();
   };
-  const filterChanged = () => { page = 1; apply(); };
+  const filterChanged = () => { if (smart.ask) clearSmart(); page = 1; apply(); };
 
   let timer;
   [input, location_].forEach(el => el.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(filterChanged, 150); }));
@@ -139,4 +159,104 @@
   $('v1ClearFilters')?.addEventListener('click', reset);
   $('v1ClearFilters2')?.addEventListener('click', reset);
   apply();
+
+  // ---------------------------------------------------------------- Smart search
+  const CHIP_ICON = { category: 'bi-grid', price: 'bi-tag', maxprice: 'bi-cash-coin', date: 'bi-calendar3', place: 'bi-geo-alt', keywords: 'bi-search', status: 'bi-clock-history', sort: 'bi-sort-down' };
+
+  function showNote(text) { if (!smartNote) return; smartNote.textContent = text || ''; smartNote.hidden = !text; }
+
+  function renderSmartChips() {
+    if (!smartChips) return;
+    smartChips.replaceChildren();
+    smart.chips.forEach(c => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'ov-smart-chip'; b.setAttribute('aria-label', 'Remove filter: ' + c.label);
+      const icon = document.createElement('i'); icon.className = 'bi ' + (CHIP_ICON[c.kind] || 'bi-funnel'); icon.setAttribute('aria-hidden', 'true');
+      const label = document.createElement('span'); label.textContent = c.label;
+      const x = document.createElement('i'); x.className = 'bi bi-x-lg'; x.setAttribute('aria-hidden', 'true');
+      b.append(icon, label, x);
+      b.addEventListener('click', () => removeChip(c));
+      smartChips.append(b);
+    });
+  }
+
+  function removeChip(chip) {
+    smart.chips = smart.chips.filter(c => c !== chip);
+    switch (chip.kind) {
+      case 'category': categorySelect.value = 'ALL'; break;
+      case 'price': priceSelect.value = 'ALL'; break;
+      case 'maxprice': smart.maxPrice = null; break;
+      case 'date': dateFrom.value = ''; dateTo.value = ''; break;
+      case 'place': location_.value = ''; smart.cityFallback = false; break;
+      case 'status': statusSelect.value = 'UPCOMING'; break;
+      case 'sort': sortSelect.value = 'date-asc'; break;
+      case 'keywords': smart.groups = []; smart.regexes = []; break;
+      default: break;
+    }
+    if (!smart.chips.length) { clearSmart(); }
+    else if (!smart.groups.length && smart.maxPrice === null && !smart.cityFallback) { smart.ask = ''; }
+    page = 1; apply(); renderSmartChips();
+    showNote('');
+  }
+
+  function runSmart(text, opts) {
+    if (!Smart) return;
+    const ask = String(text || '').trim();
+    if (!ask) { reset(); return; }
+    const select = categorySelect;
+    const parsed = Smart.parse(ask, {
+      today: new Date(), locations: locationsOnPage,
+      categories: Array.from(select.options).map(o => o.value).filter(v => v && v !== 'ALL')
+    });
+    const apply_ = (r, drop) => {
+      clearSmart(); smart.ask = ask;
+      input.value = '';
+      categorySelect.value = r.category || 'ALL';
+      priceSelect.value = r.pricing || 'ALL';
+      statusSelect.value = r.status || 'UPCOMING';
+      dateFrom.value = drop.date ? '' : (r.from || '');
+      dateTo.value = drop.date ? '' : (r.to || '');
+      location_.value = drop.place ? '' : (r.place || '');
+      smart.cityFallback = !drop.place && !!r.cityFallback;
+      smart.maxPrice = drop.price ? null : r.maxPrice;
+      sortSelect.value = r.sort || 'date-asc';
+      smart.groups = drop.keywords ? [] : (drop.formats ? r.groups.filter(g => !g.format) : r.groups);
+      smart.regexes = smart.groups.map(g => Smart.groupRegex(g));
+      smart.chips = r.chips.filter(c => !(drop.date && c.kind === 'date') && !(drop.place && c.kind === 'place')
+        && !(drop.price && c.kind === 'maxprice') && !(drop.keywords && c.kind === 'keywords'))
+        .map(c => c.kind === 'keywords' && smart.groups.length ? { kind: 'keywords', label: 'Matching: ' + smart.groups.map(g => g.label).join(', ') } : c)
+        .filter(c => !(c.kind === 'keywords' && !smart.groups.length));
+      page = 1;
+      return apply(opts && opts.scroll);
+    };
+
+    // 1) everything as understood; 2) if nothing matches, relax one filter at a time and say so
+    let found = apply_(parsed, {});
+    const notes = [];
+    const ladder = [['formats', parsed.groups.some(g => g.format), 'the word ' + (parsed.groups.filter(g => g.format).map(g => '"' + g.label.toLowerCase() + '"')[0] || 'workshop')],
+      ['keywords', parsed.groups.length, 'the extra words'], ['date', parsed.from, 'the dates'],
+      ['price', parsed.maxPrice !== null, 'the price limit'], ['place', parsed.place, 'the place']];
+    const drop = {};
+    for (const [key, active, label] of ladder) {
+      if (found > 0) break;
+      if (!active) continue;
+      drop[key] = true; notes.push(label);
+      found = apply_(parsed, drop);
+    }
+    if (smartInput) smartInput.value = ask;
+    renderSmartChips();
+    if (!parsed.understood && !parsed.groups.length) showNote('I could not find any filters in that. Try something like "free tech events this weekend".');
+    else if (found === 0) showNote('No events match that yet. Try removing a filter above, or browse all events.');
+    else if (notes.length && !smart.chips.length) showNote('No events mention "' + ask + '". Showing all upcoming events instead.');
+    else if (notes.length) showNote('No exact match, so I ignored ' + notes.join(', ') + ' and show the closest events.');
+    else showNote('');
+    return found;
+  }
+
+  if (smartForm && smartInput && Smart) {
+    smartForm.addEventListener('submit', e => { e.preventDefault(); runSmart(smartInput.value, { scroll: true }); });
+    document.querySelectorAll('[data-ask]').forEach(btn => btn.addEventListener('click', () => { smartInput.value = btn.dataset.ask; runSmart(btn.dataset.ask, { scroll: true }); }));
+    const initialAsk = params.get('ask');
+    if (initialAsk) runSmart(initialAsk, { scroll: false });
+  }
 })();

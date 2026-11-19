@@ -15,6 +15,26 @@
   </section>
 
   <div class="ov-container ov-explore-content">
+    <section class="ov-smart" aria-labelledby="ovSmartTitle">
+      <div class="ov-smart-head"><span class="ov-smart-badge"><i class="bi bi-stars" aria-hidden="true"></i> Smart search</span>
+        <h2 id="ovSmartTitle">Just say what you are looking for</h2></div>
+      <form id="ovSmartForm" class="ov-smart-form" role="search">
+        <label class="ov-sr" for="ovSmartInput">Describe the events you want</label>
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input id="ovSmartInput" type="search" maxlength="160" autocomplete="off" placeholder="Try: free tech events this weekend in Dhaka">
+        <button class="primary-button" type="submit">Find events</button>
+      </form>
+      <div class="ov-smart-examples" role="group" aria-label="Example searches"><span>Try</span>
+        <button type="button" data-ask="free events this weekend">Free this weekend</button>
+        <button type="button" data-ask="AI and tech workshops under 500">AI &amp; tech under ৳500</button>
+        <button type="button" data-ask="music concerts in December">Music in December</button>
+        <button type="button" data-ask="yoga or fitness tomorrow">Yoga tomorrow</button>
+        <button type="button" data-ask="cheap design workshops next month">Cheap design next month</button>
+      </div>
+      <div id="ovSmartChips" class="ov-smart-chips" aria-live="polite"></div>
+      <p id="ovSmartNote" class="ov-smart-note" role="status" hidden></p>
+    </section>
+
     <section class="ov-filter-shell" id="v1-filters" aria-label="Search and filter events">
       <form class="ov-filters" id="ovFilterForm" role="search" onsubmit="return false">
         <label class="ov-field ov-field-search" for="eventSearch"><span>Search</span>
@@ -55,7 +75,7 @@
     <div class="ov-event-grid" id="v1EventGrid" aria-labelledby="resultsHeading">
       <article class="ov-event-card" th:each="event : ${events}"
                th:with="efPaid=${@display.paid(event)},efStatus=${@display.status(event)},spots=${event.capacity - registrationCounts[event.id]}"
-               th:attr="data-category=${event.category},data-pricing=${efPaid ? 'PAID' : 'FREE'},data-status=${efStatus},data-date=${event.date},data-title=${event.title},data-location=${event.location},data-price=${startingPrices[event.id]},data-search=${event.title + ' ' + event.location + ' ' + event.description + ' ' + event.category + ' ' + event.organizerName}">
+               th:attr="data-id=${event.id},data-category=${event.category},data-pricing=${efPaid ? 'PAID' : 'FREE'},data-status=${efStatus},data-date=${event.date},data-title=${event.title},data-location=${event.location},data-price=${startingPrices[event.id]},data-search=${event.title + ' ' + event.location + ' ' + event.description + ' ' + event.category + ' ' + event.organizerName}">
         <a class="ov-card-photo" th:href="@{'/events/' + ${event.id}}" href="/events" th:aria-label="${'View ' + event.title}" tabindex="-1">
           <img data-event-image th:attr="data-event-category=${event.category}"
                th:with="efCover=${@display.listingImageUrl(event)}" th:src="${efCover}"
@@ -94,6 +114,8 @@
 </main>
 <div th:replace="~{fragments :: siteFooter}"></div>
 <script th:src="@{/js/site.js(v='2026.11.2')}" src="/js/site.js"></script>
+<script th:src="@{/js/compare.js}" src="/js/compare.js"></script>
+<script th:src="@{/js/smart-search.js}" src="/js/smart-search.js"></script>
 <script th:src="@{/js/explore.js(v='2026.11.2')}" src="/js/explore.js"></script>
 </body>
 </html>

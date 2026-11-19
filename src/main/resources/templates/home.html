@@ -16,7 +16,7 @@
             <form class="ov-search" th:action="@{/events}" action="/events" method="get" role="search">
                 <i class="bi bi-search" aria-hidden="true"></i>
                 <label class="ov-sr" for="ovEventSearch">Search events by title or keyword</label>
-                <input id="ovEventSearch" name="q" type="search" placeholder="Search events, topics or locations" autocomplete="off" maxlength="120">
+                <input id="ovEventSearch" name="ask" type="search" placeholder="Try: free tech events this weekend in Dhaka" autocomplete="off" maxlength="160">
                 <button class="primary-button" type="submit">Search</button>
             </form>
         </div>
@@ -44,7 +44,7 @@
         </div>
 
         <div class="ov-event-grid" th:if="${!#lists.isEmpty(featuredEvents)}">
-            <article class="ov-event-card" th:each="event : ${featuredEvents}">
+            <article class="ov-event-card" th:each="event : ${featuredEvents}" th:attr="data-id=${event.id}">
                 <a class="ov-card-photo" th:href="@{'/events/' + ${event.id}}" href="/events" th:aria-label="${'View details for ' + event.title}" tabindex="-1">
                     <img data-event-image th:attr="data-event-category=${event.category}" th:src="${event.imageUrl}"
                          src="/images/event-visual.png" th:alt="${event.title + ' cover image'}" alt="Event cover" width="600" height="375" loading="lazy" decoding="async">
@@ -110,5 +110,6 @@
 
 <div th:replace="~{fragments :: siteFooter}"></div>
 <script th:src="@{/js/site.js(v='2026.11.2')}" src="/js/site.js"></script>
+<script th:src="@{/js/compare.js}" src="/js/compare.js"></script>
 </body>
 </html>

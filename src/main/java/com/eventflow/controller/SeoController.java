@@ -33,7 +33,7 @@ public class SeoController {
     public ResponseEntity<String> robots(HttpServletRequest request) {
         String base = base(request);
         String body = "User-agent: *\nAllow: /\n"
-                + "Disallow: /dashboard\nDisallow: /admin/\nDisallow: /organizer/\nDisallow: /participant/\nDisallow: /profile\n"
+                + "Disallow: /dashboard\nDisallow: /admin/\nDisallow: /organizer/\nDisallow: /participant/\nDisallow: /profile\nDisallow: /compare\n"
                 + "Disallow: /notifications\nDisallow: /login\nDisallow: /register\nDisallow: /reset-password\nDisallow: /internal/\n\n"
                 + "Sitemap: " + base + "/sitemap.xml\n";
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofHours(1)).cachePublic()).body(body);

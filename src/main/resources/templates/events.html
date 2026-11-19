@@ -60,7 +60,7 @@
           <img data-event-image th:attr="data-event-category=${event.category}"
                th:with="efCover=${@display.listingImageUrl(event)}" th:src="${efCover}"
                src="/images/event-visual.png" th:alt="${event.title + ' cover image'}" alt="Event cover" width="600" height="375" loading="lazy" decoding="async">
-          <span class="ov-card-tag" th:text="${event.category}">Technology</span>
+          <span class="ov-card-tag" th:attr="data-cat=${event.category}" th:text="${event.category}">Technology</span>
         </a>
         <div class="ov-event-card-body">
           <span class="ov-event-date"><i class="bi bi-calendar3" aria-hidden="true"></i><span th:text="${@display.eventDate(event) + ' · ' + @display.eventTime(event)}">Date</span></span>

@@ -26,6 +26,12 @@ services:
         sync: false
       - key: OCCAVIE_BOOTSTRAP_ADMIN_PASSWORD
         sync: false
+      - key: OCCAVIE_SAMPLE_EVENTS              # true = fill an EMPTY database with sample events
+        value: "true"
+      - key: OCCAVIE_CONTACT_EMAIL              # shown on the Contact page and footer (optional)
+        sync: false
+      - key: OCCAVIE_CONTACT_WHATSAPP           # digits with country code (optional)
+        sync: false
       - key: OCCAVIE_EMAIL_PROVIDER             # "resend" to enable email, otherwise "none"
         value: none
       - key: RESEND_API_KEY

@@ -207,15 +207,13 @@
             <a th:href="@{/register}" href="/register">Create account</a>
             <a th:href="@{/contact}" href="/contact">Contact support</a>
         </nav>
-        <div class="ov-footer-col ov-footer-dev">
+        <div class="ov-footer-col ov-footer-dev" th:with="devName=${@site.developerName},devUrl=${@site.developerUrl},devMail=${@site.contactEmail},devWa=${@site.contactWhatsapp}">
             <h3>Developed by</h3>
-            <strong>Safayet Ullah</strong>
-            <p>Department of CSE<br>Southeast University</p>
+            <strong th:text="${devName}">Developer</strong>
             <div class="ov-footer-social">
-                <a href="https://wa.me/8801837945824" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Safayet Ullah" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-                <a href="https://www.facebook.com/Safayetullah.19" target="_blank" rel="noopener noreferrer" aria-label="Facebook profile" title="Facebook"><i class="bi bi-facebook"></i></a>
-                <a href="https://www.linkedin.com/in/safayet-ullah-58ba12366" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
-                <a href="mailto:safayetullah019@gmail.com" aria-label="Email Safayet Ullah" title="Email"><i class="bi bi-envelope-fill"></i></a>
+                <a th:href="${devUrl}" href="https://github.com/iamshibly" target="_blank" rel="noopener noreferrer" aria-label="Developer on GitHub" title="GitHub"><i class="bi bi-github"></i></a>
+                <a th:if="${!#strings.isEmpty(devWa)}" th:href="${'https://wa.me/' + devWa}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                <a th:if="${!#strings.isEmpty(devMail)}" th:href="${'mailto:' + devMail}" aria-label="Email" title="Email"><i class="bi bi-envelope-fill"></i></a>
             </div>
         </div>
     </div>

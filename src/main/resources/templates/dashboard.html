@@ -52,7 +52,7 @@
                 <a class="dash-card" th:each="event : ${cardEvents}" th:href="${user.role == 'PARTICIPANT' ? '/events/' + event.id : (user.role == 'ORGANIZER' ? '/organizer/events/' + event.id + '/participants' : '/events/' + event.id)}" href="/events">
                     <span class="dash-card-photo" th:with="efCover=${@display.listingImageUrl(event)}">
                         <img data-event-image th:attr="data-event-category=${event.category}" th:src="${efCover}" src="/images/event-visual.png" th:alt="${event.title + ' cover image'}" alt="Event cover" width="480" height="300" loading="lazy" decoding="async">
-                        <span class="dash-card-tag" th:text="${event.category}">Technology</span>
+                        <span class="dash-card-tag" th:attr="data-cat=${event.category}" th:text="${event.category}">Technology</span>
                     </span>
                     <span class="dash-card-body">
                         <span class="dash-card-date"><i class="bi bi-calendar3" aria-hidden="true"></i> <span th:text="${@display.eventDate(event)}">Date</span></span>

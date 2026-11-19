@@ -21,6 +21,7 @@ Occavie (formerly EventFlow) is a full-stack event management platform: people d
 **Implemented**
 
 * **Smart search:** type a sentence such as "free AI workshops in Dhaka this weekend" (home page or Explore) and it sets category, price, price cap, dates (Bangladesh weekend = Fri + Sat) and place automatically, shows what it understood as removable chips, and relaxes filters step by step (saying so) if nothing matches. Rule-based and offline: no AI service, no keys.
+* **Recommendations with reasons:** the participant dashboard and each event page rank upcoming events from what the person saved and booked (category, venue area, price level), timing and demand, and show why in plain words ("Because you saved Flutter Mobile Dev Day", "Free, like the events you picked", "Only 6 seats left"). Booked, saved, sold-out, past and cancelled events are never suggested, and no category takes more than half the list. Rule-based and offline; new visitors get "happening soon / popular" reasons.
 * **Compare events:** press Compare on 2-3 event cards (or on an event page), then open a side-by-side table of date, venue, price, ticket types, seats left, speakers, programme, rating and organizer, with the best value highlighted. The selection is kept in the browser only.
 * **Discovery:** search, category/price/date/status filters, sorting, pagination, saved events, event suggestions, organizer public pages.
 * **Event pages:** programme, speakers, sponsors, gallery, venue details and map link, share/copy link, Open Graph previews, "add to calendar" (.ics).

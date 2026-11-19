@@ -30,6 +30,10 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|
 | ![About](docs/screenshots/about.jpg) | ![Contact](docs/screenshots/contact.jpg) |
 
+| Participant dashboard | Organizer dashboard |
+|---|---|
+| ![Participant dashboard](docs/screenshots/participant-dashboard.jpg) | ![Organizer dashboard](docs/screenshots/organizer-dashboard.jpg) |
+
 | Mobile | Mobile, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |

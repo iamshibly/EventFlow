@@ -76,6 +76,21 @@ public class EventExtrasController {
         return back(eventId, from);
     }
 
+    /** Used by the Save button: toggles without a page reload. Returns {"saved": true|false}. */
+    @PostMapping("/participant/events/{eventId}/saved-toggle")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> toggle(@PathVariable String eventId,
+                                                                                          Authentication authentication) {
+        try {
+            User user = userService.currentUser(authentication);
+            boolean saved = savedEventService.isSaved(user, eventId);
+            if (saved) savedEventService.unsave(user, eventId); else savedEventService.save(user, eventId);
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of("saved", !saved));
+        } catch (IllegalArgumentException ex) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", ex.getMessage()));
+        }
+    }
+
     private String back(String eventId, String from) {
         return "dashboard".equals(from) ? "redirect:/participant/dashboard" : "redirect:/events/" + eventId;
     }

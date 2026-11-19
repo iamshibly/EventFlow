@@ -1584,3 +1584,22 @@
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
 }
+
+/* Save / unsave without reloading the page (falls back to the normal form post if the request fails). */
+document.addEventListener('submit', function (event) {
+  var form = event.target;
+  if (!form || !form.matches || !form.matches('form[data-save-toggle]')) return;
+  event.preventDefault();
+  var button = form.querySelector('button[type=submit]');
+  var icon = button && button.querySelector('i');
+  var label = button && button.querySelector('span');
+  if (button) button.disabled = true;
+  fetch('/participant/events/' + form.getAttribute('data-event-id') + '/saved-toggle', {
+    method: 'POST', credentials: 'same-origin', body: new URLSearchParams(new FormData(form)),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'fetch' }
+  }).then(function (r) { if (!r.ok) throw new Error('save failed'); return r.json(); }).then(function (data) {
+    if (icon) icon.className = 'bi ' + (data.saved ? 'bi-bookmark-fill' : 'bi-bookmark');
+    if (label) label.textContent = data.saved ? 'Saved' : 'Save';
+    if (button) { button.setAttribute('aria-pressed', data.saved ? 'true' : 'false'); button.disabled = false; }
+  }).catch(function () { form.submit(); });
+});

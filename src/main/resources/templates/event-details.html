@@ -17,7 +17,7 @@
         <div class="ov-details-tags"><span class="ov-card-tag" th:text="${event.category}">Technology</span><span class="ov-status-pill" th:text="${@display.status(event)}">UPCOMING</span></div>
         <h1 th:text="${event.title}">Event title</h1>
         <div class="ov-actions-row" aria-label="Event actions">
-          <form th:if="${user != null and user.role == 'PARTICIPANT' and !isDraftPreview}" th:action="${'/participant/events/' + event.id + (isSaved ? '/unsave' : '/save')}" method="post">
+          <form th:if="${user != null and user.role == 'PARTICIPANT' and !isDraftPreview}" th:action="${'/participant/events/' + event.id + (isSaved ? '/unsave' : '/save')}" method="post" data-save-toggle th:attr="data-event-id=${event.id}">
             <button class="ov-outline-button" type="submit" th:attr="aria-pressed=${isSaved}"><i class="bi" th:classappend="${isSaved} ? 'bi-bookmark-fill' : 'bi-bookmark'"></i><span th:text="${isSaved ? 'Saved' : 'Save'}">Save</span></button>
           </form>
           <a class="ov-outline-button" th:if="${user == null and !isDraftPreview}" th:href="@{/login(redirect=${'/events/' + event.id})}"><i class="bi bi-bookmark"></i><span>Save</span></a>

@@ -592,3 +592,21 @@ body.contact-dashboard-body .contact-hero-copy { margin-bottom: 4px; }
 .ov-card-tag[data-cat], .dash-card-tag[data-cat] { background: var(--c-bg); color: var(--c-fg); backdrop-filter: none; }
 .ov-cat-tile { padding: 20px 28px; font-size: 1.1rem; }
 .ov-cat-tile i { font-size: 1.8rem; }
+
+/* ---- Sign in / register: photo scene with a clean form card ---- */
+.ov-auth-scene { background: #F7F9FE url(/images/home-conference.jpg) center 30% / cover no-repeat; }
+.ov-auth-scene::before { background: linear-gradient(90deg, rgba(247,249,254,.86) 0%, rgba(247,249,254,.72) 38%, rgba(247,249,254,.9) 70%, #F7F9FE 100%); }
+:root[data-theme="dark"] .ov-auth-scene { background-color: #070D20; }
+:root[data-theme="dark"] .ov-auth-scene::before { background: linear-gradient(90deg, rgba(7,13,32,.82) 0%, rgba(7,13,32,.7) 40%, rgba(7,13,32,.94) 72%, #070D20 100%); }
+.ov-auth-hero { background: transparent; box-shadow: none; padding-left: 0; color: var(--ink); }
+.ov-auth-hero .brand { display: none; }
+.ov-auth-hero .ov-eyebrow { color: var(--brand); letter-spacing: .24em; }
+.ov-auth-hero h1 { color: var(--ink); font-size: clamp(3rem, 6vw, 5rem); line-height: 1; }
+.ov-auth-hero h1 em { color: var(--brand); }
+.ov-auth-hero p { color: var(--ink-2); font-size: 1.12rem; max-width: 520px; }
+.ov-auth-points li { color: var(--ink); font-weight: 600; }
+.ov-auth-points i { background: var(--brand-soft); color: var(--brand); }
+.ov-auth-panel { border-radius: 24px; box-shadow: 0 24px 60px rgba(11,21,48,.18); }
+.ov-auth-tabs button.is-active { background: var(--gradient); color: var(--on-brand); box-shadow: 0 4px 12px rgba(209,146,8,.35); }
+.ov-auth-hero h1, .ov-auth-hero p, .ov-auth-hero .ov-eyebrow, .ov-auth-points li { text-shadow: none; }
+:root[data-theme="dark"] .ov-auth-hero h1, :root[data-theme="dark"] .ov-auth-hero p, :root[data-theme="dark"] .ov-auth-hero .ov-eyebrow, :root[data-theme="dark"] .ov-auth-points li { text-shadow: none; }

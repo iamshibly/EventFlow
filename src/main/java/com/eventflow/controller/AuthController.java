@@ -82,21 +82,21 @@ public class AuthController {
     // Original Occavie recovery flow: check email, then reset in the login dialog.
     // This does not require Jakarta Mail or SMTP.
     @GetMapping("/forgot-password")
-    public String forgotPasswordEntry() {
-        return "redirect:/login?forgot=1";
+    public String forgotPasswordEntry(Model model) {
+        if (demoResetMode) return "redirect:/login?forgot=1";
+        model.addAttribute("passwordResetAvailable", passwordResets.isAvailable());
+        return "forgot-password";
     }
 
     /** Sends a reset link by email. The response is identical whether or not the account exists. */
     @PostMapping("/forgot-password/request")
     public String requestPasswordReset(@RequestParam(defaultValue = "") String email, RedirectAttributes flash) {
         if (!passwordResets.isAvailable()) {
-            flash.addFlashAttribute("loginError", "Password reset by email is not set up on this server. Contact an administrator.");
-            return "redirect:/login";
+            return "redirect:/forgot-password";
         }
         passwordResets.request(email);
-        flash.addFlashAttribute("passwordResetSuccess",
-                "If an account exists for that email, we sent a link to reset the password. It works once and expires in 30 minutes.");
-        return "redirect:/login";
+        flash.addFlashAttribute("resetSentTo", email.trim());
+        return "redirect:/forgot-password";
     }
 
     @GetMapping("/reset-password")

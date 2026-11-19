@@ -143,6 +143,7 @@
     previouslyFocused?.focus();
   };
   forgotLink?.addEventListener('click', event => {
+    if (document.body.dataset.demoReset !== 'true') return; // normal mode: follow the link to the dedicated page
     event.preventDefault();
     document.getElementById('v1ForgotError').hidden = true;
     openForgot('email');

@@ -23,10 +23,10 @@ public final class EmailTemplates {
         text.append("\nMake every moment count.\nOccavie\n");
 
         StringBuilder html = new StringBuilder();
-        html.append("<!doctype html><html><body style=\"margin:0;background:#FAFAF7;font-family:Arial,Helvetica,sans-serif;color:#0E1B2A\">")
+        html.append("<!doctype html><html><body style=\"margin:0;background:#F7F9FE;font-family:Arial,Helvetica,sans-serif;color:#0B1530\">")
             .append("<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:24px\">")
             .append("<table role=\"presentation\" width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;background:#ffffff;border:1px solid #E4E6E1;border-radius:14px\">")
-            .append("<tr><td style=\"background:#0E1B2A;color:#ffffff;padding:18px 24px;border-radius:14px 14px 0 0;font-size:20px;font-weight:bold\">Occavie</td></tr>")
+            .append("<tr><td style=\"background:#0B1530;color:#ffffff;padding:18px 24px;border-radius:14px 14px 0 0;font-size:20px;font-weight:bold\">Occavie</td></tr>")
             .append("<tr><td style=\"padding:24px\"><p style=\"margin:0 0 12px\">").append(escape(greeting)).append("</p>")
             .append("<p style=\"margin:0 0 16px;line-height:1.5\">").append(escape(message)).append("</p>");
         if (details != null && !details.isEmpty()) {
@@ -36,7 +36,7 @@ public final class EmailTemplates {
         }
         if (absoluteLink != null) {
             html.append("<p style=\"margin:20px 0\"><a href=\"").append(escape(absoluteLink))
-                .append("\" style=\"background:#0B7F7E;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:bold;display:inline-block\">View in Occavie</a></p>");
+                .append("\" style=\"background:#875900;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:bold;display:inline-block\">View in Occavie</a></p>");
         }
         html.append("<p style=\"margin:24px 0 0;color:#5B6773;font-size:13px\">Make every moment count.</p></td></tr></table></td></tr></table></body></html>");
         return new Rendered(subject, text.toString(), html.toString());

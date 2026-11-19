@@ -11,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#0E1B2A">
+    <meta name="theme-color" content="#0B1530">
     <meta name="description" th:content="${ogDescription ?: 'Occavie - Make every moment count. Discover, book and manage events in one place.'}">
     <meta name="robots" content="noindex, nofollow" th:if="${#strings.contains(scope, 'app')}">
     <link rel="canonical" th:if="${canonicalUrl != null and !#strings.contains(scope, 'app')}" th:href="${canonicalUrl}">
@@ -46,7 +46,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" th:href="@{/css/occavie-core.css(v='2026.11.2')}" href="/css/occavie-core.css">
     <link rel="stylesheet" th:if="${#strings.contains(scope, 'public') or #strings.contains(scope, 'all')}" th:href="@{/css/occavie-public.css(v='2026.11.2')}" href="/css/occavie-public.css">
@@ -63,7 +63,7 @@
         </button>
         <a class="brand brand-compact" th:href="@{/dashboard}" aria-label="Occavie dashboard">
             <img class="brand-mark" th:src="@{/images/occavie-mark.svg}" src="/images/occavie-mark.svg" alt="" width="34" height="34">
-            <span class="brand-word">Occavie</span>
+            <span class="brand-word">Occa<em>vie</em></span>
         </a>
         <div class="topbar-spacer"></div>
         <a class="topbar-site-link" th:href="@{/events}" title="Browse public events"><i class="bi bi-compass"></i><span>Browse events</span></a>
@@ -165,7 +165,7 @@
     <div class="ov-container ov-header-inner">
         <a class="brand" th:href="@{/}" href="/" aria-label="Occavie home">
             <img class="brand-mark" th:src="@{/images/occavie-mark.svg}" src="/images/occavie-mark.svg" alt="" width="38" height="38">
-            <span class="brand-word">Occavie</span>
+            <span class="brand-word">Occa<em>vie</em></span>
         </a>
         <nav class="ov-main-nav" aria-label="Main navigation">
             <a th:href="@{/}" href="/" th:classappend="${active == 'home'} ? ' is-active' : ''">Home</a>
@@ -189,7 +189,7 @@
         <div class="ov-footer-brand">
             <a class="brand" th:href="@{/}" href="/" aria-label="Occavie home">
                 <img class="brand-mark" th:src="@{/images/occavie-mark.svg}" src="/images/occavie-mark.svg" alt="" width="38" height="38">
-                <span class="brand-word">Occavie</span>
+                <span class="brand-word">Occa<em>vie</em></span>
             </a>
             <p class="ov-footer-tagline">Make every moment count.</p>
             <p class="ov-footer-copy">Discover events, book tickets and run unforgettable experiences — all in one place.</p>

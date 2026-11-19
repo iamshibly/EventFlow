@@ -5,12 +5,20 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <div th:replace="~{fragments :: siteNav('events')}"></div>
 <main id="main-content">
-  <section class="ov-explore-intro ov-explore-photo">
-    <img class="ov-hero-bgimg" th:src="@{/images/home-conference-hero.webp}" src="/images/home-conference-hero.webp" alt="" width="1600" height="900">
+  <section class="ov-explore-intro ov-explore-photo ov-ex-hero" aria-labelledby="exTitle">
+    <div class="ov-auth-bg" aria-hidden="true">
+      <span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span>
+      <i class="orb o1"></i><i class="orb o2"></i>
+    </div>
     <div class="ov-container">
       <p class="ov-eyebrow">EVENTS · LEARN · CONNECT</p>
-      <h1>Explore events</h1>
-      <p>Search by keyword, then narrow by category, date, location, price or status.</p>
+      <h1 id="exTitle">Explore <em>events</em></h1>
+      <p>Say what you are looking for, or narrow by topic, date, place, price and status.</p>
+      <ul class="ov-ct-chips" aria-label="Highlights">
+        <li><i class="bi bi-calendar2-check" aria-hidden="true"></i> <span th:text="${initialEventCount + ' events to explore'}">24 events to explore</span></li>
+        <li><i class="bi bi-columns-gap" aria-hidden="true"></i> Compare up to 3</li>
+        <li><i class="bi bi-heart" aria-hidden="true"></i> Save your favourites</li>
+      </ul>
     </div>
   </section>
 

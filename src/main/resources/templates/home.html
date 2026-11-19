@@ -7,8 +7,11 @@
 
 <main id="main-content">
     <!-- Hero: full-bleed photo -->
-    <section class="ov-hero ov-hero-photo-bg" aria-labelledby="ovHeroTitle">
-        <img class="ov-hero-bgimg" th:src="@{/images/home-conference-hero.webp}" src="/images/home-conference-hero.webp" alt="" width="1600" height="900" fetchpriority="high">
+    <section class="ov-hero ov-hero-photo-bg ov-home-hero" aria-labelledby="ovHeroTitle">
+        <div class="ov-auth-bg" aria-hidden="true">
+            <span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span>
+            <i class="orb o1"></i><i class="orb o2"></i>
+        </div>
         <div class="ov-container ov-hero-inner">
             <p class="ov-eyebrow">EVENTS · LEARN · CONNECT</p>
             <h1 id="ovHeroTitle">Find your next <em>unforgettable</em> experience.</h1>
@@ -19,6 +22,19 @@
                 <input id="ovEventSearch" name="ask" type="search" placeholder="Try: free tech events this weekend in Dhaka" autocomplete="off" maxlength="160">
                 <button class="primary-button" type="submit">Search</button>
             </form>
+            <div class="ov-try" aria-label="Quick searches">
+                <span>Popular:</span>
+                <a th:href="@{/events(ask='free events this weekend')}" href="/events">Free this weekend</a>
+                <a th:href="@{/events(ask='tech workshops')}" href="/events">Tech workshops</a>
+                <a th:href="@{/events(ask='music')}" href="/events">Music</a>
+                <a th:href="@{/events(ask='cheap events')}" href="/events">Under budget</a>
+            </div>
+            <ul class="ov-home-stats" aria-label="Occavie at a glance">
+                <li><strong th:text="${upcomingCount}">24</strong><span>upcoming events</span></li>
+                <li><strong th:text="${#lists.size(categories)}">8</strong><span>topics to explore</span></li>
+                <li><strong>Free</strong><span>and paid tickets</span></li>
+                <li><strong>PDF</strong><span>tickets with QR codes</span></li>
+            </ul>
         </div>
     </section>
 
@@ -91,20 +107,40 @@
         </div>
     </section>
 
-    <!-- About -->
-    <section class="ov-container ov-section" id="about" aria-labelledby="ovAboutHeading">
-        <div class="ov-about">
-            <div class="ov-about-copy">
-                <p class="ov-eyebrow">ABOUT OCCAVIE</p>
-                <h2 id="ovAboutHeading">Great experiences start with showing up.</h2>
-                <p>Occavie helps people discover events they care about and gives organizers the tools to deliver them well. Browse by category, compare tickets, and book without the hassle.</p>
-                <a class="ov-outline-button" th:href="@{/about}" href="/about">More about Occavie <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    <!-- How it works -->
+    <section class="ov-container ov-section" id="about" aria-labelledby="ovHowHeading" data-reveal>
+        <div class="ov-ab-head"><p class="ov-eyebrow">HOW IT WORKS</p><h2 id="ovHowHeading">From curious to checked in, in three steps</h2></div>
+        <ol class="ov-home-steps">
+            <li><span class="ov-home-step-ic"><i class="bi bi-search" aria-hidden="true"></i></span><b aria-hidden="true">1</b><h3>Discover</h3><p>Search in plain words, filter by topic, price, date or place, and compare events side by side.</p></li>
+            <li><span class="ov-home-step-ic"><i class="bi bi-ticket-perforated" aria-hidden="true"></i></span><b aria-hidden="true">2</b><h3>Book</h3><p>Pick a ticket, apply a coupon and confirm. Your PDF ticket with a QR code is ready instantly.</p></li>
+            <li><span class="ov-home-step-ic"><i class="bi bi-qr-code-scan" aria-hidden="true"></i></span><b aria-hidden="true">3</b><h3>Show up</h3><p>Scan in at the door, then share a rating so the next event is even better.</p></li>
+        </ol>
+    </section>
+
+    <!-- Smart helpers -->
+    <section class="ov-ab-band ov-home-band" aria-labelledby="ovSmartHeading" data-reveal>
+        <div class="ov-container ov-ab-section">
+            <div class="ov-ab-head is-light"><p class="ov-eyebrow">MADE TO SAVE YOU TIME</p><h2 id="ovSmartHeading">Smart helpers, built in</h2>
+                <p>Explainable and private: no external AI service and nothing to set up.</p></div>
+            <div class="ov-ab-smart">
+                <a th:href="@{/events}" href="/events"><i class="bi bi-search" aria-hidden="true"></i><h3>Smart search</h3><p>Type "free AI workshops this weekend" and we filter for you.</p></a>
+                <a th:href="@{/events}" href="/events"><i class="bi bi-lightbulb" aria-hidden="true"></i><h3>Recommendations</h3><p>Picks based on what you save and book, each with a 💡 reason.</p></a>
+                <a th:href="@{/events}" href="/events"><i class="bi bi-columns-gap" aria-hidden="true"></i><h3>Compare events</h3><p>Two or three events side by side: date, price, seats and more.</p></a>
+                <a th:href="@{/events}" href="/events"><i class="bi bi-chat-dots" aria-hidden="true"></i><h3>Concierge</h3><p>Ask about seats, prices and venues and get answers from live data.</p></a>
+                <a th:href="@{/about}" href="/about"><i class="bi bi-rocket-takeoff" aria-hidden="true"></i><h3>Organizer Copilot</h3><p>A readiness score and a to-do list for every event you host.</p></a>
             </div>
-            <ol class="ov-steps">
-                <li><span>1</span><div><h3>Discover</h3><p>Search by topic, category, location, date or price.</p></div></li>
-                <li><span>2</span><div><h3>Book</h3><p>Pick a ticket, apply a coupon and confirm.</p></div></li>
-                <li><span>3</span><div><h3>Attend and review</h3><p>Download your ticket and share feedback afterwards.</p></div></li>
-            </ol>
+        </div>
+    </section>
+
+    <!-- Final call to action -->
+    <section class="ov-container ov-section" aria-label="Get started" data-reveal>
+        <div class="ov-ab-final">
+            <h2>Ready to make your next moment count?</h2>
+            <div class="ov-ab-cta">
+                <a class="ov-gold-button" th:href="@{/events}" href="/events">Find an event</a>
+                <a class="ov-ab-ghost" th:if="${user == null}" th:href="@{/register}" href="/register">Create a free account</a>
+                <a class="ov-ab-ghost" th:if="${user != null}" th:href="@{/about}" href="/about">About Occavie</a>
+            </div>
         </div>
     </section>
 </main>
@@ -112,5 +148,11 @@
 <div th:replace="~{fragments :: siteFooter}"></div>
 <script th:src="@{/js/site.js(v='2026.11.2')}" src="/js/site.js"></script>
 <script th:src="@{/js/compare.js}" src="/js/compare.js"></script>
+<script>
+(function(){var els=document.querySelectorAll('[data-reveal]');if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){return;}
+document.documentElement.classList.add('ov-reveal-on');
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}});},{threshold:.12});
+els.forEach(function(el){io.observe(el);});})();
+</script>
 </body>
 </html>

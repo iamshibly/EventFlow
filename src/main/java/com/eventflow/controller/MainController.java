@@ -59,6 +59,8 @@ public class MainController {
                 .limit(6)
                 .toList();
 
+        List<Event> allUpcoming = events.stream().filter(eventService::isUpcoming).toList();
+        model.addAttribute("upcomingCount", allUpcoming.size());
         model.addAttribute("user", user);
         model.addAttribute("isGuest", user == null);
         model.addAttribute("featuredEvents", upcomingEvents.stream()

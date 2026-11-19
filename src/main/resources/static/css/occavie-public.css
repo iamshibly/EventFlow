@@ -891,3 +891,24 @@ body.contact-public-body .contact-submit-button { min-height: 50px; padding: 0 2
 .ov-ct-faq details[open] summary::after { transform: rotate(45deg); }
 .ov-ct-faq details p { padding: 0 0 18px; color: var(--ink-2); }
 .ov-ct-faq details a { color: var(--brand); font-weight: 700; }
+
+/* ---- Home: living hero ---- */
+.ov-home-hero { background: #0B1530; }
+.ov-home-hero .ov-auth-bg { z-index: -2; }
+.ov-home-hero::before { background: linear-gradient(100deg, rgba(8,14,36,.92) 0%, rgba(8,14,36,.68) 48%, rgba(8,14,36,.3) 100%), radial-gradient(45% 55% at 10% 95%, rgba(229,173,28,.3), transparent 70%); }
+.ov-try { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .88rem; color: rgba(255,255,255,.85); }
+.ov-try a { padding: 6px 14px; border-radius: 999px; color: #fff; text-decoration: none; font-weight: 600; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(8px); transition: background .2s, border-color .2s, transform .2s; }
+.ov-try a:hover { background: rgba(255,255,255,.22); border-color: #F2C14E; transform: translateY(-2px); }
+.ov-home-stats { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: min(100%, 700px); }
+.ov-home-stats li { padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(10px); display: grid; gap: 2px; }
+.ov-home-stats strong { font-family: var(--font-display); font-size: 1.8rem; line-height: 1; color: #F2C14E; }
+.ov-home-stats span { font-size: .78rem; color: rgba(255,255,255,.88); }
+.ov-home-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; position: relative; counter-reset: s; }
+.ov-home-steps li { position: relative; display: grid; gap: 8px; align-content: start; padding: 30px 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow-sm); transition: transform .25s, box-shadow .25s; }
+.ov-home-steps li:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+.ov-home-steps b { position: absolute; right: 22px; top: 14px; font-family: var(--font-display); font-size: 3.4rem; line-height: 1; color: var(--brand-soft); }
+.ov-home-step-ic { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 18px; background: var(--gradient); color: #0B1530; font-size: 1.5rem; box-shadow: 0 10px 22px rgba(209,146,8,.35); }
+.ov-home-steps h3 { font-family: var(--font-display); font-size: 1.35rem; margin-top: 6px; } .ov-home-steps p { color: var(--ink-2); font-size: .95rem; }
+.ov-home-band { margin-top: 84px; }
+.ov-home-band .ov-ab-section { padding-top: 72px; }
+@media (max-width: 860px) { .ov-home-steps { grid-template-columns: 1fr; } .ov-home-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

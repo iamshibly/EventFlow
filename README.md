@@ -20,6 +20,8 @@ Occavie (formerly EventFlow) is a full-stack event management platform: people d
 
 **Implemented**
 
+* **Smart search:** type a sentence such as "free AI workshops in Dhaka this weekend" (home page or Explore) and it sets category, price, price cap, dates (Bangladesh weekend = Fri + Sat) and place automatically, shows what it understood as removable chips, and relaxes filters step by step (saying so) if nothing matches. Rule-based and offline: no AI service, no keys.
+* **Compare events:** press Compare on 2-3 event cards (or on an event page), then open a side-by-side table of date, venue, price, ticket types, seats left, speakers, programme, rating and organizer, with the best value highlighted. The selection is kept in the browser only.
 * **Discovery:** search, category/price/date/status filters, sorting, pagination, saved events, event suggestions, organizer public pages.
 * **Event pages:** programme, speakers, sponsors, gallery, venue details and map link, share/copy link, Open Graph previews, "add to calendar" (.ics).
 * **Booking:** free and ticket-category booking, coupons, capacity enforcement, waitlist with held-seat offers, cancellation of free bookings, PDF tickets with signed QR codes.
@@ -103,7 +105,7 @@ Sample-event photos are from [Unsplash](https://unsplash.com) (Unsplash License)
 ./mvnw test -Djava.version=21 -Dtest='!EventflowApplicationTests'
 ```
 
-108 unit tests (Mockito, no database needed) cover booking/capacity, coupons, free and simulated-paid booking, cancellation, waitlist, QR check-in, approval workflow, notifications/email, announcements, UX features, security helpers (rate limiter, production secret checks, upload sniffing, CSV injection, JSON-LD escaping). `EventflowApplicationTests` loads the full context and therefore needs a reachable MongoDB (`MONGODB_URI`).
+Java unit tests (see `src/test`) plus 12 Node tests for the search parser (`node --test src/test/js/`) (Mockito, no database needed) cover booking/capacity, coupons, free and simulated-paid booking, cancellation, waitlist, QR check-in, approval workflow, notifications/email, announcements, UX features, security helpers (rate limiter, production secret checks, upload sniffing, CSV injection, JSON-LD escaping). `EventflowApplicationTests` loads the full context and therefore needs a reachable MongoDB (`MONGODB_URI`).
 
 ## Deployment
 

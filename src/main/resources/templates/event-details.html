@@ -22,6 +22,7 @@
           </form>
           <a class="ov-outline-button" th:if="${user == null and !isDraftPreview}" th:href="@{/login(redirect=${'/events/' + event.id})}"><i class="bi bi-bookmark"></i><span>Save</span></a>
           <a class="ov-outline-button" th:if="${!isDraftPreview and event.date != null}" th:href="@{'/events/' + ${event.id} + '/calendar.ics'}"><i class="bi bi-calendar-plus"></i><span>Add to calendar</span></a>
+          <button class="ov-outline-button" type="button" data-compare-toggle th:attr="data-id=${event.id},data-title=${event.title}" aria-pressed="false"><i class="bi bi-layout-split" aria-hidden="true"></i><span>Compare</span></button>
           <button class="ov-outline-button" type="button" data-copy-link th:attr="data-url=${canonicalUrl}"><i class="bi bi-link-45deg"></i><span>Copy link</span></button>
           <button class="ov-outline-button" type="button" data-share hidden th:attr="data-url=${canonicalUrl},data-title=${event.title}"><i class="bi bi-share"></i><span>Share</span></button>
         </div>
@@ -226,5 +227,6 @@
 </div>
 <div th:replace="~{fragments :: toasts}"></div>
 <script th:src="@{/js/site.js(v='2026.11.1')}" src="/js/site.js"></script>
+<script th:src="@{/js/compare.js}" src="/js/compare.js"></script>
 </body>
 </html>

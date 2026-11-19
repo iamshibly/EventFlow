@@ -45,6 +45,7 @@ public class SeoController {
         StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         add(xml, base + "/", null, "daily");
         add(xml, base + "/events", null, "daily");
+        add(xml, base + "/about", null, "monthly");
         add(xml, base + "/contact", null, "yearly");
         List<Event> events = eventService.findAllSorted().stream().filter(EventRules::isPublished).limit(SITEMAP_LIMIT).toList();
         java.util.Set<String> organizerIds = new java.util.LinkedHashSet<>();

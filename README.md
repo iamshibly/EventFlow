@@ -46,6 +46,10 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|
 | ![Notifications](docs/screenshots/notifications.jpg) | ![Profile](docs/screenshots/profile.jpg) |
 
+| Checkout | Payment result |
+|---|---|
+| ![Checkout](docs/screenshots/checkout.jpg) | ![Payment result](docs/screenshots/payment-result.jpg) |
+
 | Mobile | Mobile, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |

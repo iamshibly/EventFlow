@@ -56,11 +56,13 @@
 
         <section class="dash-cards" th:if="${cardEvents != null and !#lists.isEmpty(cardEvents)}" aria-labelledby="dashCardsHeading">
             <div class="dash-cards-head">
-                <div><span class="section-kicker">EXPLORE</span><h2 id="dashCardsHeading" th:text="${cardHeading}">Recommended for you</h2><p th:text="${cardSubheading}">Subheading</p></div>
+                <div><span class="section-kicker">EXPLORE</span><h2 id="dashCardsHeading" th:text="${cardHeading}">Recommended for you</h2><p th:text="${cardSubheading}">Subheading</p>
+                    <p class="why-legend" th:if="${cardWhy != null and !cardWhy.isEmpty()}"><i class="bi bi-lightbulb-fill" aria-hidden="true"></i> The light bulb on a card tells you why we picked it. Hover or tap it.</p></div>
                 <a class="secondary-button" th:href="${user.role == 'ADMIN' ? '/admin/events' : (user.role == 'ORGANIZER' ? '/organizer/events' : '/events')}" href="/events">View all <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
             </div>
             <div class="dash-card-grid">
-                <a class="dash-card" th:each="event : ${cardEvents}" th:href="${user.role == 'PARTICIPANT' ? '/events/' + event.id : (user.role == 'ORGANIZER' ? '/organizer/events/' + event.id + '/participants' : '/events/' + event.id)}" href="/events">
+                <div class="dash-card-wrap" th:each="event : ${cardEvents}">
+                <a class="dash-card" th:href="${user.role == 'PARTICIPANT' ? '/events/' + event.id : (user.role == 'ORGANIZER' ? '/organizer/events/' + event.id + '/participants' : '/events/' + event.id)}" href="/events">
                     <span class="dash-card-photo" th:with="efCover=${@display.listingImageUrl(event)}">
                         <img data-event-image th:attr="data-event-category=${event.category}" th:src="${efCover}" src="/images/event-visual.png" th:alt="${event.title + ' cover image'}" alt="Event cover" width="480" height="300" loading="lazy" decoding="async">
                         <span class="dash-card-tag" th:attr="data-cat=${event.category}" th:text="${event.category}">Technology</span>
@@ -69,11 +71,14 @@
                         <span class="dash-card-date"><i class="bi bi-calendar3" aria-hidden="true"></i> <span th:text="${@display.eventDate(event)}">Date</span></span>
                         <strong th:text="${event.title}">Event title</strong>
                         <span class="dash-card-meta"><i class="bi bi-geo-alt" aria-hidden="true"></i> <span th:text="${event.location}">Venue</span></span>
-                        <span class="dash-card-reason" th:if="${cardReasons != null and !#strings.isEmpty(cardReasons[event.id])}"><i class="bi bi-lightbulb" aria-hidden="true"></i><span th:text="${cardReasons[event.id]}">Because you saved an event</span></span>
-                        <span class="dash-card-reason is-secondary" th:if="${cardReasons2 != null and !#strings.isEmpty(cardReasons2[event.id])}" th:text="${cardReasons2[event.id]}">Second reason</span>
                         <span class="dash-card-price" th:text="${cardPrices[event.id]}">Free</span>
                     </span>
                 </a>
+                <div class="why-wrap" th:if="${cardWhy != null and cardWhy[event.id] != null and !cardWhy[event.id].isEmpty()}">
+                    <button class="why-bulb" type="button" aria-expanded="false" th:attr="aria-label=${'Why we picked this: ' + #strings.listJoin(cardWhy[event.id], '; ')}"><i class="bi bi-lightbulb-fill" aria-hidden="true"></i></button>
+                    <div class="why-pop" aria-hidden="true"><strong>Why this pick</strong><ul><li th:each="reason : ${cardWhy[event.id]}" th:text="${reason}">Reason</li></ul></div>
+                </div>
+                </div>
             </div>
         </section>
 

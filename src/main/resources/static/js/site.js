@@ -1603,3 +1603,16 @@ document.addEventListener('submit', function (event) {
     if (button) { button.setAttribute('aria-pressed', data.saved ? 'true' : 'false'); button.disabled = false; }
   }).catch(function () { form.submit(); });
 });
+
+/* "Why we picked this" light bulbs: hover/focus shows the reason via CSS; tap or Enter toggles it (touch screens). */
+document.addEventListener('click', function (event) {
+  var bulb = event.target.closest && event.target.closest('.why-bulb');
+  document.querySelectorAll('.why-wrap.is-open').forEach(function (wrap) { if (!bulb || wrap !== bulb.closest('.why-wrap')) { wrap.classList.remove('is-open'); var b = wrap.querySelector('.why-bulb'); if (b) b.setAttribute('aria-expanded', 'false'); } });
+  if (!bulb) return;
+  event.preventDefault();
+  var wrapEl = bulb.closest('.why-wrap'); var open = wrapEl.classList.toggle('is-open'); bulb.setAttribute('aria-expanded', String(open));
+});
+document.addEventListener('keydown', function (event) {
+  if (event.key !== 'Escape') return;
+  document.querySelectorAll('.why-wrap.is-open').forEach(function (wrap) { wrap.classList.remove('is-open'); var b = wrap.querySelector('.why-bulb'); if (b) b.setAttribute('aria-expanded', 'false'); });
+});

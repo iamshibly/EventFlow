@@ -322,14 +322,9 @@ public class MainController {
         addPhotoCards(model, "Recommended for you", recommendations.isEmpty() ? "Upcoming events you have not booked yet"
                         : "Picked from what you saved, booked and what is happening soon",
                 recommendations.stream().map(com.eventflow.service.RecommendationEngine.Recommendation::event).toList());
-        Map<String, String> reasons = new java.util.HashMap<>();
-        Map<String, String> secondReasons = new java.util.HashMap<>();
-        for (var r : recommendations) {
-            reasons.put(r.event().getId(), r.reasons().isEmpty() ? "" : r.reasons().get(0));
-            secondReasons.put(r.event().getId(), r.reasons().size() > 1 ? r.reasons().get(1) : "");
-        }
-        model.addAttribute("cardReasons", reasons);
-        model.addAttribute("cardReasons2", secondReasons);
+        Map<String, java.util.List<String>> why = new java.util.HashMap<>();
+        for (var r : recommendations) why.put(r.event().getId(), r.reasons());
+        model.addAttribute("cardWhy", why);
         return "dashboard";
     }
 

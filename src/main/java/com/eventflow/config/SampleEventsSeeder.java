@@ -14,25 +14,40 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Optional sample content for a brand-new database (OCCAVIE_SAMPLE_EVENTS=true). Runs only when there are no events at all,
- * so it never touches real data. The events belong to a non-login "Occavie Events" organizer account.
+ * Optional sample content (OCCAVIE_SAMPLE_EVENTS=true) that keeps the site from ever looking empty.
+ * <ul>
+ *   <li>Empty database: loads the sample events.</li>
+ *   <li>Every start and every day at 03:10: keeps at least {@value #MIN_UPCOMING} sample events inside the next
+ *       {@value #WINDOW_DAYS} days, with dates shuffled and at most {@value #MAX_PER_DAY} per day.
+ *       Expired events nobody booked get a new random date; expired events with bookings stay as history and a fresh
+ *       copy is scheduled; if still short, missing sample events are created.</li>
+ * </ul>
+ * Only events owned by the non-login "Occavie Events" account are ever touched. Real organizers' events are never changed.
  */
 @Component
 public class SampleEventsSeeder implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(SampleEventsSeeder.class);
     private static final String ORGANIZER_EMAIL = "events@occavie.local";
+    static final int MIN_UPCOMING = 24;
+    static final int WINDOW_DAYS = 90;
+    static final int MAX_PER_DAY = 2;
 
     record Row(String title, String category, String venue, int days, int hour, int minute, int capacity, int price) { }
 
@@ -110,6 +125,7 @@ public class SampleEventsSeeder implements ApplicationRunner {
         return "/images/event-photos/" + slug + ".webp";
     }
 
+
     private final boolean enabled;
     private final EventRepository events;
     private final EventTicketTypeRepository tickets;
@@ -121,58 +137,68 @@ public class SampleEventsSeeder implements ApplicationRunner {
     public SampleEventsSeeder(@Value("${occavie.sample-events.enabled:false}") boolean enabled, EventRepository events,
                               EventTicketTypeRepository tickets, EventScheduleRepository schedule, UserRepository users,
                               PasswordEncoder encoder, RegistrationRepository registrations) {
-        this.registrations = registrations;
         this.enabled = enabled; this.events = events; this.tickets = tickets; this.schedule = schedule;
-        this.users = users; this.encoder = encoder;
+        this.users = users; this.encoder = encoder; this.registrations = registrations;
     }
 
     @Override
     public void run(ApplicationArguments args) {
         if (!enabled) return;
-        if (events.count() > 0) { refreshImages(); rollDatesForward(); return; }
-        User organizer = users.findByEmailIgnoreCase(ORGANIZER_EMAIL).orElseGet(() -> users.save(User.builder()
+        if (events.count() == 0) seedInitial();
+        else refreshImages();
+        maintain();
+    }
+
+    private User organizer() {
+        return users.findByEmailIgnoreCase(ORGANIZER_EMAIL).orElseGet(() -> users.save(User.builder()
                 .fullName("Occavie Events").email(ORGANIZER_EMAIL).role("ORGANIZER").enabled(true)
                 .password(encoder.encode(UUID.randomUUID() + "Aa1!")).build()));   // random password: nobody can log in
+    }
+
+    private void seedInitial() {
+        User organizer = organizer();
         LocalDate today = LocalDate.now();
-        List<EventTicketType> ticketRows = new ArrayList<>();
-        List<EventScheduleItem> scheduleRows = new ArrayList<>();
         int index = 0;
-        for (Row r : ROWS) {
-            LocalTime start = LocalTime.of(r.hour(), r.minute());
-            boolean paid = r.price() > 0;
-            Event event = events.save(Event.builder().title(r.title()).category(r.category()).location(r.venue())
-                    .date(today.plusDays(r.days())).time(start)
-                    .description(r.title() + " brings people together at " + r.venue() + " for talks, hands-on sessions and networking.")
-                    .capacity(r.capacity()).status("UPCOMING").featured(index++ < 6)
-                    .organizerId(organizer.getId()).organizerName(organizer.getFullName())
-                    .imageUrl(imageFor(r.title())).pricingType(paid ? "PAID" : "FREE").basePrice(BigDecimal.valueOf(r.price())).build());
-            int standard = paid ? (int) Math.floor(r.capacity() * 0.8) : r.capacity();
-            ticketRows.add(EventTicketType.builder().eventId(event.getId()).name(paid ? "Standard" : "General Admission")
-                    .description(paid ? "Regular event entry" : "Free admission").price(BigDecimal.valueOf(r.price()))
-                    .capacity(standard).active(true).sortOrder(1).build());
-            if (paid) ticketRows.add(EventTicketType.builder().eventId(event.getId()).name("VIP")
-                    .description("Priority seating and enhanced access").price(BigDecimal.valueOf(r.price() * 2L))
-                    .capacity(r.capacity() - standard).active(true).sortOrder(2).build());
-            int[][] parts = {{0, 25}, {30, 100}, {110, 155}};
-            String[] names = {"Registration & Welcome", "Main Session: " + r.title(), "Questions & Networking"};
-            for (int i = 0; i < 3; i++) {
-                int from = r.hour() * 60 + r.minute() + parts[i][0], to = r.hour() * 60 + r.minute() + parts[i][1];
-                scheduleRows.add(EventScheduleItem.builder().eventId(event.getId()).title(names[i])
-                        .startTime(LocalTime.of((from / 60) % 24, from % 60)).endTime(LocalTime.of((to / 60) % 24, to % 60))
-                        .location(r.venue()).description("").build());
-            }
-        }
-        tickets.saveAll(ticketRows);
-        schedule.saveAll(scheduleRows);
+        for (Row r : ROWS) createEvent(r, organizer, today.plusDays(r.days()), index++ < 6);
         log.info("Loaded {} sample events (OCCAVIE_SAMPLE_EVENTS=true).", ROWS.size());
     }
 
-    /** Sample events loaded earlier carry no image; give each its own (only events still on the default placeholder). */
+    /** Creates one sample event with its ticket types and schedule. */
+    private Event createEvent(Row r, User organizer, LocalDate date, boolean featured) {
+        boolean paid = r.price() > 0;
+        Event event = events.save(Event.builder().title(r.title()).category(r.category()).location(r.venue())
+                .date(date).time(LocalTime.of(r.hour(), r.minute()))
+                .description(r.title() + " brings people together at " + r.venue() + " for talks, hands-on sessions and networking.")
+                .capacity(r.capacity()).status("UPCOMING").featured(featured)
+                .organizerId(organizer.getId()).organizerName(organizer.getFullName())
+                .imageUrl(imageFor(r.title())).pricingType(paid ? "PAID" : "FREE").basePrice(BigDecimal.valueOf(r.price())).build());
+        int standard = paid ? (int) Math.floor(r.capacity() * 0.8) : r.capacity();
+        List<EventTicketType> ticketRows = new ArrayList<>();
+        ticketRows.add(EventTicketType.builder().eventId(event.getId()).name(paid ? "Standard" : "General Admission")
+                .description(paid ? "Regular event entry" : "Free admission").price(BigDecimal.valueOf(r.price()))
+                .capacity(standard).active(true).sortOrder(1).build());
+        if (paid) ticketRows.add(EventTicketType.builder().eventId(event.getId()).name("VIP")
+                .description("Priority seating and enhanced access").price(BigDecimal.valueOf(r.price() * 2L))
+                .capacity(r.capacity() - standard).active(true).sortOrder(2).build());
+        tickets.saveAll(ticketRows);
+        int[][] parts = {{0, 25}, {30, 100}, {110, 155}};
+        String[] names = {"Registration & Welcome", "Main Session: " + r.title(), "Questions & Networking"};
+        List<EventScheduleItem> items = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            int from = r.hour() * 60 + r.minute() + parts[i][0], to = r.hour() * 60 + r.minute() + parts[i][1];
+            items.add(EventScheduleItem.builder().eventId(event.getId()).title(names[i])
+                    .startTime(LocalTime.of((from / 60) % 24, from % 60)).endTime(LocalTime.of((to / 60) % 24, to % 60))
+                    .location(r.venue()).description("").build());
+        }
+        schedule.saveAll(items);
+        return event;
+    }
+
+    /** Sample events loaded earlier carry no (or an older) image; give each its own. */
     private void refreshImages() {
         users.findByEmailIgnoreCase(ORGANIZER_EMAIL).ifPresent(organizer -> {
             int updated = 0;
-            for (Event event : events.findAll()) {
-                if (!organizer.getId().equals(event.getOrganizerId())) continue;
+            for (Event event : events.findByOrganizerIdOrderByDateAsc(organizer.getId())) {
                 String img = event.getImageUrl();
                 boolean placeholder = img == null || img.isBlank() || "/images/event-visual.png".equals(img);
                 boolean oldSamplePath = img != null && img.startsWith("/images/events/");   // earlier generated artwork
@@ -185,27 +211,67 @@ public class SampleEventsSeeder implements ApplicationRunner {
         });
     }
 
-    /**
-     * Sample events must not run out: any sample event whose date has passed and that nobody booked is moved forward
-     * to its original lead time from today, so the "upcoming" lists stay populated. Events with bookings are left
-     * alone and simply become past events. Runs at start-up and every day at 03:10.
-     */
+    /** Daily (and at start-up): keep the upcoming list populated with shuffled dates. */
     @Scheduled(cron = "0 10 3 * * *")
-    public void rollDatesForward() {
+    public void maintain() {
         if (!enabled) return;
-        users.findByEmailIgnoreCase(ORGANIZER_EMAIL).ifPresent(organizer -> {
-            LocalDate today = LocalDate.now();
-            java.util.Map<String, Integer> lead = new java.util.HashMap<>();
-            for (Row r : ROWS) lead.put(r.title(), r.days());
-            int moved = 0;
-            for (Event event : events.findByOrganizerIdOrderByDateAsc(organizer.getId())) {
-                if (event.getDate() == null || !event.getDate().isBefore(today)) continue;
-                if (registrations.countByEventId(event.getId()) > 0) continue;
-                event.setDate(today.plusDays(Math.max(3, lead.getOrDefault(event.getTitle(), 14))));
-                events.save(event);
-                moved++;
+        User organizer = organizer();
+        LocalDate today = LocalDate.now();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        List<Event> mine = events.findByOrganizerIdOrderByDateAsc(organizer.getId());
+
+        Map<LocalDate, Integer> perDay = new HashMap<>();
+        Set<String> upcomingTitles = new HashSet<>();
+        int upcoming = 0;
+        for (Event e : mine) {
+            if (e.getDate() != null && !e.getDate().isBefore(today)) {
+                perDay.merge(e.getDate(), 1, Integer::sum);
+                upcomingTitles.add(e.getTitle());
+                upcoming++;
             }
-            if (moved > 0) log.info("Moved {} expired sample events forward.", moved);
-        });
+        }
+
+        int moved = 0, copied = 0, created = 0;
+        Map<String, Row> byTitle = new HashMap<>();
+        for (Row r : ROWS) byTitle.put(r.title(), r);
+
+        for (Event e : mine) {
+            if (e.getDate() == null || !e.getDate().isBefore(today)) continue;
+            if (registrations.countByEventId(e.getId()) == 0) {
+                // nobody booked it: it simply gets a new random date
+                LocalDate next = freeDay(today, perDay, random);
+                e.setDate(next);
+                events.save(e);
+                perDay.merge(next, 1, Integer::sum); upcomingTitles.add(e.getTitle()); upcoming++; moved++;
+            } else if (!upcomingTitles.contains(e.getTitle()) && byTitle.containsKey(e.getTitle())) {
+                // booked: keep it as history and schedule a fresh copy
+                LocalDate next = freeDay(today, perDay, random);
+                createEvent(byTitle.get(e.getTitle()), organizer, next, false);
+                perDay.merge(next, 1, Integer::sum); upcomingTitles.add(e.getTitle()); upcoming++; copied++;
+            }
+        }
+
+        // top up: create sample events that have no upcoming date yet until the minimum is reached
+        List<Row> pool = new ArrayList<>(ROWS);
+        java.util.Collections.shuffle(pool, random);
+        for (Row r : pool) {
+            if (upcoming >= MIN_UPCOMING) break;
+            if (upcomingTitles.contains(r.title())) continue;
+            LocalDate next = freeDay(today, perDay, random);
+            createEvent(r, organizer, next, false);
+            perDay.merge(next, 1, Integer::sum); upcomingTitles.add(r.title()); upcoming++; created++;
+        }
+        if (moved + copied + created > 0) {
+            log.info("Sample events: {} re-dated, {} rescheduled copies, {} created; {} upcoming.", moved, copied, created, upcoming);
+        }
+    }
+
+    /** A random day in [today+3, today+WINDOW_DAYS] with fewer than MAX_PER_DAY events (falls back to any day in the window). */
+    static LocalDate freeDay(LocalDate today, Map<LocalDate, Integer> perDay, ThreadLocalRandom random) {
+        for (int attempt = 0; attempt < 60; attempt++) {
+            LocalDate d = today.plusDays(3 + random.nextInt(WINDOW_DAYS - 2));
+            if (perDay.getOrDefault(d, 0) < MAX_PER_DAY) return d;
+        }
+        return today.plusDays(3 + random.nextInt(WINDOW_DAYS - 2));
     }
 }

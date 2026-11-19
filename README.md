@@ -91,6 +91,8 @@ See [`.env.example`](.env.example) for every variable. Production (`SPRING_PROFI
 
 Set `OCCAVIE_SAMPLE_EVENTS=true` and the app loads about 54 upcoming sample events (with tickets and schedules) **only if the database has no events at all**. They belong to a non-login "Occavie Events" organizer. Set `OCCAVIE_CONTACT_EMAIL`, `OCCAVIE_CONTACT_WHATSAPP` and `OCCAVIE_DEVELOPER_NAME` to control what the footer and Contact page show; no personal contact details are stored in the repository.
 
+Sample events never run out: at start-up and daily at 03:10 the app keeps at least 24 sample events inside the next 90 days, with shuffled dates and at most 2 per day. Expired events nobody booked get a new date; booked ones stay as history and a fresh copy is scheduled. Only the non-login "Occavie Events" account's events are touched; real organizers' events never change. Set `OCCAVIE_SAMPLE_EVENTS=false` once you have your own events.
+
 ### Image credits
 
 Sample-event photos are from [Unsplash](https://unsplash.com) (Unsplash License) plus a few supplied project photos. The 54 sample events each use a different image (`static/images/events/`, `static/images/photos/`).

@@ -22,6 +22,10 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|---|
 | ![Explore](docs/screenshots/events-desktop.jpg) | ![Event details](docs/screenshots/event-details.jpg) | ![Admin dark](docs/screenshots/admin-dashboard-dark.jpg) |
 
+| Register | |
+|---|---|
+| ![Register](docs/screenshots/register.jpg) | |
+
 | Mobile | Mobile, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |

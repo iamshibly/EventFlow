@@ -15,14 +15,17 @@
     const loggedOutNotice = document.getElementById('v1LogoutSuccess');
     if (loggedOutNotice) loggedOutNotice.hidden = register;
     document.title = register ? 'Register | Occavie' : 'Login | Occavie';
+    document.querySelector('.ov-auth-points:not(.ov-auth-points-register)')?.toggleAttribute('hidden', register);
+    document.querySelector('.ov-auth-points-register')?.toggleAttribute('hidden', !register);
     const heroTitle = document.getElementById('v1AuthHeroTitle');
     const heroDescription = document.getElementById('v1AuthHeroDescription');
     if (heroTitle) heroTitle.innerHTML = register
-      ? 'Create Your<br><em>Account</em>' : 'Welcome<br><em>Back</em>';
+      ? 'Make every<br><em>moment count</em>' : 'Welcome<br><em>Back</em>';
     if (heroDescription) heroDescription.textContent = register
-      ? 'Join Occavie to discover or organize events.'
+      ? 'Create your free Occavie account to discover, book and host events.'
       : 'Log in to your Occavie account and continue your event journey.';
   };
+  document.getElementById('goLogin')?.addEventListener('click', () => switchTo('login'));
   loginTab?.addEventListener('click', () => switchTo('login'));
   registerTab?.addEventListener('click', () => switchTo('register'));
   if (window.occavieAuthTab === 'register' || window.location.pathname.endsWith('/register')) switchTo('register');

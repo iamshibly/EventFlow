@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .permissionsPolicyHeader(permissions -> permissions.policy("camera=(self), microphone=(), geolocation=(), payment=()")))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/internal/jobs/**"))   // token-authenticated machine endpoint
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/login", "/register", "/forgot-password/**", "/forgot-password", "/reset-password", "/contact", "/events", "/events/**", "/compare", "/organizers/**", "/internal/jobs/**", "/robots.txt", "/sitemap.xml", "/healthz", "/readyz", "/sw.js", "/offline.html", "/event-images/**", "/event-gallery-images/**", "/speaker-images/**", "/sponsor-images/**", "/error", "/favicon.ico", "/site.webmanifest", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/home", "/login", "/register", "/forgot-password/**", "/forgot-password", "/reset-password", "/contact", "/events", "/events/**", "/compare", "/concierge/**", "/organizers/**", "/internal/jobs/**", "/robots.txt", "/sitemap.xml", "/healthz", "/readyz", "/sw.js", "/offline.html", "/event-images/**", "/event-gallery-images/**", "/speaker-images/**", "/sponsor-images/**", "/error", "/favicon.ico", "/site.webmanifest", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers("/participant/**").hasRole("PARTICIPANT")

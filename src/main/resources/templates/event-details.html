@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head(${event.title}, 'public')}"></head>
-<body class="ov-page ov-details-page">
+<body class="ov-page ov-details-page" th:attr="data-event-id=${event.id}">
 <script type="application/ld+json" th:if="${eventJsonLd != null}" th:utext="${eventJsonLd}"></script>
 <a class="skip-link" href="#main-content">Skip to content</a>
 <div th:replace="~{fragments :: siteNav('events')}"></div>

@@ -1616,3 +1616,17 @@ document.addEventListener('keydown', function (event) {
   if (event.key !== 'Escape') return;
   document.querySelectorAll('.why-wrap.is-open').forEach(function (wrap) { wrap.classList.remove('is-open'); var b = wrap.querySelector('.why-bulb'); if (b) b.setAttribute('aria-expanded', 'false'); });
 });
+
+// Workspace banners: add the moving-photo backdrop to every page heading that is not the dashboard hero.
+(() => {
+  const add = () => {
+    document.querySelectorAll('.app-main > .page-heading:not(.dash-photo-hero)').forEach(h => {
+      if (h.querySelector(':scope > .ov-auth-bg')) return;
+      const bg = document.createElement('div');
+      bg.className = 'ov-auth-bg'; bg.setAttribute('aria-hidden', 'true');
+      bg.innerHTML = '<span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span><i class="orb o1"></i><i class="orb o2"></i>';
+      h.prepend(bg);
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add, { once: true }); else add();
+})();

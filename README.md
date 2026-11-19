@@ -34,6 +34,10 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|
 | ![Participant dashboard](docs/screenshots/participant-dashboard.jpg) | ![Organizer dashboard](docs/screenshots/organizer-dashboard.jpg) |
 
+| Admin users | Event wizard |
+|---|---|
+| ![Admin users](docs/screenshots/admin-users.jpg) | ![Event wizard](docs/screenshots/event-wizard.jpg) |
+
 | Mobile | Mobile, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |

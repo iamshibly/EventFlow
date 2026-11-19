@@ -127,7 +127,7 @@ public class MainController {
         var fRegistered = async(() -> participant && registrationService.isRegistered(id, viewerId));
         var fSaved = async(() -> savedEventService.isSaved(user, id));
         var fOrganizerPublic = async(() -> organizerProfileService.hasPublicPage(event.getOrganizerId()));
-        var fRelated = async(() -> draft ? List.<Event>of() : suggestionService.relatedTo(event, user, 3));
+        var fRelated = async(() -> draft ? List.<com.eventflow.service.RecommendationEngine.Recommendation>of() : suggestionService.relatedTo(event, user, 3));
         var fRoom = async(() -> waitlistService.hasRoom(event, viewerId));
         var fEntry = async(() -> participant
                 ? waitlistService.entryFor(id, viewerId).filter(com.eventflow.model.WaitlistEntry::isActive).orElse(null) : null);
@@ -165,7 +165,7 @@ public class MainController {
         model.addAttribute("isSaved", await(fSaved));
         model.addAttribute("organizerPublic", await(fOrganizerPublic));
         model.addAttribute("showOnlineLink", event.getOnlineUrl() != null && !event.getOnlineUrl().isBlank() && (isRegistered || manager));
-        model.addAttribute("relatedEvents", await(fRelated));
+        model.addAttribute("relatedRecs", await(fRelated));
         String desc = event.getDescription() == null ? "" : event.getDescription().replaceAll("\\s+", " ").trim();
         if (desc.length() > 160) desc = desc.substring(0, 157) + "...";
         if (!draft) model.addAttribute("eventJsonLd", eventJsonLd(event, (String) model.getAttribute("siteUrl"), cover(event)));
@@ -317,10 +317,18 @@ public class MainController {
                 .sorted(java.util.Comparator.comparing(Event::getDate).reversed()).limit(5).toList());
         model.addAttribute("recentNotifications", notificationService.findRecentForUser(user.getId()).stream().limit(5).toList());
         model.addAttribute("savedEvents", savedEventService.savedEvents(user).stream().limit(6).toList());
-        model.addAttribute("suggestedEvents", suggestionService.forParticipant(user, 3));
-        List<Event> recommended = events.stream().filter(eventService::isUpcoming)
-                .filter(event -> !ids.contains(event.getId())).limit(8).toList();
-        addPhotoCards(model, "Recommended for you", "Upcoming events you have not booked yet", recommended);
+        var recommendations = suggestionService.forParticipant(user, 8);
+        addPhotoCards(model, "Recommended for you", recommendations.isEmpty() ? "Upcoming events you have not booked yet"
+                        : "Picked from what you saved, booked and what is happening soon",
+                recommendations.stream().map(com.eventflow.service.RecommendationEngine.Recommendation::event).toList());
+        Map<String, String> reasons = new java.util.HashMap<>();
+        Map<String, String> secondReasons = new java.util.HashMap<>();
+        for (var r : recommendations) {
+            reasons.put(r.event().getId(), r.reasons().isEmpty() ? "" : r.reasons().get(0));
+            secondReasons.put(r.event().getId(), r.reasons().size() > 1 ? r.reasons().get(1) : "");
+        }
+        model.addAttribute("cardReasons", reasons);
+        model.addAttribute("cardReasons2", secondReasons);
         return "dashboard";
     }
 

@@ -149,38 +149,40 @@ class UxFeaturesTest {
     // ---------------------------------------------------------------- suggestions
 
     @Test
-    void suggestionsPreferSameCategoryThenInterestsThenSoonestAndSkipRegisteredEvents() {
-        EventSuggestionService suggestions = new EventSuggestionService(events, registrations, saved);
+    void suggestionsPreferSameCategoryAndSkipBookedOrSavedEvents() {
+        com.eventflow.service.EventService eventService = mock(com.eventflow.service.EventService.class);
+        com.eventflow.service.RegistrationService registrationService = mock(com.eventflow.service.RegistrationService.class);
+        EventSuggestionService suggestions = new EventSuggestionService(eventService, registrationService, registrations, saved);
         Event current = event("cur", "Music", 5);
         Event music1 = event("m1", "Music", 6), music2 = event("m2", "Music", 8);
         Event tech1 = event("t1", "Technology", 4), design1 = event("d1", "Design", 2);
         Event registered = event("reg", "Music", 3);
-        when(events.findTop12ByCategoryAndStatusAndDateGreaterThanEqualOrderByDateAsc(eq("Music"), eq("UPCOMING"), any(LocalDate.class)))
-                .thenReturn(List.of(registered, current, music1, music2));
-        when(events.findTop12ByCategoryAndStatusAndDateGreaterThanEqualOrderByDateAsc(eq("Technology"), eq("UPCOMING"), any(LocalDate.class))).thenReturn(List.of(tech1));
-        when(events.findTop12ByStatusAndDateGreaterThanEqualOrderByDateAsc(eq("UPCOMING"), any(LocalDate.class))).thenReturn(List.of(design1, tech1, music1));
+        when(eventService.findAllSorted()).thenReturn(List.of(design1, registered, tech1, current, music1, music2));
         when(registrations.findByParticipantIdOrderByRegisteredAtDesc("p1")).thenReturn(List.of(Registration.builder().eventId("reg").build()));
         when(saved.findByParticipantIdOrderBySavedAtDesc("p1")).thenReturn(List.of(SavedEvent.builder().eventId("t1").build()));
-        when(events.findById("reg")).thenReturn(Optional.of(registered));
-        when(events.findById("t1")).thenReturn(Optional.of(tech1));
 
-        List<String> ids = suggestions.relatedTo(current, pat, 3).stream().map(Event::getId).toList();
-        assertEquals(List.of("m1", "m2", "t1"), ids, "same category first, never the event itself or one already booked");
-        // a guest gets same-category then the soonest overall
-        List<String> guest = suggestions.relatedTo(current, null, 4).stream().map(Event::getId).toList();
-        assertEquals("reg", guest.get(0));
+        List<String> ids = suggestions.relatedTo(current, pat, 3).stream().map(r -> r.event().getId()).toList();
+        assertEquals(List.of("m1", "m2"), ids.subList(0, 2), "same category first");
+        assertFalse(ids.contains("cur"), "never the event itself");
+        assertFalse(ids.contains("reg"), "never one already booked");
+        assertFalse(ids.contains("t1"), "never one already saved");
+        assertEquals(ids.size(), ids.stream().distinct().count(), "no duplicates");
+        // a guest has no history, so booked events are fine to suggest
+        List<String> guest = suggestions.relatedTo(current, null, 5).stream().map(r -> r.event().getId()).toList();
+        assertTrue(guest.contains("reg"));
         assertFalse(guest.contains("cur"));
-        assertEquals(guest.size(), guest.stream().distinct().count(), "no duplicates");
+        assertTrue(suggestions.relatedTo(current, null, 3).stream().allMatch(r -> !r.reasons().isEmpty()), "every suggestion says why");
     }
 
     @Test
     void suggestionsNeverIncludeNonPublishedEvents() {
-        EventSuggestionService suggestions = new EventSuggestionService(events, registrations, saved);
+        com.eventflow.service.EventService eventService = mock(com.eventflow.service.EventService.class);
+        com.eventflow.service.RegistrationService registrationService = mock(com.eventflow.service.RegistrationService.class);
+        EventSuggestionService suggestions = new EventSuggestionService(eventService, registrationService, registrations, saved);
         Event pending = event("p", "Music", 2); pending.setStatus("PENDING_APPROVAL");
         Event ok = event("ok", "Music", 3);
-        when(events.findTop12ByCategoryAndStatusAndDateGreaterThanEqualOrderByDateAsc(anyString(), anyString(), any(LocalDate.class))).thenReturn(List.of(pending, ok));
-        when(events.findTop12ByStatusAndDateGreaterThanEqualOrderByDateAsc(anyString(), any(LocalDate.class))).thenReturn(List.of(pending));
-        assertEquals(List.of("ok"), suggestions.relatedTo(event("cur", "Music", 9), null, 5).stream().map(Event::getId).toList());
+        when(eventService.findAllSorted()).thenReturn(List.of(pending, ok));
+        assertEquals(List.of("ok"), suggestions.relatedTo(event("cur", "Music", 9), null, 5).stream().map(r -> r.event().getId()).toList());
     }
 
     // ---------------------------------------------------------------- organizer public profiles

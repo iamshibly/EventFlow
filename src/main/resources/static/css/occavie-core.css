@@ -401,3 +401,34 @@ a.skip-link:focus { top: 12px; }
 .sidebar-brand .brand-word em, .ov-footer .brand-word em, footer .brand-word em, .ov-hero-photo-bg .brand-word em { color: #F2C14E; }
 .brand-mark { width: 42px; height: 42px; border-radius: 12px; }
 h1, h2, h3 { font-family: var(--font-display); letter-spacing: -.01em; }
+
+/* ---- per-topic colours (pastel tiles + badges, like the reference site) ---- */
+[data-cat="Technology"], [data-cat="technology"] { --c-bg: #E3ECFF; --c-fg: #1B47B5; }
+[data-cat="Business"], [data-cat="business"] { --c-bg: #DDF5E8; --c-fg: #0B6B49; }
+[data-cat="Education"], [data-cat="education"] { --c-bg: #ECE6FF; --c-fg: #5236BE; }
+[data-cat="Health"], [data-cat="health"] { --c-bg: #FDE6EC; --c-fg: #B3173F; }
+[data-cat="Music"], [data-cat="music"] { --c-bg: #FBE4F3; --c-fg: #A3157C; }
+[data-cat="Sports"], [data-cat="sports"] { --c-bg: #DAF5EE; --c-fg: #0B6B5A; }
+[data-cat="Career"], [data-cat="career"] { --c-bg: #D9F6EA; --c-fg: #0A6B48; }
+[data-cat="Community"], [data-cat="community"] { --c-bg: #FFE9D2; --c-fg: #9A4A00; }
+[data-cat="Design"], [data-cat="design"] { --c-bg: #F1E6FF; --c-fg: #6A2CBA; }
+[data-cat="Arts"], [data-cat="arts"] { --c-bg: #FFE3DD; --c-fg: #B23A21; }
+[data-cat="Science"], [data-cat="science"] { --c-bg: #D9F2FB; --c-fg: #0A5E7C; }
+[data-cat="Food"], [data-cat="food"] { --c-bg: #FFF0CC; --c-fg: #8A5600; }
+[data-cat="Charity"], [data-cat="charity"] { --c-bg: #FFE1E8; --c-fg: #A3203F; }
+[data-cat="Other"], [data-cat="other"] { --c-bg: #E8ECF5; --c-fg: #33415C; }
+[data-cat="Other"] { --c-bg: #E8ECF5; --c-fg: #33415C; }
+:root[data-theme="dark"] [data-cat="Technology"] { --c-bg: rgba(90,130,255,.18); --c-fg: #9DB8FF; }
+:root[data-theme="dark"] [data-cat="Business"] { --c-bg: rgba(75,214,160,.16); --c-fg: #6FE0B0; }
+:root[data-theme="dark"] [data-cat="Education"] { --c-bg: rgba(150,120,255,.18); --c-fg: #BBA6FF; }
+:root[data-theme="dark"] [data-cat="Health"] { --c-bg: rgba(255,110,140,.16); --c-fg: #FF9DB3; }
+:root[data-theme="dark"] [data-cat="Music"] { --c-bg: rgba(255,100,200,.16); --c-fg: #FF9BDD; }
+:root[data-theme="dark"] [data-cat="Sports"] { --c-bg: rgba(60,210,180,.16); --c-fg: #6EE3CE; }
+:root[data-theme="dark"] [data-cat="Career"] { --c-bg: rgba(70,220,160,.16); --c-fg: #7BE6B9; }
+:root[data-theme="dark"] [data-cat="Community"] { --c-bg: rgba(255,160,70,.18); --c-fg: #FFBF7D; }
+:root[data-theme="dark"] [data-cat="Design"] { --c-bg: rgba(180,120,255,.18); --c-fg: #CFA8FF; }
+:root[data-theme="dark"] [data-cat="Arts"] { --c-bg: rgba(255,120,90,.16); --c-fg: #FFA48F; }
+:root[data-theme="dark"] [data-cat="Science"] { --c-bg: rgba(60,190,240,.16); --c-fg: #86D6F5; }
+:root[data-theme="dark"] [data-cat="Food"] { --c-bg: rgba(255,190,60,.16); --c-fg: #FFD27A; }
+:root[data-theme="dark"] [data-cat="Charity"] { --c-bg: rgba(255,110,140,.16); --c-fg: #FF9DB3; }
+:root[data-theme="dark"] [data-cat="Other"] { --c-bg: rgba(160,175,205,.16); --c-fg: #C3CDE3; }

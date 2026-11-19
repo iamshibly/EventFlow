@@ -4,86 +4,76 @@ import com.eventflow.model.Event;
 import com.eventflow.model.Registration;
 import com.eventflow.model.SavedEvent;
 import com.eventflow.model.User;
-import com.eventflow.repository.EventRepository;
 import com.eventflow.repository.RegistrationRepository;
 import com.eventflow.repository.SavedEventRepository;
+import com.eventflow.service.RecommendationEngine.Recommendation;
+import com.eventflow.service.RecommendationEngine.Signal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-/** Related events using plain filters: same category, categories the participant already likes, then soonest. */
+/**
+ * Feeds {@link RecommendationEngine} with real data: the events a participant saved or booked, every upcoming event and how
+ * many seats are taken (one aggregation query). Results carry plain-English reasons shown next to each suggestion.
+ */
 @Service
 @RequiredArgsConstructor
 public class EventSuggestionService {
-    private static final String PUBLISHED = "UPCOMING";
-
-    private final EventRepository eventRepository;
+    private final EventService eventService;
+    private final RegistrationService registrationService;
     private final RegistrationRepository registrationRepository;
     private final SavedEventRepository savedEventRepository;
 
-    /** "You might also like" for an event page. */
-    public List<Event> relatedTo(Event event, User viewer, int limit) {
-        Set<String> exclude = new LinkedHashSet<>(excludedIds(viewer));
-        exclude.add(event.getId());
-        Map<String, Event> picks = new LinkedHashMap<>();
+    /** "You might also like" on an event page. */
+    public List<Recommendation> relatedTo(Event event, User viewer, int limit) {
+        List<Event> all = eventService.findAllSorted();
+        Map<String, Event> byId = index(all);
+        return RecommendationEngine.related(event, upcoming(all), RecommendationEngine.profile(signals(viewer, byId)),
+                counts(all), LocalDate.now(), limit);
+    }
+
+    /** "Recommended for you" on the participant dashboard. */
+    public List<Recommendation> forParticipant(User participant, int limit) {
+        List<Event> all = eventService.findAllSorted();
+        Map<String, Event> byId = index(all);
+        return RecommendationEngine.rank(upcoming(all), RecommendationEngine.profile(signals(participant, byId)),
+                counts(all), LocalDate.now(), limit);
+    }
+
+    private List<Event> upcoming(List<Event> all) {
         LocalDate today = LocalDate.now();
-        if (event.getCategory() != null) add(picks, eventRepository.findTop12ByCategoryAndStatusAndDateGreaterThanEqualOrderByDateAsc(event.getCategory(), PUBLISHED, today), exclude, limit);
-        for (String category : interests(viewer)) {
-            if (picks.size() >= limit) break;
-            add(picks, eventRepository.findTop12ByCategoryAndStatusAndDateGreaterThanEqualOrderByDateAsc(category, PUBLISHED, today), exclude, limit);
-        }
-        if (picks.size() < limit) add(picks, eventRepository.findTop12ByStatusAndDateGreaterThanEqualOrderByDateAsc(PUBLISHED, today), exclude, limit);
-        return new ArrayList<>(picks.values());
+        return all.stream().filter(e -> e.getDate() != null && !e.getDate().isBefore(today)).toList();
     }
 
-    /** "Suggested for you" on the participant dashboard. */
-    public List<Event> forParticipant(User participant, int limit) {
-        Set<String> exclude = new LinkedHashSet<>(excludedIds(participant));
-        Map<String, Event> picks = new LinkedHashMap<>();
+    private Map<String, Long> counts(List<Event> all) {
         LocalDate today = LocalDate.now();
-        for (String category : interests(participant)) {
-            if (picks.size() >= limit) break;
-            add(picks, eventRepository.findTop12ByCategoryAndStatusAndDateGreaterThanEqualOrderByDateAsc(category, PUBLISHED, today), exclude, limit);
-        }
-        if (picks.size() < limit) add(picks, eventRepository.findTop12ByStatusAndDateGreaterThanEqualOrderByDateAsc(PUBLISHED, today), exclude, limit);
-        return new ArrayList<>(picks.values());
+        return registrationService.countsForEvents(all.stream().filter(e -> e.getDate() != null && !e.getDate().isBefore(today))
+                .map(Event::getId).toList());
     }
 
-    private void add(Map<String, Event> picks, List<Event> candidates, Set<String> exclude, int limit) {
-        for (Event candidate : candidates) {
-            if (picks.size() >= limit) return;
-            if (!exclude.contains(candidate.getId()) && EventRules.isPublished(candidate) && EventRules.bookable(candidate)) {
-                picks.putIfAbsent(candidate.getId(), candidate);
-            }
-        }
+    private Map<String, Event> index(List<Event> all) {
+        Map<String, Event> byId = new HashMap<>();
+        for (Event e : all) byId.put(e.getId(), e);
+        return byId;
     }
 
-    /** Events a participant already registered for or saved are not suggested again. */
-    private Set<String> excludedIds(User user) {
-        Set<String> ids = new LinkedHashSet<>();
-        if (user == null || !"PARTICIPANT".equals(user.getRole())) return ids;
-        registrationRepository.findByParticipantIdOrderByRegisteredAtDesc(user.getId()).forEach(r -> ids.add(r.getEventId()));
-        return ids;
-    }
-
-    /** Categories of events the participant registered for or saved, most recent first. */
-    private List<String> interests(User user) {
-        if (user == null || !"PARTICIPANT".equals(user.getRole())) return List.of();
-        List<String> ids = new ArrayList<>();
-        registrationRepository.findByParticipantIdOrderByRegisteredAtDesc(user.getId()).stream().map(Registration::getEventId).forEach(ids::add);
-        savedEventRepository.findByParticipantIdOrderBySavedAtDesc(user.getId()).stream().map(SavedEvent::getEventId).forEach(ids::add);
-        Set<String> categories = new LinkedHashSet<>();
-        for (String id : ids) {
-            eventRepository.findById(id).map(Event::getCategory).filter(c -> c != null && !c.isBlank()).ifPresent(categories::add);
-            if (categories.size() >= 3) break;
+    /** Registered events first (stronger signal), then saved events; most recent first within each. */
+    private List<Signal> signals(User user, Map<String, Event> byId) {
+        List<Signal> out = new ArrayList<>();
+        if (user == null || !"PARTICIPANT".equals(user.getRole())) return out;
+        for (Registration r : registrationRepository.findByParticipantIdOrderByRegisteredAtDesc(user.getId())) {
+            Event e = byId.get(r.getEventId());
+            if (e != null) out.add(new Signal(e, "registered"));
         }
-        return new ArrayList<>(categories);
+        for (SavedEvent s : savedEventRepository.findByParticipantIdOrderBySavedAtDesc(user.getId())) {
+            Event e = byId.get(s.getEventId());
+            if (e != null) out.add(new Signal(e, "saved"));
+        }
+        return out;
     }
 }

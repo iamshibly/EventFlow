@@ -112,12 +112,34 @@ public class MainController {
                     org.springframework.http.HttpStatus.NOT_FOUND, "Event not found");
         }
         model.addAttribute("isDraftPreview", draft);
-        var schedule = eventProgramService.findSchedule(id);
-        List<EventSpeaker> speakers = eventProgramService.findSpeakers(id);
-        var sponsors = eventProgramService.findSponsors(id);
-        var allTicketTypes = ticketTypeService.findByEvent(id);
+        // Independent database reads run in parallel (each is a network round trip to MongoDB), so the page costs roughly
+        // the slowest query instead of the sum of all of them.
+        String viewerId = user == null ? null : user.getId();
+        boolean participant = user != null && "PARTICIPANT".equals(user.getRole());
+        var fSchedule = async(() -> eventProgramService.findSchedule(id));
+        var fSpeakers = async(() -> eventProgramService.findSpeakers(id));
+        var fSponsors = async(() -> eventProgramService.findSponsors(id));
+        var fTickets = async(() -> ticketTypeService.findByEvent(id));
+        var fTicketCounts = async(() -> ticketTypeService.registrationCounts(id));
+        var fFeedback = async(() -> feedbackService.findForEvents(List.of(event)));
+        var fRegCount = async(() -> registrationService.countByEvent(id));
+        var fGallery = async(() -> eventGalleryService.findByEvent(id));
+        var fRegistered = async(() -> participant && registrationService.isRegistered(id, viewerId));
+        var fSaved = async(() -> savedEventService.isSaved(user, id));
+        var fOrganizerPublic = async(() -> organizerProfileService.hasPublicPage(event.getOrganizerId()));
+        var fRelated = async(() -> draft ? List.<Event>of() : suggestionService.relatedTo(event, user, 3));
+        var fRoom = async(() -> waitlistService.hasRoom(event, viewerId));
+        var fEntry = async(() -> participant
+                ? waitlistService.entryFor(id, viewerId).filter(com.eventflow.model.WaitlistEntry::isActive).orElse(null) : null);
+        var fOffer = async(() -> waitlistService.validOffer(id, viewerId).orElse(null));
+        var fWaiting = async(() -> waitlistService.waitingInOrder(id).size());
+
+        var schedule = await(fSchedule);
+        List<EventSpeaker> speakers = await(fSpeakers);
+        var sponsors = await(fSponsors);
+        var allTicketTypes = await(fTickets);
         var ticketTypes = allTicketTypes.stream().filter(com.eventflow.model.EventTicketType::isActive).toList();
-        var feedback = feedbackService.findForEvents(List.of(event));
+        var feedback = await(fFeedback);
 
         model.addAttribute("user", user);
         model.addAttribute("isGuest", user == null);
@@ -127,24 +149,23 @@ public class MainController {
         model.addAttribute("sponsors", sponsors);
         model.addAttribute("ticketTypes", ticketTypes);
         model.addAttribute("hasCustomTicketTypes", !allTicketTypes.isEmpty());
-        model.addAttribute("ticketRegistrationCounts", ticketTypeService.registrationCounts(id));
+        model.addAttribute("ticketRegistrationCounts", await(fTicketCounts));
         model.addAttribute("startingPrice", ticketTypeService.startingPriceLabel(event, allTicketTypes));
         model.addAttribute("speakerMap", eventProgramService.speakerMap(speakers));
-        model.addAttribute("registrationCount", registrationService.countByEvent(id));
+        model.addAttribute("registrationCount", await(fRegCount));
         model.addAttribute("feedbackSummary", feedbackService.summaryOf(feedback));
         model.addAttribute("feedback", feedback.stream().limit(6).toList());
-        model.addAttribute("gallery", eventGalleryService.findByEvent(id));
-        boolean isRegistered = user != null && "PARTICIPANT".equals(user.getRole())
-                && registrationService.isRegistered(id, user.getId());
+        model.addAttribute("gallery", await(fGallery));
+        boolean isRegistered = await(fRegistered);
         model.addAttribute("isRegistered", isRegistered);
         // Extras: bookmark, organizer page, online link visibility, related events, social preview.
         boolean manager = user != null && ("ADMIN".equals(user.getRole())
                 || ("ORGANIZER".equals(user.getRole()) && user.getId().equals(event.getOrganizerId())));
         model.addAttribute("mapUrl", display.mapUrl(event));
-        model.addAttribute("isSaved", savedEventService.isSaved(user, id));
-        model.addAttribute("organizerPublic", organizerProfileService.hasPublicPage(event.getOrganizerId()));
+        model.addAttribute("isSaved", await(fSaved));
+        model.addAttribute("organizerPublic", await(fOrganizerPublic));
         model.addAttribute("showOnlineLink", event.getOnlineUrl() != null && !event.getOnlineUrl().isBlank() && (isRegistered || manager));
-        model.addAttribute("relatedEvents", draft ? java.util.List.of() : suggestionService.relatedTo(event, user, 3));
+        model.addAttribute("relatedEvents", await(fRelated));
         String desc = event.getDescription() == null ? "" : event.getDescription().replaceAll("\\s+", " ").trim();
         if (desc.length() > 160) desc = desc.substring(0, 157) + "...";
         if (!draft) model.addAttribute("eventJsonLd", eventJsonLd(event, (String) model.getAttribute("siteUrl"), cover(event)));
@@ -156,15 +177,13 @@ public class MainController {
         boolean customCover = cover != null && cover.startsWith("/event-images/");
         model.addAttribute("ogImage", (String) model.getAttribute("siteUrl") + (customCover ? cover : "/images/og-default.png"));
         // Waitlist: seats held for offered participants count as taken for everyone else.
-        String viewerId = user == null ? null : user.getId();
-        boolean full = !draft && !waitlistService.hasRoom(event, viewerId);
-        var waitlistEntry = user != null && "PARTICIPANT".equals(user.getRole())
-                ? waitlistService.entryFor(id, viewerId).filter(com.eventflow.model.WaitlistEntry::isActive).orElse(null) : null;
-        var offer = waitlistService.validOffer(id, viewerId).orElse(null);
+        boolean full = !draft && !await(fRoom);
+        var waitlistEntry = await(fEntry);
+        var offer = await(fOffer);
         model.addAttribute("capacityFull", full);
         model.addAttribute("waitlistEntry", waitlistEntry);
         model.addAttribute("waitlistPosition", waitlistEntry == null ? 0 : waitlistService.position(id, viewerId));
-        model.addAttribute("waitlistSize", waitlistService.waitingInOrder(id).size());
+        model.addAttribute("waitlistSize", await(fWaiting));
         model.addAttribute("hasOffer", offer != null);
         model.addAttribute("offerUntil", offer == null ? "" : offer.getOfferExpiresAt()
                 .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, h:mm a")));
@@ -174,6 +193,21 @@ public class MainController {
                 ? feedbackService.findByEventAndParticipant(id, user.getId()).orElse(null)
                 : null);
         return "event-details";
+    }
+
+    private static final java.util.concurrent.ExecutorService IO = java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor();
+
+    private static <T> java.util.concurrent.CompletableFuture<T> async(java.util.function.Supplier<T> task) {
+        return java.util.concurrent.CompletableFuture.supplyAsync(task, IO);
+    }
+
+    private static <T> T await(java.util.concurrent.CompletableFuture<T> future) {
+        try {
+            return future.join();
+        } catch (java.util.concurrent.CompletionException ex) {
+            if (ex.getCause() instanceof RuntimeException runtime) throw runtime;
+            throw ex;
+        }
     }
 
     private static String cover(Event event) {

@@ -118,11 +118,16 @@ public class SampleEventsSeeder implements ApplicationRunner {
             "Full Stack Web Bootcamp", "/images/photos/workshop.webp",
             "Cybersecurity Conference", "/images/photos/tech-lock.webp");
 
+    /** Replaced photos get a new file name so browsers that cached the earlier file fetch the new one. */
+    private static final Map<String, String> REVISIONS = Map.of(
+            "flutter-mobile-dev-day", "-2",
+            "inter-department-cricket-cup", "-2");
+
     static String imageFor(String title) {
         String photo = PHOTOS.get(title);
         if (photo != null) return photo;
         String slug = title.toLowerCase(java.util.Locale.ROOT).replace("&", "and").replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
-        return "/images/event-photos/" + slug + ".webp";
+        return "/images/event-photos/" + slug + REVISIONS.getOrDefault(slug, "") + ".webp";
     }
 
 
@@ -202,8 +207,10 @@ public class SampleEventsSeeder implements ApplicationRunner {
                 String img = event.getImageUrl();
                 boolean placeholder = img == null || img.isBlank() || "/images/event-visual.png".equals(img);
                 boolean oldSamplePath = img != null && img.startsWith("/images/events/");   // earlier generated artwork
-                if (!placeholder && !oldSamplePath) continue;
-                event.setImageUrl(imageFor(event.getTitle()));
+                String expected = imageFor(event.getTitle());
+                boolean outdated = img != null && img.startsWith("/images/event-photos/") && !img.equals(expected);
+                if (!placeholder && !oldSamplePath && !outdated) continue;
+                event.setImageUrl(expected);
                 events.save(event);
                 updated++;
             }

@@ -52,7 +52,7 @@ public class PaymentService {
     }
 
     public PaymentAttempt require(String reference) {
-        if (reference == null || !reference.matches("EF[A-F0-9]{25}"))
+        if (reference == null || !reference.matches("(EF|OV)[A-F0-9]{25}"))
             throw new IllegalArgumentException("Invalid payment reference.");
         return paymentAttemptRepository.findByTransactionId(reference)
                 .orElseThrow(() -> new IllegalArgumentException("Payment order not found."));

@@ -109,15 +109,20 @@
         </section>
 
         <section class="event-details-section" th:if="${!#lists.isEmpty(relatedRecs)}" aria-labelledby="ovRelatedHeading">
-          <div class="event-details-section-head"><div><span class="section-kicker">KEEP EXPLORING</span><h2 id="ovRelatedHeading">You might also like</h2><p>Chosen for this event, with the reason for each pick.</p></div></div>
+          <div class="event-details-section-head"><div><span class="section-kicker">KEEP EXPLORING</span><h2 id="ovRelatedHeading">You might also like</h2><p>Chosen for this event. The light bulb <i class="bi bi-lightbulb-fill" aria-hidden="true"></i> on a card tells you why.</p></div></div>
           <div class="ov-related-grid">
-            <a class="ov-related-card" th:each="rec : ${relatedRecs}" th:with="r=${rec.event},relatedImage=${@display.listingImageUrl(rec.event)}" th:href="@{'/events/' + ${r.id}}">
+            <div class="ov-related-wrap" th:each="rec : ${relatedRecs}">
+            <a class="ov-related-card" th:with="r=${rec.event},relatedImage=${@display.listingImageUrl(rec.event)}" th:href="@{'/events/' + ${r.id}}">
               <img data-event-image th:attr="data-event-category=${r.category}" th:src="${relatedImage}" src="/images/event-visual.png" alt="" loading="lazy" decoding="async" width="320" height="200">
               <span class="ov-card-tag" th:attr="data-cat=${r.category}" th:text="${r.category}">Category</span>
               <strong th:text="${r.title}">Event</strong>
               <small><i class="bi bi-calendar3"></i> <span th:text="${@display.eventDate(r)}">Date</span> · <span th:text="${r.location}">Venue</span></small>
-              <span class="ov-related-reason" th:if="${!#lists.isEmpty(rec.reasons)}"><i class="bi bi-lightbulb" aria-hidden="true"></i> <span th:text="${#strings.listJoin(rec.reasons.subList(0, rec.reasons.size() > 2 ? 2 : rec.reasons.size()), ' · ')}">Same category</span></span>
             </a>
+              <div class="why-wrap" th:if="${!#lists.isEmpty(rec.reasons)}">
+                <button class="why-bulb" type="button" aria-expanded="false" th:attr="aria-label=${'Why we suggest this: ' + #strings.listJoin(rec.reasons, '; ')}"><i class="bi bi-lightbulb-fill" aria-hidden="true"></i></button>
+                <div class="why-pop" aria-hidden="true"><strong>Why this pick</strong><ul><li th:each="reason : ${rec.reasons}" th:text="${reason}">Reason</li></ul></div>
+              </div>
+            </div>
           </div>
         </section>
       </div>

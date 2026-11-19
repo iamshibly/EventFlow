@@ -75,10 +75,32 @@ public class ViewFormatter {
         BigDecimal price = EventRules.basePrice(event);
         return !EventRules.isPaid(event) || price.signum() <= 0 ? "Free" : bdt(price);
     }
-    private static final java.util.Set<String> COVER_CATEGORIES = java.util.Set.of("technology", "business", "education",
-            "health", "music", "sports", "career", "community", "design");
+    /**
+     * Preferred real photos per category (files in static/images/photos/). Names that are not present on the classpath
+     * are skipped, so adding a photo with one of these names is enough: no code change needed.
+     */
+    private static final java.util.Map<String, java.util.List<String>> PHOTO_NAMES = java.util.Map.of(
+            "technology", java.util.List.of("tech-lock", "laptop-bw", "workshop-room", "workshop", "conference"),
+            "business", java.util.List.of("business-laptop", "market-stall", "networking", "speaker-hall", "conference"),
+            "education", java.util.List.of("panel", "speaker-hall", "workshop-room", "workshop", "business-laptop"),
+            "career", java.util.List.of("career-fair", "networking", "business-laptop"),
+            "design", java.util.List.of("design-desk", "market-stall", "business-laptop"),
+            "music", java.util.List.of("music", "dance", "conference"),
+            "community", java.util.List.of("volunteers", "dance", "networking", "workshop"),
+            "sports", java.util.List.of("marathon"),
+            "arts", java.util.List.of("market-stall", "dance", "design-desk"),
+            "science", java.util.List.of("workshop-room", "panel", "tech-lock"),
+            "food", java.util.List.of("market-stall"),
+            "charity", java.util.List.of("volunteers", "networking"));
+    private static final java.util.Map<String, java.util.List<String>> PHOTOS = new java.util.concurrent.ConcurrentHashMap<>();
 
-    /** The event's own photo, or an original category cover (3 variants per category, chosen by event id). */
+    private static java.util.List<String> photosFor(String category) {
+        return PHOTOS.computeIfAbsent(category, c -> PHOTO_NAMES.getOrDefault(c, java.util.List.of()).stream()
+                .filter(n -> new org.springframework.core.io.ClassPathResource("static/images/photos/" + n + ".webp").exists())
+                .toList());
+    }
+
+    /** The event's own photo, or a category photo (variant chosen by event) when none was uploaded. */
     public String listingImageUrl(Event event) {
         if (event != null && event.getImageUrl() != null && !event.getImageUrl().isBlank()
                 && !"/images/event-visual.png".equals(event.getImageUrl())) {
@@ -89,10 +111,12 @@ public class ViewFormatter {
 
     public static String coverFor(Event event) {
         String category = event == null || event.getCategory() == null ? "" : event.getCategory().trim().toLowerCase(java.util.Locale.ROOT);
-        String slug = COVER_CATEGORIES.contains(category) ? category : "other";
-        String key = event == null || event.getId() == null ? (event == null || event.getTitle() == null ? "" : event.getTitle()) : event.getId();
-        int variant = Math.floorMod((key + (event == null || event.getTitle() == null ? "" : event.getTitle())).hashCode(), 3) + 1;
-        return "/images/covers/" + slug + "-" + variant + ".webp";
+        String key = (event == null || event.getId() == null ? "" : event.getId()) + (event == null || event.getTitle() == null ? "" : event.getTitle());
+        int hash = Math.floorMod(key.hashCode(), 1000);
+        java.util.List<String> photos = photosFor(category);
+        if (!photos.isEmpty()) return "/images/photos/" + photos.get(hash % photos.size()) + ".webp";
+        String slug = "health".equals(category) || "sports".equals(category) ? category : "other";
+        return "/images/covers/" + slug + "-" + (hash % 3 + 1) + ".webp";
     }
 
     public String ticketPrice(EventTicketType ticket) {

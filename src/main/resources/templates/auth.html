@@ -1,6 +1,10 @@
 <!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('Log in or Sign up', 'public')}"></head><body class="ov-page ov-auth-page" th:classappend="${activeTab == 'register'} ? ' ov-register-open' : ''" th:attr="data-forgot-open=${forgotOpen},data-forgot-step=${forgotStep},data-forgot-email=${forgotEmail},data-forgot-error=${forgotError}">
 <div th:replace="~{fragments :: siteNav('auth')}"></div>
 <main class="ov-auth-scene">
+  <div class="ov-auth-bg" aria-hidden="true">
+    <span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span>
+    <i class="orb o1"></i><i class="orb o2"></i>
+  </div>
   <div class="ov-auth-main ov-container" th:classappend="${!demoAccessAvailable} ? ' no-demo' : ''">
     <section class="ov-auth-hero" aria-label="Welcome to Occavie">
       <a class="brand" th:href="@{/}" href="/" aria-label="Occavie home"><img class="brand-mark" th:src="@{/images/occavie-mark.svg}" src="/images/occavie-mark.svg" alt="" width="44" height="44"><span class="brand-word">Occa<em>vie</em></span></a>
@@ -12,6 +16,11 @@
         <li><i class="bi bi-calendar2-event"></i> Create and manage your own events</li>
         <li><i class="bi bi-graph-up-arrow"></i> Track bookings, ratings and analytics</li>
       </ul>
+      <div class="ov-auth-floats" aria-hidden="true">
+        <span class="f1"><i class="bi bi-qr-code-scan"></i> Scan in at the door</span>
+        <span class="f2"><i class="bi bi-stars"></i> Picked for you</span>
+        <span class="f3"><i class="bi bi-ticket-perforated"></i> Instant PDF tickets</span>
+      </div>
     </section>
     <section class="ov-auth-panel" aria-label="Login and registration">
       <div class="ov-auth-tabs" role="tablist" aria-label="Account access">

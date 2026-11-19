@@ -2,7 +2,7 @@
 
 > **Make every moment count.**
 
-Occavie (formerly EventFlow) is a full-stack event platform. People discover events and book tickets, organizers plan and run events, and administrators oversee the whole site. It is a Spring Boot + Thymeleaf + MongoDB application with three role-based workspaces (Admin, Organizer, Participant) and a set of rule-based "smart" features (search, recommendations, comparison, an organizer Copilot and a visitor Concierge) that need **no AI service, no API keys and no extra configuration**.
+Occavie is a full-stack event platform. People discover events and book tickets, organizers plan and run events, and administrators oversee the whole site. It is a Spring Boot + Thymeleaf + MongoDB application with three role-based workspaces (Admin, Organizer, Participant) and a set of rule-based "smart" features (search, recommendations, comparison, an organizer Copilot and a visitor Concierge) that need **no AI service, no API keys and no extra configuration**.
 
 Developed by **Md. Zubayer Ahmad Shibly**.
 
@@ -28,7 +28,23 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 
 > Screenshots come from a local run with sample data.
 
-## What it does
+## What the website can do
+
+In one list:
+
+* **Find events**: search in plain sentences, filter by topic, price, date and place, sort, and save favourites.
+* **Get answers**: ask the on-site Concierge about seats, prices, venues and tickets.
+* **Get ideas**: personal recommendations with a 💡 reason on every card.
+* **Compare**: put 2 or 3 events side by side.
+* **Book**: free or paid tickets, coupons, waitlist, instant PDF tickets and receipts with QR codes.
+* **Attend**: add to calendar, share, get reminders and announcements, rate events afterwards.
+* **Organize**: create events with a guided wizard, schedules, speakers, sponsors, galleries, ticket types and coupons, and get a Copilot readiness score with next steps.
+* **Run the door**: scan QR tickets or enter codes for fast, single-use check-in.
+* **Measure**: analytics, attendance rates and CSV exports.
+* **Administer**: manage users, events, approvals, reviews and support messages.
+* **Everywhere**: phone, tablet and desktop layouts, light and dark mode, accessible and secure by default.
+
+The details follow.
 
 ### Smart features (rule-based, offline, no configuration)
 
@@ -78,7 +94,7 @@ How they stay honest: recommendations never suggest booked, saved, sold-out, pas
 
 | Area | What changed |
 |---|---|
-| Identity and design | Rebrand from EventFlow to Occavie, new design system, navy-and-gold theme with serif headings, new logo and icons, photo hero, per-topic coloured category tiles |
+| Identity and design | Complete visual identity, new design system, navy-and-gold theme with serif headings, new logo and icons, photo hero, per-topic coloured category tiles |
 | Booking | Event pages, checkout, PDF tickets and receipts, demo-payment labelling, coupons |
 | Dashboards | Participant, organizer and admin dashboards with photo event cards and analytics |
 | Check-in | Signed QR tickets, camera/manual check-in, duplicate-scan protection |
@@ -207,6 +223,6 @@ See [DEPLOYMENT.md](DEPLOYMENT.md). Render (Docker) is the recommended host; Ver
 
 Developer: Md. Zubayer Ahmad Shibly. Photos: Unsplash contributors (Unsplash License). Icons: Bootstrap Icons. Charts: Chart.js. QR codes: ZXing.
 
-## Project history
+## Technical notes
 
-Rebranded from EventFlow. The Java package (`com.eventflow`), the MongoDB database and collection names, URLs and the three demo email addresses are unchanged for compatibility.
+For compatibility the Java package is `com.eventflow`, the MongoDB database and collection names keep their original names, and the three demo accounts use `@eventflow.com` addresses. These are internal names only; the site everywhere else is Occavie.

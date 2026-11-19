@@ -751,3 +751,28 @@ body.has-compare-tray .ov-concierge { bottom: 104px; }
   .ov-auth-bg span, .ov-auth-bg .orb, .ov-auth-floats span { animation: none; }
   .ov-auth-bg .s1 { opacity: 1; transform: none; }
 }
+
+/* ---- Register tab ---- */
+.ov-role-pick { border: 0; margin: 6px 0 4px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ov-role-pick legend { font-size: .85rem; font-weight: 700; color: var(--ink-2); padding: 0; margin-bottom: 8px; }
+.ov-role-opt { position: relative; cursor: pointer; }
+.ov-role-opt input { position: absolute; opacity: 0; inset: 0; }
+.ov-role-opt-body { display: grid; gap: 2px; justify-items: start; padding: 14px; border: 1.5px solid var(--line); border-radius: 16px; background: var(--surface); transition: border-color .15s, box-shadow .15s, transform .15s; }
+.ov-role-opt-body i { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; background: var(--brand-soft); color: var(--brand); font-size: 1.15rem; margin-bottom: 6px; }
+.ov-role-opt-body strong { color: var(--ink); } .ov-role-opt-body small { color: var(--muted); font-size: .8rem; }
+.ov-role-opt:hover .ov-role-opt-body { transform: translateY(-2px); }
+.ov-role-opt input:checked + .ov-role-opt-body { border-color: var(--gold-2, #D19208); box-shadow: 0 0 0 3px rgba(229,173,28,.28); background: var(--brand-soft); }
+.ov-role-opt input:focus-visible + .ov-role-opt-body { outline: 3px solid var(--brand); outline-offset: 2px; }
+.ov-auth-switch { text-align: center; font-size: .9rem; color: var(--muted); margin: 6px 0 0; }
+.ov-link-button { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--brand); cursor: pointer; text-decoration: underline; }
+.ov-auth-points[hidden] { display: none; }
+body.ov-register-open .ov-auth-scene::before { background: linear-gradient(100deg, rgba(8,14,36,.9) 0%, rgba(30,20,6,.7) 45%, rgba(8,14,36,.45) 100%), radial-gradient(50% 60% at 15% 85%, rgba(229,173,28,.4), transparent 70%); }
+body.ov-register-open .ov-auth-panel form#registerForm { animation: ovRise .35s ease both; }
+@keyframes ovRise { from { opacity: 0; transform: translateY(10px); } }
+@media (min-width: 700px) { #registerForm .ov-auth-input input { min-height: 46px; } }
+@media (max-width: 420px) { .ov-role-pick { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { body.ov-register-open .ov-auth-panel form#registerForm { animation: none; } }
+.ov-auth-hero { align-self: start; position: sticky; top: 110px; justify-content: flex-start; }
+.ov-role-opt input:checked + .ov-role-opt-body i { background: #fff; box-shadow: 0 2px 8px rgba(209,146,8,.3); }
+@media (max-width: 420px) { .ov-role-pick { grid-template-columns: 1fr 1fr; } .ov-role-opt-body { padding: 12px; } .ov-role-opt-body small { font-size: .74rem; } }
+@media (max-width: 960px) { .ov-auth-hero { position: static; } }

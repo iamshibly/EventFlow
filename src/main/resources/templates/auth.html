@@ -16,6 +16,11 @@
         <li><i class="bi bi-calendar2-event"></i> Create and manage your own events</li>
         <li><i class="bi bi-graph-up-arrow"></i> Track bookings, ratings and analytics</li>
       </ul>
+      <ul class="ov-auth-points ov-auth-points-register" hidden>
+        <li><i class="bi bi-gift"></i> Free to join, no card needed</li>
+        <li><i class="bi bi-lightning-charge"></i> Book your first event in seconds</li>
+        <li><i class="bi bi-megaphone"></i> Or host your own and sell tickets</li>
+      </ul>
       <div class="ov-auth-floats" aria-hidden="true">
         <span class="f1"><i class="bi bi-qr-code-scan"></i> Scan in at the door</span>
         <span class="f2"><i class="bi bi-stars"></i> Picked for you</span>
@@ -48,7 +53,10 @@
         <form id="registerForm" th:action="@{/register}" method="post">
           <input type="hidden" name="redirect" th:value="${redirect}">
           <label for="fullName">Full name</label><div class="ov-auth-input"><input id="fullName" name="fullName" type="text" th:value="${formName}" autocomplete="name" minlength="3" maxlength="50" placeholder="Your full name" required></div>
-          <label for="role">Account type</label><div class="ov-auth-input"><select id="role" name="role" required><option value="">Choose a role</option><option value="PARTICIPANT" th:selected="${formRole == 'PARTICIPANT'}">Participant</option><option value="ORGANIZER" th:selected="${formRole == 'ORGANIZER'}">Organizer</option></select></div>
+          <fieldset class="ov-role-pick"><legend>I want to</legend>
+            <label class="ov-role-opt"><input type="radio" name="role" value="PARTICIPANT" th:checked="${formRole != 'ORGANIZER'}" required><span class="ov-role-opt-body"><i class="bi bi-ticket-perforated" aria-hidden="true"></i><strong>Join events</strong><small>Book tickets, save favourites</small></span></label>
+            <label class="ov-role-opt"><input type="radio" name="role" value="ORGANIZER" th:checked="${formRole == 'ORGANIZER'}"><span class="ov-role-opt-body"><i class="bi bi-calendar2-event" aria-hidden="true"></i><strong>Host events</strong><small>Create, sell and check in</small></span></label>
+          </fieldset>
           <label for="registerEmail">Email address</label><div class="ov-auth-input"><input id="registerEmail" name="email" type="email" th:value="${formEmail}" placeholder="you@example.com" autocomplete="email" required></div>
           <label for="registerPassword">Password</label><div class="ov-auth-input"><input id="registerPassword" name="password" type="password" placeholder="Create a strong password" autocomplete="new-password" minlength="8" required><button type="button" class="ov-password-toggle" data-target="registerPassword" aria-label="Show password"><i class="bi bi-eye ov-eye-open" aria-hidden="true"></i><i class="bi bi-eye-slash ov-eye-closed" aria-hidden="true"></i></button></div>
           <div class="ov-strength" id="v1PasswordStrength" aria-live="polite">
@@ -64,6 +72,7 @@
           <p class="ov-match-status" id="v1PasswordMatch" aria-live="polite"></p>
           <p class="ov-inline-error" id="v1RegisterError" aria-live="polite"></p>
           <button class="ov-gold-button ov-auth-submit" type="submit">Create Account</button>
+          <p class="ov-auth-switch">Already have an account? <button type="button" class="ov-link-button" id="goLogin">Log in</button></p>
         </form>
       </section>
     </section>

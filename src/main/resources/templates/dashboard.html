@@ -43,6 +43,17 @@
             <a th:href="@{/contact}"><i class="bi bi-headset"></i><span>Support</span></a>
         </nav>
 
+        <section class="surface-card copilot-attention" th:if="${user.role == 'ORGANIZER' and copilotAttention != null and !#lists.isEmpty(copilotAttention)}" aria-labelledby="copAttn">
+            <div class="surface-heading"><div><span class="section-kicker">EVENT COPILOT</span><h2 id="copAttn">Events that need attention</h2></div><a th:href="@{/organizer/events}">All events</a></div>
+            <ul class="copilot-attn-list">
+                <li th:each="e : ${copilotAttention}" th:with="r=${copilotScores[e.id]}">
+                    <span class="copilot-mini" th:classappend="${'is-' + r.tone}" th:style="${'--score:' + r.score}"><b th:text="${r.score}">0</b></span>
+                    <span><strong th:text="${e.title}">Event</strong><small th:text="${r.topTips[0].tip}">Tip</small></span>
+                    <a class="secondary-button" th:href="@{'/organizer/events/' + ${e.id} + '/copilot'}">Open Copilot</a>
+                </li>
+            </ul>
+        </section>
+
         <section class="dash-cards" th:if="${cardEvents != null and !#lists.isEmpty(cardEvents)}" aria-labelledby="dashCardsHeading">
             <div class="dash-cards-head">
                 <div><span class="section-kicker">EXPLORE</span><h2 id="dashCardsHeading" th:text="${cardHeading}">Recommended for you</h2><p th:text="${cardSubheading}">Subheading</p></div>

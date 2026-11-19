@@ -132,6 +132,13 @@
             <div class="wiz-check is-missing" th:if="${event.approvalNote != null}"><i class="bi bi-exclamation-circle-fill"></i><div><strong>Not approved last time</strong><span th:text="${event.approvalNote}">Reason</span></div></div>
             <div class="wiz-check is-ok" th:if="${#lists.isEmpty(missing)}"><i class="bi bi-check-circle-fill"></i><span>Everything required is filled in.</span></div>
             <div class="wiz-check is-missing" th:if="${!#lists.isEmpty(missing)}"><i class="bi bi-exclamation-circle-fill"></i><div><strong>Still needed before publishing</strong><ul><li th:each="m : ${missing}" th:text="${m}">Title</li></ul></div></div>
+            <div class="copilot-panel" th:if="${copilot != null}" th:classappend="${'is-' + copilot.tone}">
+                <div class="copilot-mini" th:style="${'--score:' + copilot.score}"><b th:text="${copilot.score}">0</b></div>
+                <div class="copilot-panel-body"><strong th:text="${'Copilot check: ' + copilot.level + ' (' + copilot.score + '/100)'}">Copilot check</strong>
+                    <ul th:if="${!#lists.isEmpty(copilot.topTips)}"><li th:each="tip : ${copilot.topTips}"><span th:text="${tip.tip}">Tip</span> <a th:href="${copilotLinks[tip.id]}">Fix</a></li></ul>
+                    <span th:if="${#lists.isEmpty(copilot.topTips)}">Every check passed.</span>
+                    <a class="copilot-more" th:href="@{'/organizer/events/' + ${event.id} + '/copilot'}">See the full checklist</a></div>
+            </div>
             <div class="wiz-nav">
                 <a class="secondary-button" th:href="@{/organizer/events/{id}/wizard(id=${event.id},step=5)}"><i class="bi bi-arrow-left"></i>Back</a>
                 <span class="wiz-spacer"></span>

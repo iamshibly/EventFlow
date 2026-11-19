@@ -38,6 +38,7 @@ public class OrganizerController {
     private final FeedbackService feedbackService;
     private final EventProgramService eventProgramService;
     private final TicketTypeService ticketTypeService;
+    private final com.eventflow.service.ReadinessService readinessService;
 
 
 
@@ -54,6 +55,7 @@ public class OrganizerController {
         model.addAttribute("speakerCounts", eventProgramService.speakerCounts(events));
         model.addAttribute("sponsorCounts", eventProgramService.sponsorCounts(events));
         model.addAttribute("ticketCounts", ticketTypeService.ticketCounts(events));
+        model.addAttribute("readiness", readinessService.assessAll(events.stream().filter(e -> !"CANCELLED".equals(e.getStatus())).toList()));
         return "organizer-events";
     }
 

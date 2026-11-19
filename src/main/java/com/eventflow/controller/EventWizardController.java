@@ -37,6 +37,7 @@ public class EventWizardController {
 
     private final UserService userService;
     private final EventService eventService;
+    private final com.eventflow.service.ReadinessService readinessService;
     private final EventProgramService eventProgramService;
     private final TicketTypeService ticketTypeService;
     private final NotificationService notificationService;
@@ -90,6 +91,13 @@ public class EventWizardController {
             model.addAttribute("sponsorCount", eventProgramService.findSponsors(id).size());
             model.addAttribute("ticketTypes", ticketTypeService.findByEvent(id));
             model.addAttribute("missing", eventService.readiness(event));
+            if (step == 6) {
+                var copilot = readinessService.assess(event);
+                java.util.Map<String, String> copilotLinks = new java.util.HashMap<>();
+                copilot.checks().forEach(c -> copilotLinks.put(c.id(), com.eventflow.service.ReadinessService.fixLink(event, c.area())));
+                model.addAttribute("copilot", copilot);
+                model.addAttribute("copilotLinks", copilotLinks);
+            }
             return "event-wizard";
         } catch (IllegalArgumentException ex) {
             flash.addFlashAttribute("toastError", ex.getMessage());

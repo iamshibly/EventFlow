@@ -7,14 +7,17 @@
     <div th:replace="~{fragments :: sidebar('dashboard')}"></div>
     <main class="app-main">
         <section class="page-heading dashboard-heading dash-photo-hero">
-            <img class="dash-hero-img" alt="" width="1600" height="600" fetchpriority="high"
-                 th:src="${user.role == 'PARTICIPANT' ? '/images/home-conference-hero.webp' : (user.role == 'ORGANIZER' ? '/images/photos/networking.webp' : '/images/photos/conference.webp')}" src="/images/home-conference-hero.webp">
+            <div class="ov-auth-bg dash-hero-bg" aria-hidden="true">
+                <span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span>
+                <i class="orb o1"></i><i class="orb o2"></i>
+            </div>
             <div>
                 <span class="role-label" th:text="${user.role}">PARTICIPANT</span>
-                <h1 th:text="'Welcome back, ' + ${user.fullName}">Welcome back</h1>
+                <h1><span id="dashGreeting">Welcome back</span>, <span class="dash-name" th:text="${user.fullName}">Name</span></h1>
                 <p th:if="${user.role == 'PARTICIPANT'}">Keep track of your registrations and discover what is happening next.</p>
                 <p th:if="${user.role == 'ORGANIZER'}">Manage your events, registrations and participant activity from one place.</p>
                 <p th:if="${user.role == 'ADMIN'}">Monitor users, events and registrations across Occavie.</p>
+                <p class="dash-today"><i class="bi bi-calendar3" aria-hidden="true"></i> <span id="dashToday">Today</span></p>
             </div>
             <a class="primary-button" th:if="${user.role == 'ORGANIZER'}" th:href="@{/organizer/events/new}"><i class="bi bi-plus-lg"></i>Create Event</a>
         </section>
@@ -42,6 +45,13 @@
             <a th:href="@{/profile}"><i class="bi bi-person-circle"></i><span>Profile &amp; settings</span></a>
             <a th:href="@{/contact}"><i class="bi bi-headset"></i><span>Support</span></a>
         </nav>
+
+        <section class="metric-grid" th:classappend="${user.role == 'PARTICIPANT'} ? ' ef-participant-metrics' : ''">
+            <article class="metric-card" th:if="${user.role != 'PARTICIPANT'}"><div class="metric-icon"><i class="bi bi-calendar2-event"></i></div><div><span th:text="${metricOneLabel}">Metric</span><strong th:text="${metricOneValue}">0</strong></div></article>
+            <article class="metric-card" th:if="${user.role != 'PARTICIPANT'}"><div class="metric-icon"><i class="bi bi-clock-history"></i></div><div><span th:text="${metricTwoLabel}">Metric</span><strong th:text="${metricTwoValue}">0</strong></div></article>
+            <article class="metric-card"><div class="metric-icon"><i class="bi bi-people"></i></div><div><span th:text="${metricThreeLabel}">Metric</span><strong th:text="${metricThreeValue}">0</strong></div></article>
+            <article class="metric-card"><div class="metric-icon"><i class="bi bi-check2-circle"></i></div><div><span th:text="${metricFourLabel}">Metric</span><strong th:text="${metricFourValue}">0</strong></div></article>
+        </section>
 
         <section class="surface-card copilot-attention" th:if="${user.role == 'ORGANIZER' and copilotAttention != null and !#lists.isEmpty(copilotAttention)}" aria-labelledby="copAttn">
             <div class="surface-heading"><div><span class="section-kicker">EVENT COPILOT</span><h2 id="copAttn">Events that need attention</h2></div><a th:href="@{/organizer/events}">All events</a></div>
@@ -82,12 +92,6 @@
             </div>
         </section>
 
-        <section class="metric-grid" th:classappend="${user.role == 'PARTICIPANT'} ? ' ef-participant-metrics' : ''">
-            <article class="metric-card" th:if="${user.role != 'PARTICIPANT'}"><div class="metric-icon"><i class="bi bi-calendar2-event"></i></div><div><span th:text="${metricOneLabel}">Metric</span><strong th:text="${metricOneValue}">0</strong></div></article>
-            <article class="metric-card" th:if="${user.role != 'PARTICIPANT'}"><div class="metric-icon"><i class="bi bi-clock-history"></i></div><div><span th:text="${metricTwoLabel}">Metric</span><strong th:text="${metricTwoValue}">0</strong></div></article>
-            <article class="metric-card"><div class="metric-icon"><i class="bi bi-people"></i></div><div><span th:text="${metricThreeLabel}">Metric</span><strong th:text="${metricThreeValue}">0</strong></div></article>
-            <article class="metric-card"><div class="metric-icon"><i class="bi bi-check2-circle"></i></div><div><span th:text="${metricFourLabel}">Metric</span><strong th:text="${metricFourValue}">0</strong></div></article>
-        </section>
 
 
         <section class="analytics-section" th:if="${(user.role == 'ADMIN' or user.role == 'ORGANIZER') and analytics != null}">
@@ -232,5 +236,10 @@
     };
 </script>
 <script th:src="@{/js/site.js(v='2026.11.1')}" src="/js/site.js"></script>
+<script>
+(function(){var h=new Date().getHours(),g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+var a=document.getElementById('dashGreeting');if(a)a.textContent=g;
+var d=document.getElementById('dashToday');if(d)d.textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});})();
+</script>
 </body>
 </html>

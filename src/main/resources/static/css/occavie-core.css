@@ -446,3 +446,22 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -.01em; }
 .why-legend { margin: 6px 0 0; font-size: .84rem; color: var(--ink-2); }
 .why-legend i { color: var(--brand); }
 .ov-related-wrap .why-wrap { top: 8px; }
+
+/* ---- Shared moving-photo backdrop (used by public pages and dashboards) ---- */
+.ov-auth-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.ov-auth-bg span { position: absolute; inset: -4%; background-size: cover; background-position: center; opacity: 0; animation: ovSlide 30s infinite, ovZoom 30s infinite; }
+.ov-auth-bg .s1 { background-image: url(/images/event-photos/music-and-cultural-festival.webp); animation-delay: 0s; }
+.ov-auth-bg .s2 { background-image: url(/images/event-photos/startup-pitch-day.webp); animation-delay: 6s; }
+.ov-auth-bg .s3 { background-image: url(/images/event-photos/inter-university-football-tournament.webp); animation-delay: 12s; }
+.ov-auth-bg .s4 { background-image: url(/images/event-photos/women-in-leadership-summit.webp); animation-delay: 18s; }
+.ov-auth-bg .s5 { background-image: url(/images/event-photos/cloud-native-meetup.webp); animation-delay: 24s; }
+@keyframes ovSlide { 0% { opacity: 0; } 4% { opacity: 1; } 20% { opacity: 1; } 26% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes ovZoom { 0% { transform: scale(1); } 26% { transform: scale(1.09) translate(-1%, -1%); } 100% { transform: scale(1.09); } }
+.ov-auth-bg .orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .5; animation: ovDrift 14s ease-in-out infinite alternate; }
+.ov-auth-bg .o1 { width: 340px; height: 340px; left: -80px; top: 10%; background: #E5AD1C; }
+.ov-auth-bg .o2 { width: 300px; height: 300px; right: 5%; bottom: -80px; background: #3B5BDB; animation-delay: -6s; }
+@keyframes ovDrift { to { transform: translate(60px, -40px) scale(1.15); } }
+@keyframes ovFloat { to { transform: translateY(-8px); } }
+@keyframes ovRise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes ovCardIn { from { opacity: 0; transform: translateY(18px); } }
+@media (prefers-reduced-motion: reduce) { .ov-auth-bg span, .ov-auth-bg .orb { animation: none; } .ov-auth-bg .s1 { opacity: 1; transform: none; } }

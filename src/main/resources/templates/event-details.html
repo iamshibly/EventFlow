@@ -5,17 +5,26 @@
 <script type="application/ld+json" th:if="${eventJsonLd != null}" th:utext="${eventJsonLd}"></script>
 <a class="skip-link" href="#main-content">Skip to content</a>
 <div th:replace="~{fragments :: siteNav('events')}"></div>
-<main class="ov-container ov-details-main" id="main-content">
+<section class="ov-ed-hero" aria-labelledby="edTitle" th:with="efCover=${@display.listingImageUrl(event)},edSpots=${event.capacity - registrationCount}">
+  <img class="ov-ed-hero-img" data-event-image th:attr="data-event-category=${event.category}" th:src="${efCover}" src="/images/event-visual.png" alt="" fetchpriority="high">
+  <div class="ov-container ov-ed-hero-inner">
+    <a class="ov-ed-back" th:href="@{/events}" href="/events"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to Explore Events</a>
+    <div class="ov-ed-tags"><span class="ov-card-tag" th:attr="data-cat=${event.category}" th:text="${event.category}">Technology</span><span class="ov-status-pill" th:text="${@display.status(event)}">UPCOMING</span></div>
+    <h1 id="edTitle" th:text="${event.title}">Event title</h1>
+    <ul class="ov-ed-meta" aria-label="Event at a glance">
+      <li><i class="bi bi-calendar3" aria-hidden="true"></i><span th:text="${@display.eventDate(event) + ' · ' + @display.eventTime(event)}">Date</span></li>
+      <li><i class="bi bi-geo-alt" aria-hidden="true"></i><span th:text="${event.location}">Dhaka</span></li>
+      <li><i class="bi bi-people" aria-hidden="true"></i><span th:text="${@display.status(event) == 'COMPLETED' ? 'Event ended' : (edSpots le 0 ? 'Sold out' : edSpots + (edSpots == 1 ? ' spot left' : ' spots left'))}">50 spots left</span></li>
+      <li class="is-price"><i class="bi bi-tag" aria-hidden="true"></i><span th:text="${startingPrice}">Free</span></li>
+    </ul>
+  </div>
+</section>
+<main class="ov-container ov-details-main ov-ed-main" id="main-content">
   <div class="ov-banner is-draft" th:if="${isDraftPreview}" role="note"><i class="bi bi-eye"></i><div><strong>Preview, not public</strong><span th:text="${'Status: ' + @display.statusLabel(event) + '. Only you and administrators can see this page.'}">Only you and administrators can see this page.</span></div></div>
   <div class="ov-banner is-cancelled" th:if="${@display.status(event) == 'CANCELLED'}" role="note"><i class="bi bi-slash-circle"></i><div><strong>This event was cancelled</strong><span th:text="${event.cancellationReason != null ? event.cancellationReason : 'Registrations are no longer valid.'}">Reason</span></div></div>
-  <a class="ov-back-link" th:href="@{/events}"><i class="bi bi-arrow-left"></i> Back to Explore Events</a>
   <div class="ov-details-columns">
     <div class="ov-details-content">
       <section class="ov-details-overview">
-        <img class="ov-details-cover" data-event-image th:attr="data-event-category=${event.category}"
-             th:with="efCover=${@display.listingImageUrl(event)}" th:src="${efCover}" src="/images/event-visual.png" th:alt="${event.title}" alt="Event image">
-        <div class="ov-details-tags"><span class="ov-card-tag" th:text="${event.category}">Technology</span><span class="ov-status-pill" th:text="${@display.status(event)}">UPCOMING</span></div>
-        <h1 th:text="${event.title}">Event title</h1>
         <div class="ov-actions-row" aria-label="Event actions">
           <form th:if="${user != null and user.role == 'PARTICIPANT' and !isDraftPreview}" th:action="${'/participant/events/' + event.id + (isSaved ? '/unsave' : '/save')}" method="post" data-save-toggle th:attr="data-event-id=${event.id}">
             <button class="ov-outline-button" type="submit" th:attr="aria-pressed=${isSaved}"><i class="bi" th:classappend="${isSaved} ? 'bi-bookmark-fill' : 'bi-bookmark'"></i><span th:text="${isSaved ? 'Saved' : 'Save'}">Save</span></button>

@@ -42,6 +42,10 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|
 | ![Event setup](docs/screenshots/event-program.jpg) | |
 
+| Notifications | Profile |
+|---|---|
+| ![Notifications](docs/screenshots/notifications.jpg) | ![Profile](docs/screenshots/profile.jpg) |
+
 | Mobile | Mobile, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |

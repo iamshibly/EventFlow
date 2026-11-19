@@ -44,6 +44,13 @@
                         <span><i class="bi bi-award"></i><strong th:text="${sponsorCounts[event.id]}">0</strong> sponsors</span>
                         <span><i class="bi bi-ticket-detailed"></i><strong th:text="${ticketCounts[event.id]}">0</strong> ticket types</span>
                     </div>
+                    <a class="copilot-strip" th:if="${readiness != null and readiness[event.id] != null}" th:href="@{'/organizer/events/' + ${event.id} + '/copilot'}" th:classappend="${'is-' + readiness[event.id].tone}"
+                       th:aria-label="${'Event Copilot for ' + event.title + ': ' + readiness[event.id].score + ' percent ready'}">
+                        <span class="copilot-mini" th:style="${'--score:' + readiness[event.id].score}"><b th:text="${readiness[event.id].score}">0</b></span>
+                        <span class="copilot-strip-text"><strong th:text="${'Copilot: ' + readiness[event.id].level}">Copilot</strong>
+                            <small th:text="${#lists.isEmpty(readiness[event.id].topTips) ? 'Every check passed.' : readiness[event.id].topTips[0].tip}">Tip</small></span>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </a>
                     <div class="capacity-block">
                         <div><span>Registrations</span><strong th:text="${registrationCounts[event.id] + ' / ' + event.capacity}">0 / 100</strong></div>
                         <div class="progress-track"><span th:style="|width:${event.capacity > 0 ? (registrationCounts[event.id] * 100 / event.capacity) : 0}%|"></span></div>

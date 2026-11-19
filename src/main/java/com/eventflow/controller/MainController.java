@@ -46,6 +46,7 @@ public class MainController {
     private final com.eventflow.service.SavedEventService savedEventService;
     private final com.eventflow.service.EventSuggestionService suggestionService;
     private final com.eventflow.service.OrganizerProfileService organizerProfileService;
+    private final com.eventflow.service.ReadinessService readinessService;
 
 
 
@@ -355,6 +356,13 @@ public class MainController {
         model.addAttribute("analytics", analyticsService.forEvents(events));
         addPhotoCards(model, "Your events", "Your upcoming events at a glance",
                 events.stream().filter(eventService::isUpcoming).limit(8).toList());
+        // Copilot: the events that would gain most from a few fixes (drafts and upcoming only).
+        List<Event> active = events.stream().filter(e -> "DRAFT".equals(e.getStatus()) || eventService.isUpcoming(e)).limit(12).toList();
+        var readinessByEvent = readinessService.assessAll(active);
+        List<Event> attention = active.stream().filter(e -> readinessByEvent.get(e.getId()).score() < 75)
+                .sorted(java.util.Comparator.comparingInt(e -> readinessByEvent.get(e.getId()).score())).limit(3).toList();
+        model.addAttribute("copilotAttention", attention);
+        model.addAttribute("copilotScores", readinessByEvent);
         return "dashboard";
     }
 

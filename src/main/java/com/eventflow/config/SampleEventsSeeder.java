@@ -7,6 +7,7 @@ import com.eventflow.model.User;
 import com.eventflow.repository.EventRepository;
 import com.eventflow.repository.EventScheduleRepository;
 import com.eventflow.repository.EventTicketTypeRepository;
+import com.eventflow.repository.RegistrationRepository;
 import com.eventflow.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -90,7 +92,7 @@ public class SampleEventsSeeder implements ApplicationRunner {
         new Row("Creative Entrepreneurship Fest", "Business", "Gulshan Business Centre", 75, 12, 0, 320, 500),
         new Row("Community Volunteer Meetup", "Community", "Dhanmondi Lake", 80, 9, 0, 120, 0));
 
-    /** Real photos placed on the events they suit best; every other event gets its own generated image (/images/events/<slug>.webp). */
+    /** Real photos placed on the events they suit best; every other event gets its own generated image (/images/event-photos/<slug>.webp). */
     private static final java.util.Map<String, String> PHOTOS = java.util.Map.of(
             "AI & Cloud Innovation Summit", "/images/photos/conference.webp",
             "Resume & LinkedIn Clinic", "/images/photos/business-laptop.webp",
@@ -105,7 +107,7 @@ public class SampleEventsSeeder implements ApplicationRunner {
         String photo = PHOTOS.get(title);
         if (photo != null) return photo;
         String slug = title.toLowerCase(java.util.Locale.ROOT).replace("&", "and").replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
-        return "/images/events/" + slug + ".webp";
+        return "/images/event-photos/" + slug + ".webp";
     }
 
     private final boolean enabled;
@@ -114,10 +116,12 @@ public class SampleEventsSeeder implements ApplicationRunner {
     private final EventScheduleRepository schedule;
     private final UserRepository users;
     private final PasswordEncoder encoder;
+    private final RegistrationRepository registrations;
 
     public SampleEventsSeeder(@Value("${occavie.sample-events.enabled:false}") boolean enabled, EventRepository events,
                               EventTicketTypeRepository tickets, EventScheduleRepository schedule, UserRepository users,
-                              PasswordEncoder encoder) {
+                              PasswordEncoder encoder, RegistrationRepository registrations) {
+        this.registrations = registrations;
         this.enabled = enabled; this.events = events; this.tickets = tickets; this.schedule = schedule;
         this.users = users; this.encoder = encoder;
     }
@@ -125,7 +129,7 @@ public class SampleEventsSeeder implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (!enabled) return;
-        if (events.count() > 0) { refreshImages(); return; }
+        if (events.count() > 0) { refreshImages(); rollDatesForward(); return; }
         User organizer = users.findByEmailIgnoreCase(ORGANIZER_EMAIL).orElseGet(() -> users.save(User.builder()
                 .fullName("Occavie Events").email(ORGANIZER_EMAIL).role("ORGANIZER").enabled(true)
                 .password(encoder.encode(UUID.randomUUID() + "Aa1!")).build()));   // random password: nobody can log in
@@ -170,12 +174,38 @@ public class SampleEventsSeeder implements ApplicationRunner {
             for (Event event : events.findAll()) {
                 if (!organizer.getId().equals(event.getOrganizerId())) continue;
                 String img = event.getImageUrl();
-                if (img != null && !img.isBlank() && !"/images/event-visual.png".equals(img)) continue;
+                boolean placeholder = img == null || img.isBlank() || "/images/event-visual.png".equals(img);
+                boolean oldSamplePath = img != null && img.startsWith("/images/events/");   // earlier generated artwork
+                if (!placeholder && !oldSamplePath) continue;
                 event.setImageUrl(imageFor(event.getTitle()));
                 events.save(event);
                 updated++;
             }
             if (updated > 0) log.info("Gave {} sample events their own image.", updated);
+        });
+    }
+
+    /**
+     * Sample events must not run out: any sample event whose date has passed and that nobody booked is moved forward
+     * to its original lead time from today, so the "upcoming" lists stay populated. Events with bookings are left
+     * alone and simply become past events. Runs at start-up and every day at 03:10.
+     */
+    @Scheduled(cron = "0 10 3 * * *")
+    public void rollDatesForward() {
+        if (!enabled) return;
+        users.findByEmailIgnoreCase(ORGANIZER_EMAIL).ifPresent(organizer -> {
+            LocalDate today = LocalDate.now();
+            java.util.Map<String, Integer> lead = new java.util.HashMap<>();
+            for (Row r : ROWS) lead.put(r.title(), r.days());
+            int moved = 0;
+            for (Event event : events.findByOrganizerIdOrderByDateAsc(organizer.getId())) {
+                if (event.getDate() == null || !event.getDate().isBefore(today)) continue;
+                if (registrations.countByEventId(event.getId()) > 0) continue;
+                event.setDate(today.plusDays(Math.max(3, lead.getOrDefault(event.getTitle(), 14))));
+                events.save(event);
+                moved++;
+            }
+            if (moved > 0) log.info("Moved {} expired sample events forward.", moved);
         });
     }
 }

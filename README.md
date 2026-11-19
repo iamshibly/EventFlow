@@ -91,6 +91,10 @@ See [`.env.example`](.env.example) for every variable. Production (`SPRING_PROFI
 
 Set `OCCAVIE_SAMPLE_EVENTS=true` and the app loads about 54 upcoming sample events (with tickets and schedules) **only if the database has no events at all**. They belong to a non-login "Occavie Events" organizer. Set `OCCAVIE_CONTACT_EMAIL`, `OCCAVIE_CONTACT_WHATSAPP` and `OCCAVIE_DEVELOPER_NAME` to control what the footer and Contact page show; no personal contact details are stored in the repository.
 
+### Image credits
+
+Sample-event photos are from [Unsplash](https://unsplash.com) (Unsplash License) plus a few supplied project photos. The 54 sample events each use a different image (`static/images/events/`, `static/images/photos/`).
+
 ## Tests
 
 ```bash

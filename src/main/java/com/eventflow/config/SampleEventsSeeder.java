@@ -90,6 +90,24 @@ public class SampleEventsSeeder implements ApplicationRunner {
         new Row("Creative Entrepreneurship Fest", "Business", "Gulshan Business Centre", 75, 12, 0, 320, 500),
         new Row("Community Volunteer Meetup", "Community", "Dhanmondi Lake", 80, 9, 0, 120, 0));
 
+    /** Real photos placed on the events they suit best; every other event gets its own generated image (/images/events/<slug>.webp). */
+    private static final java.util.Map<String, String> PHOTOS = java.util.Map.of(
+            "AI & Cloud Innovation Summit", "/images/photos/conference.webp",
+            "Resume & LinkedIn Clinic", "/images/photos/business-laptop.webp",
+            "UI Design Portfolio Review", "/images/photos/design-desk.webp",
+            "University Job Fair", "/images/photos/career-fair.webp",
+            "Campus Music Fiesta", "/images/photos/music.webp",
+            "Entrepreneur Networking Night", "/images/photos/networking.webp",
+            "Full Stack Web Bootcamp", "/images/photos/workshop.webp",
+            "Cybersecurity Conference", "/images/photos/tech-lock.webp");
+
+    static String imageFor(String title) {
+        String photo = PHOTOS.get(title);
+        if (photo != null) return photo;
+        String slug = title.toLowerCase(java.util.Locale.ROOT).replace("&", "and").replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        return "/images/events/" + slug + ".webp";
+    }
+
     private final boolean enabled;
     private final EventRepository events;
     private final EventTicketTypeRepository tickets;
@@ -106,7 +124,8 @@ public class SampleEventsSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (!enabled || events.count() > 0) return;
+        if (!enabled) return;
+        if (events.count() > 0) { refreshImages(); return; }
         User organizer = users.findByEmailIgnoreCase(ORGANIZER_EMAIL).orElseGet(() -> users.save(User.builder()
                 .fullName("Occavie Events").email(ORGANIZER_EMAIL).role("ORGANIZER").enabled(true)
                 .password(encoder.encode(UUID.randomUUID() + "Aa1!")).build()));   // random password: nobody can log in
@@ -122,7 +141,7 @@ public class SampleEventsSeeder implements ApplicationRunner {
                     .description(r.title() + " brings people together at " + r.venue() + " for talks, hands-on sessions and networking.")
                     .capacity(r.capacity()).status("UPCOMING").featured(index++ < 6)
                     .organizerId(organizer.getId()).organizerName(organizer.getFullName())
-                    .pricingType(paid ? "PAID" : "FREE").basePrice(BigDecimal.valueOf(r.price())).build());
+                    .imageUrl(imageFor(r.title())).pricingType(paid ? "PAID" : "FREE").basePrice(BigDecimal.valueOf(r.price())).build());
             int standard = paid ? (int) Math.floor(r.capacity() * 0.8) : r.capacity();
             ticketRows.add(EventTicketType.builder().eventId(event.getId()).name(paid ? "Standard" : "General Admission")
                     .description(paid ? "Regular event entry" : "Free admission").price(BigDecimal.valueOf(r.price()))
@@ -142,5 +161,21 @@ public class SampleEventsSeeder implements ApplicationRunner {
         tickets.saveAll(ticketRows);
         schedule.saveAll(scheduleRows);
         log.info("Loaded {} sample events (OCCAVIE_SAMPLE_EVENTS=true).", ROWS.size());
+    }
+
+    /** Sample events loaded earlier carry no image; give each its own (only events still on the default placeholder). */
+    private void refreshImages() {
+        users.findByEmailIgnoreCase(ORGANIZER_EMAIL).ifPresent(organizer -> {
+            int updated = 0;
+            for (Event event : events.findAll()) {
+                if (!organizer.getId().equals(event.getOrganizerId())) continue;
+                String img = event.getImageUrl();
+                if (img != null && !img.isBlank() && !"/images/event-visual.png".equals(img)) continue;
+                event.setImageUrl(imageFor(event.getTitle()));
+                events.save(event);
+                updated++;
+            }
+            if (updated > 0) log.info("Gave {} sample events their own image.", updated);
+        });
     }
 }

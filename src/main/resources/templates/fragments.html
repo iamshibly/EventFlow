@@ -170,7 +170,7 @@
         <nav class="ov-main-nav" aria-label="Main navigation">
             <a th:href="@{/}" href="/" th:classappend="${active == 'home'} ? ' is-active' : ''">Home</a>
             <a th:href="@{/events}" href="/events" th:classappend="${active == 'events'} ? ' is-active' : ''">Explore Events</a>
-            <a th:href="@{/home#about}" href="/home#about">About</a>
+            <a th:href="@{/about}" href="/about" th:classappend="${active == 'about'} ? ' is-active' : ''">About</a>
         </nav>
         <div class="ov-header-actions">
             <button class="ov-icon-button" type="button" data-theme-toggle aria-label="Switch theme" title="Switch theme"><i class="bi bi-moon-stars"></i></button>

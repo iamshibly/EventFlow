@@ -26,6 +26,10 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|
 | ![Register](docs/screenshots/register.jpg) | ![Forgot password](docs/screenshots/forgot-password.jpg) |
 
+| About | |
+|---|---|
+| ![About](docs/screenshots/about.jpg) | |
+
 | Mobile | Mobile, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |
@@ -46,6 +50,7 @@ In one list:
 * **Run the door**: scan QR tickets or enter codes for fast, single-use check-in.
 * **Measure**: analytics, attendance rates and CSV exports.
 * **Administer**: manage users, events, approvals, reviews and support messages.
+* **Learn about it**: a dedicated About page explains the platform, the three workspaces, the smart helpers and the principles behind it.
 * **Everywhere**: phone, tablet and desktop layouts, light and dark mode, accessible and secure by default.
 
 The details follow.

@@ -87,6 +87,10 @@ See [`.env.example`](.env.example) for every variable. Production (`SPRING_PROFI
 
 `scripts/eventflow-demo-40-no-registrations.js` seeds 40 events (it resets its own earlier seed). `scripts/occavie-more-events.js` adds 30 more upcoming events without touching anything else (run either in mongosh or the Compass shell). Events without an uploaded photo automatically get an original category cover (`/images/covers/`, three variants per category).
 
+### Sample events on a fresh database
+
+Set `OCCAVIE_SAMPLE_EVENTS=true` and the app loads about 54 upcoming sample events (with tickets and schedules) **only if the database has no events at all**. They belong to a non-login "Occavie Events" organizer. Set `OCCAVIE_CONTACT_EMAIL`, `OCCAVIE_CONTACT_WHATSAPP` and `OCCAVIE_DEVELOPER_NAME` to control what the footer and Contact page show; no personal contact details are stored in the repository.
+
 ## Tests
 
 ```bash

@@ -26,7 +26,7 @@
     <section class="ov-container ov-cat-section" th:if="${!#lists.isEmpty(categories)}" aria-label="Browse by category">
         <div class="ov-cat-grid">
             <a class="ov-cat-tile" th:href="@{/events}" href="/events"><i class="bi bi-grid-fill" aria-hidden="true"></i><span>All events</span></a>
-            <a class="ov-cat-tile" th:each="category : ${categories}" th:href="@{/events(category=${category})}" href="/events">
+            <a class="ov-cat-tile" th:attr="data-cat=${category}" th:each="category : ${categories}" th:href="@{/events(category=${category})}" href="/events">
                 <i class="bi" aria-hidden="true" th:classappend="${category == 'Technology' ? 'bi-laptop' : category == 'Business' ? 'bi-briefcase' : category == 'Education' ? 'bi-mortarboard' : category == 'Health' ? 'bi-heart-pulse' : category == 'Music' ? 'bi-music-note-beamed' : category == 'Sports' ? 'bi-trophy' : category == 'Career' ? 'bi-person-workspace' : category == 'Community' ? 'bi-people' : category == 'Design' ? 'bi-palette' : category == 'Arts' ? 'bi-brush' : category == 'Science' ? 'bi-radioactive' : category == 'Food' ? 'bi-cup-hot' : category == 'Charity' ? 'bi-heart' : 'bi-stars'}"></i>
                 <span th:text="${category}">Technology</span>
             </a>
@@ -48,7 +48,7 @@
                 <a class="ov-card-photo" th:href="@{'/events/' + ${event.id}}" href="/events" th:aria-label="${'View details for ' + event.title}" tabindex="-1">
                     <img data-event-image th:attr="data-event-category=${event.category}" th:src="${event.imageUrl}"
                          src="/images/event-visual.png" th:alt="${event.title + ' cover image'}" alt="Event cover" width="600" height="375" loading="lazy" decoding="async">
-                    <span class="ov-card-tag" th:text="${event.category}">Technology</span>
+                    <span class="ov-card-tag" th:attr="data-cat=${event.category}" th:text="${event.category}">Technology</span>
                 </a>
                 <div class="ov-event-card-body">
                     <span class="ov-event-date"><i class="bi bi-calendar3"></i><span th:text="${event.formattedDate}">20 May 2026</span></span>

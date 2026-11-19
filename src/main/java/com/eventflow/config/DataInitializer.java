@@ -111,11 +111,11 @@ public class DataInitializer {
             // Existing accounts, credentials and profile changes are never overwritten.
             if (demoSeedEnabled) {
                 ensureDemoUser(userRepository, passwordEncoder,
-                        "Safayet Ullah", "admin@eventflow.com", "Admin123!", "ADMIN");
+                        "Occavie Admin", "admin@eventflow.com", "Admin123!", "ADMIN");
                 User demoOrganizer = ensureDemoUser(userRepository, passwordEncoder,
-                        "Safayet Ullah", "organizer@eventflow.com", "Organizer123!", "ORGANIZER");
+                        "Occavie Organizer", "organizer@eventflow.com", "Organizer123!", "ORGANIZER");
                 User demoParticipant = ensureDemoUser(userRepository, passwordEncoder,
-                        "Safayet Ullah", "participant@eventflow.com", "Participant123!", "PARTICIPANT");
+                        "Demo Participant", "participant@eventflow.com", "Participant123!", "PARTICIPANT");
                 syncDemoDisplayNames(eventRepository, registrationRepository, feedbackRepository,
                         demoOrganizer, demoParticipant);
             }

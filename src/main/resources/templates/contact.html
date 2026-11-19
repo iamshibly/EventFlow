@@ -21,25 +21,25 @@
                 <div><span class="section-kicker">CONTACT INFORMATION</span><h2>Reach Occavie</h2><p>Use the form or contact the support representative directly.</p></div>
             </div>
 
-            <div class="contact-person-card">
-                <div class="contact-person-avatar">SU</div>
-                <div><small>Support Representative</small><strong>Safayet Ullah</strong></div>
+            <div class="contact-person-card" th:with="devName=${@site.developerName},devInitials=${@site.developerInitials}">
+                <div class="contact-person-avatar" th:text="${devInitials}">OC</div>
+                <div><small>Support Representative</small><strong th:text="${devName}">Occavie team</strong></div>
             </div>
 
-            <div class="contact-channel-list">
-                <a class="contact-channel" href="mailto:safayetullah019@gmail.com">
+            <div class="contact-channel-list" th:with="cMail=${@site.contactEmail},cWa=${@site.contactWhatsapp},cAddr=${@site.contactAddress}">
+                <a class="contact-channel" th:if="${!#strings.isEmpty(cMail)}" th:href="${'mailto:' + cMail}">
                     <span class="gmail-contact-mark"><img src="/images/gmail-logo.svg" th:src="@{/images/gmail-logo.svg}" alt="" width="26" height="26"></span>
-                    <div><small>Email</small><strong>safayetullah019@gmail.com</strong></div>
+                    <div><small>Email</small><strong th:text="${cMail}">email</strong></div>
                     <i class="bi bi-arrow-up-right"></i>
                 </a>
-                <a class="contact-channel whatsapp" href="https://wa.me/8801837945824" target="_blank" rel="noopener">
+                <a class="contact-channel whatsapp" th:if="${!#strings.isEmpty(cWa)}" th:href="${'https://wa.me/' + cWa}" target="_blank" rel="noopener">
                     <span><i class="bi bi-whatsapp"></i></span>
-                    <div><small>WhatsApp</small><strong>+880 1837-945824</strong></div>
+                    <div><small>WhatsApp</small><strong th:text="${'+' + cWa}">number</strong></div>
                     <i class="bi bi-arrow-up-right"></i>
                 </a>
-                <div class="contact-channel static">
+                <div class="contact-channel static" th:if="${!#strings.isEmpty(cAddr)}">
                     <span><i class="bi bi-geo-alt-fill"></i></span>
-                    <div><small>Address</small><strong>Southeast University, Dhaka</strong></div>
+                    <div><small>Address</small><strong th:text="${cAddr}">Dhaka, Bangladesh</strong></div>
                 </div>
             </div>
 

@@ -38,6 +38,10 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|
 | ![Admin users](docs/screenshots/admin-users.jpg) | ![Event wizard](docs/screenshots/event-wizard.jpg) |
 
+| Event setup (tabs) | |
+|---|---|
+| ![Event setup](docs/screenshots/event-program.jpg) | |
+
 | Mobile | Mobile, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |

@@ -5,10 +5,28 @@
 <th:block th:if="${!signedIn}"><div th:replace="~{fragments :: siteNav('contact')}"></div></th:block>
 
 <th:block th:if="${signedIn}"><div th:replace="~{fragments :: topbar}"></div></th:block>
+<th:block th:if="${!signedIn}">
+<section class="ov-auth-scene ov-ct-hero" aria-labelledby="ctTitle">
+  <div class="ov-auth-bg" aria-hidden="true">
+    <span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span>
+    <i class="orb o1"></i><i class="orb o2"></i>
+  </div>
+  <div class="ov-container ov-ct-hero-inner">
+    <p class="ov-eyebrow">OCCAVIE SUPPORT</p>
+    <h1 id="ctTitle">How can we <em>help?</em></h1>
+    <p class="ov-ab-lead">Questions about an event, a booking or hosting your own? Send us a message and a real person will get back to you.</p>
+    <ul class="ov-ct-chips" aria-label="Support highlights">
+      <li><i class="bi bi-chat-heart" aria-hidden="true"></i> Friendly, human replies</li>
+      <li><i class="bi bi-shield-check" aria-hidden="true"></i> Your message stays private</li>
+      <li><i class="bi bi-lightning-charge" aria-hidden="true"></i> Quick answers below</li>
+    </ul>
+  </div>
+</section>
+</th:block>
 <div th:class="${signedIn} ? 'app-shell' : 'contact-public-shell'">
     <th:block th:if="${signedIn}"><div th:replace="~{fragments :: sidebar('contact')}"></div></th:block>
     <main th:class="${signedIn} ? 'app-main contact-dashboard-main' : 'contact-public-main'">
-    <section class="contact-hero-copy">
+    <section class="contact-hero-copy" th:if="${signedIn}">
         <span class="section-kicker">OCCAVIE SUPPORT</span>
         <h1>How can we help?</h1>
         <p>Send a request to Occavie support for event, registration, organizer or technical assistance.</p>
@@ -75,6 +93,16 @@
             </form>
         </section>
     </div>
+    <section class="ov-ct-faq" th:if="${!signedIn}" aria-labelledby="ctFaq">
+        <div class="ov-ab-head"><p class="ov-eyebrow">QUICK ANSWERS</p><h2 id="ctFaq">Maybe we have already answered it</h2></div>
+        <div class="ov-ct-faq-list">
+            <details><summary>How do I get my ticket?</summary><p>After booking, open <strong>My Registrations</strong> in your dashboard and download the PDF ticket. It includes a QR code to scan at the door.</p></details>
+            <details><summary>I paid but my payment was not accepted</summary><p>Payments on Occavie are a demonstration. Use the reference shown at checkout exactly as displayed. If it still fails, send us the event name and what you saw.</p></details>
+            <details><summary>How do I host my own event?</summary><p>Create a free account, choose <strong>Host events</strong>, and the event wizard walks you through details, tickets and publishing. The Copilot shows what to improve.</p></details>
+            <details><summary>Can I get a refund or cancel a booking?</summary><p>Free bookings can be cancelled from your registrations. For anything else, send a request with the event name and we will point you to the organizer.</p></details>
+            <details><summary>I forgot my password</summary><p>Use <a href="/forgot-password">Forgot password</a> on the login page. We email you a secure link that works once for 30 minutes.</p></details>
+        </div>
+    </section>
 </main>
 </div>
 <th:block th:if="${signedIn}"><div th:replace="~{fragments :: toasts}"></div></th:block>

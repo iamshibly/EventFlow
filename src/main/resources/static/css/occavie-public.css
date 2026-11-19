@@ -865,3 +865,29 @@ body.ov-register-open .ov-auth-panel form#registerForm { animation: ovRise .35s 
 @media (max-width: 1080px) { .ov-ab-smart { grid-template-columns: repeat(3, minmax(0, 1fr)); } .ov-ab-values { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 860px) { .ov-ab-story { grid-template-columns: 1fr; gap: 32px; } .ov-ab-roles { grid-template-columns: 1fr; } .ov-ab-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ov-ab-collage { min-height: 360px; } }
 @media (max-width: 560px) { .ov-ab-smart, .ov-ab-values { grid-template-columns: 1fr; } .ov-ab-dev { grid-template-columns: 1fr; justify-items: start; } .ov-ab-hero h1 { max-width: none; } }
+
+/* ---- Contact page (public) ---- */
+.ov-ct-hero { min-height: 340px; padding: 64px 0 120px; align-items: center; }
+.ov-ct-hero-inner { position: relative; z-index: 2; display: grid; gap: 14px; justify-items: start; color: #fff; }
+.ov-ct-hero .ov-eyebrow { color: #F2C14E; letter-spacing: .24em; }
+.ov-ct-hero h1 { font-family: var(--font-display); font-size: clamp(2.6rem, 6vw, 4.4rem); line-height: 1; color: #fff; }
+.ov-ct-hero h1 em { font-style: normal; color: #F2C14E; }
+.ov-ct-chips { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.ov-ct-chips li { display: inline-flex; gap: 8px; align-items: center; padding: 9px 14px; border-radius: 999px; font-size: .85rem; font-weight: 700; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(10px); }
+.ov-ct-chips i { color: #F2C14E; }
+body.contact-public-body .contact-public-shell { padding-top: 0; }
+body.contact-public-body .contact-layout { position: relative; z-index: 3; margin-top: -84px; }
+body.contact-public-body .contact-form-card { box-shadow: 0 24px 60px rgba(11,21,48,.25); border-radius: 26px; }
+body.contact-public-body .contact-info-card { border-radius: 26px; box-shadow: 0 24px 60px rgba(11,21,48,.35); background: linear-gradient(160deg, #0B1530, #14305A); }
+body.contact-public-body .contact-form input:focus, body.contact-public-body .contact-form select:focus, body.contact-public-body .contact-form textarea:focus { border-color: var(--gold-2, #D19208); box-shadow: 0 0 0 3px rgba(229,173,28,.28); outline: none; }
+body.contact-public-body .contact-submit-button { min-height: 50px; padding: 0 28px; }
+.ov-ct-faq { margin: 64px 0 24px; }
+.ov-ct-faq-list { display: grid; gap: 12px; max-width: 860px; }
+.ov-ct-faq details { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 0 20px; transition: box-shadow .2s, border-color .2s; }
+.ov-ct-faq details[open] { border-color: var(--gold-2, #D19208); box-shadow: var(--shadow-sm); }
+.ov-ct-faq summary { cursor: pointer; list-style: none; padding: 18px 0; font-weight: 700; color: var(--ink); display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.ov-ct-faq summary::-webkit-details-marker { display: none; }
+.ov-ct-faq summary::after { content: "+"; font-size: 1.4rem; color: var(--brand); line-height: 1; transition: transform .2s; }
+.ov-ct-faq details[open] summary::after { transform: rotate(45deg); }
+.ov-ct-faq details p { padding: 0 0 18px; color: var(--ink-2); }
+.ov-ct-faq details a { color: var(--brand); font-weight: 700; }

@@ -79,19 +79,19 @@ public class ViewFormatter {
      * Preferred real photos per category (files in static/images/photos/). Names that are not present on the classpath
      * are skipped, so adding a photo with one of these names is enough: no code change needed.
      */
-    private static final java.util.Map<String, java.util.List<String>> PHOTO_NAMES = java.util.Map.of(
-            "technology", java.util.List.of("tech-lock", "laptop-bw", "workshop-room", "workshop", "conference"),
-            "business", java.util.List.of("business-laptop", "market-stall", "networking", "speaker-hall", "conference"),
-            "education", java.util.List.of("panel", "speaker-hall", "workshop-room", "workshop", "business-laptop"),
-            "career", java.util.List.of("career-fair", "networking", "business-laptop"),
-            "design", java.util.List.of("design-desk", "market-stall", "business-laptop"),
-            "music", java.util.List.of("music", "dance", "conference"),
-            "community", java.util.List.of("volunteers", "dance", "networking", "workshop"),
-            "sports", java.util.List.of("marathon"),
-            "arts", java.util.List.of("market-stall", "dance", "design-desk"),
-            "science", java.util.List.of("workshop-room", "panel", "tech-lock"),
-            "food", java.util.List.of("market-stall"),
-            "charity", java.util.List.of("volunteers", "networking"));
+    private static final java.util.Map<String, java.util.List<String>> PHOTO_NAMES = java.util.Map.ofEntries(
+            java.util.Map.entry("technology", java.util.List.of("tech-lock", "laptop-bw", "workshop-room", "workshop", "conference")),
+            java.util.Map.entry("business", java.util.List.of("business-laptop", "market-stall", "networking", "speaker-hall", "conference")),
+            java.util.Map.entry("education", java.util.List.of("panel", "speaker-hall", "workshop-room", "workshop", "business-laptop")),
+            java.util.Map.entry("career", java.util.List.of("career-fair", "networking", "business-laptop")),
+            java.util.Map.entry("design", java.util.List.of("design-desk", "market-stall", "business-laptop")),
+            java.util.Map.entry("music", java.util.List.of("music", "dance", "conference")),
+            java.util.Map.entry("community", java.util.List.of("volunteers", "dance", "networking", "workshop")),
+            java.util.Map.entry("sports", java.util.List.of("marathon")),
+            java.util.Map.entry("arts", java.util.List.of("market-stall", "dance", "design-desk")),
+            java.util.Map.entry("science", java.util.List.of("workshop-room", "panel", "tech-lock")),
+            java.util.Map.entry("food", java.util.List.of("market-stall")),
+            java.util.Map.entry("charity", java.util.List.of("volunteers", "networking")));
     private static final java.util.Map<String, java.util.List<String>> PHOTOS = new java.util.concurrent.ConcurrentHashMap<>();
 
     private static java.util.List<String> photosFor(String category) {

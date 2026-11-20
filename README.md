@@ -10,55 +10,97 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 
 ## Screenshots
 
-| Smart search | Compare events | Concierge assistant |
-|---|---|---|
-| ![Smart search](docs/screenshots/smart-search.jpg) | ![Compare](docs/screenshots/compare.jpg) | ![Concierge](docs/screenshots/concierge.jpg) |
+Every page shares one look: a navy-and-gold identity, serif headings, a slowly moving photo backdrop in the page banners, and light and dark themes. All screenshots come from a local run with sample data.
 
-| Recommendations with reasons | Organizer Copilot | Sign in |
-|---|---|---|
-| ![Recommendations](docs/screenshots/recommendations.jpg) | ![Copilot](docs/screenshots/organizer-copilot.jpg) | ![Login](docs/screenshots/login.jpg) |
+### Public pages
 
-| Explore | Event details | Admin (dark mode) |
-|---|---|---|
-| ![Explore](docs/screenshots/events-desktop.jpg) | ![Event details](docs/screenshots/event-details.jpg) | ![Admin dark](docs/screenshots/admin-dashboard-dark.jpg) |
-
-| Register | Forgot password |
+| Home | Explore |
 |---|---|
-| ![Register](docs/screenshots/register.jpg) | ![Forgot password](docs/screenshots/forgot-password.jpg) |
+| ![Home](docs/screenshots/home-desktop.jpg) | ![Explore](docs/screenshots/events-desktop.jpg) |
+
+| Event details | Compare |
+|---|---|
+| ![Event details](docs/screenshots/event-details.jpg) | ![Compare](docs/screenshots/compare.jpg) |
 
 | About | Contact |
 |---|---|
 | ![About](docs/screenshots/about.jpg) | ![Contact](docs/screenshots/contact.jpg) |
 
-| Participant dashboard | Organizer dashboard |
+| Organizer public page | Not found |
 |---|---|
-| ![Participant dashboard](docs/screenshots/participant-dashboard.jpg) | ![Organizer dashboard](docs/screenshots/organizer-dashboard.jpg) |
+| ![Organizer page](docs/screenshots/organizer-page.jpg) | ![Not found](docs/screenshots/not-found.jpg) |
 
-| Admin users | Event wizard |
-|---|---|
-| ![Admin users](docs/screenshots/admin-users.jpg) | ![Event wizard](docs/screenshots/event-wizard.jpg) |
+### Sign in and account
 
-| Event setup (tabs) | |
+| Sign in | Register |
 |---|---|
-| ![Event setup](docs/screenshots/event-program.jpg) | |
+| ![Login](docs/screenshots/login.jpg) | ![Register](docs/screenshots/register.jpg) |
 
-| Notifications | Profile |
+| Forgot password | Profile |
 |---|---|
-| ![Notifications](docs/screenshots/notifications.jpg) | ![Profile](docs/screenshots/profile.jpg) |
+| ![Forgot password](docs/screenshots/forgot-password.jpg) | ![Profile](docs/screenshots/profile.jpg) |
+
+| Notifications | |
+|---|---|
+| ![Notifications](docs/screenshots/notifications.jpg) | |
+
+### Smart features
+
+| Smart search | Concierge assistant |
+|---|---|
+| ![Smart search](docs/screenshots/smart-search.jpg) | ![Concierge](docs/screenshots/concierge.jpg) |
+
+| Recommendations with reasons | Organizer Copilot |
+|---|---|
+| ![Recommendations](docs/screenshots/recommendations.jpg) | ![Copilot](docs/screenshots/organizer-copilot.jpg) |
+
+### Booking
 
 | Checkout | Payment result |
 |---|---|
 | ![Checkout](docs/screenshots/checkout.jpg) | ![Payment result](docs/screenshots/payment-result.jpg) |
 
-| Organizer public page | Not found |
-|---|---|
-| ![Organizer page](docs/screenshots/organizer-page.jpg) | ![Not found](docs/screenshots/not-found.jpg) |
+### Workspaces
 
-| Mobile | Mobile, dark mode |
+| Participant dashboard | Organizer dashboard |
+|---|---|
+| ![Participant dashboard](docs/screenshots/participant-dashboard.jpg) | ![Organizer dashboard](docs/screenshots/organizer-dashboard.jpg) |
+
+| Admin dashboard (dark mode) | Admin users |
+|---|---|
+| ![Admin dark](docs/screenshots/admin-dashboard-dark.jpg) | ![Admin users](docs/screenshots/admin-users.jpg) |
+
+| Event wizard | Event setup (tabs) |
+|---|---|
+| ![Event wizard](docs/screenshots/event-wizard.jpg) | ![Event setup](docs/screenshots/event-program.jpg) |
+
+### On a phone
+
+| Home | Event details, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |
 
-> Screenshots come from a local run with sample data.
+## Page tour
+
+| Page | What it offers |
+|---|---|
+| **Home** | Moving-photo hero with the smart search box, popular-search chips and live stats; category tiles; upcoming events; a three-step "how it works"; the smart helpers; a closing call to action |
+| **Explore** | Smart search card over a photo hero, full filters (search, place, category, price, status, dates, sort), category pills, event cards with Compare and Save |
+| **Event details** | Full-width hero from the event's own photo with title, status and glass chips for date, place, seats left and price; actions (save, calendar, compare, share); venue and map; programme, speakers, gallery and sponsors; ticket panel with a mobile booking bar |
+| **Compare** | Two or three events side by side with the best value in each row highlighted |
+| **About** | Story, the three workspaces, the five smart helpers, principles, developer card and call to action |
+| **Contact** | Support form beside direct channels (WhatsApp, Facebook, LinkedIn, email, address) and a quick-answers FAQ |
+| **Organizer page** | Public profile with bio, links and counts, upcoming events and history |
+| **Sign in / Register** | Moving-photo backdrop; register uses two cards ("Join events" or "Host events"); password strength guide |
+| **Forgot / reset password** | Dedicated pages with a three-step guide, a "check your inbox" confirmation and an expired-link state |
+| **Checkout** | Three-step progress, payment-method and promo steps, and a sticky order summary |
+| **Payment result** | Ticket-style confirmation with reference and PDF ticket and receipt downloads, or a calm not-confirmed state |
+| **Dashboards** | Banner with a time-of-day greeting, colour-coded stat tiles, recommendations (participant), analytics and Copilot attention list (organizer), platform analytics (admin) |
+| **Workspace pages** | Every Organizer, Admin and Participant page opens with the photo banner; tables, cards, badges and forms share one polished style |
+| **Event setup** | Sticky tabs for tickets, schedule, speakers, gallery and sponsors, with counts |
+| **Notifications** | Colour-coded card per message type, unread highlight, filters and "mark all read" |
+| **Profile** | Cover with avatar, public organizer profile, switch-style email preferences and password change |
+| **Errors and offline** | 404, 500 and 403 pages and the offline fallback share the same look and offer ways forward |
 
 ## What the website can do
 
@@ -117,7 +159,8 @@ How they stay honest: recommendations never suggest booked, saved, sold-out, pas
 
 ### Look and feel
 
-* Navy-and-gold identity with serif headings, an original logo, photo-led pages, light and dark themes.
+* Navy-and-gold identity with serif headings, an original logo, photo-led pages with a slowly moving photo backdrop (it stands still for people who prefer reduced motion), light and dark themes.
+* One consistent design across every public page, the sign-in flow, checkout and all three workspaces (see the page tour above).
 * Responsive layouts (checked at phone, tablet, laptop and large-desktop widths), skip links, keyboard-friendly dialogs, custom 404 and error pages, optional installable PWA shell that only caches static assets.
 
 ### Platform
@@ -143,6 +186,7 @@ How they stay honest: recommendations never suggest booked, saved, sold-out, pas
 | Demo data | Sample events on an empty database; a daily job keeps at least 24 upcoming events inside the next 90 days with shuffled dates |
 | Performance | Event page queries run in parallel; Save updates instantly without reloading |
 | Fixes | "Invalid payment reference" after paying (the reference prefix check), stale cached CSS, wrong contact details |
+| Page redesigns | Home, Explore, Event details, Compare, About, Contact, Organizer page, Sign in, Register, Forgot and reset password, Checkout, Payment result, all dashboards and workspace pages, Event setup tabs, Notifications, Profile, error pages and the offline page, each checked with axe at phone and desktop sizes in light and dark mode |
 | Smart features | Smart search, Compare events, Recommendations with reasons (💡), Organizer Copilot, Occavie Concierge |
 
 ## Stack

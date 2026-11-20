@@ -5,12 +5,16 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <div th:replace="~{fragments :: siteNav('events')}"></div>
 <main id="main-content">
-  <section class="ov-compare-hero">
-    <div class="ov-container">
-      <a class="ov-back-link" th:href="@{/events}" href="/events"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to events</a>
+  <section class="ov-auth-scene ov-ex-hero ov-cmp-hero" aria-labelledby="cmpTitle">
+  <div class="ov-auth-bg" aria-hidden="true">
+    <span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span>
+    <i class="orb o1"></i><i class="orb o2"></i>
+  </div>
+    <div class="ov-container ov-cmp-hero-inner">
+      <a class="ov-ed-back" th:href="@{/events}" href="/events"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to events</a>
       <p class="ov-eyebrow">SIDE BY SIDE</p>
-      <h1>Compare events</h1>
-      <p>Price, date, venue, tickets, seats and speakers in one view. The best value in each row is highlighted.</p>
+      <h1 id="cmpTitle">Compare <em>events</em></h1>
+      <p class="ov-ab-lead">Price, date, venue, tickets, seats and speakers in one view. The best value in each row is highlighted.</p>
     </div>
   </section>
 

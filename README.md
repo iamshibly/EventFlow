@@ -50,6 +50,10 @@ Developed by **Md. Zubayer Ahmad Shibly**.
 |---|---|
 | ![Checkout](docs/screenshots/checkout.jpg) | ![Payment result](docs/screenshots/payment-result.jpg) |
 
+| Organizer public page | Not found |
+|---|---|
+| ![Organizer page](docs/screenshots/organizer-page.jpg) | ![Not found](docs/screenshots/not-found.jpg) |
+
 | Mobile | Mobile, dark mode |
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.jpg) | ![Mobile event](docs/screenshots/event-details-mobile-dark.jpg) |
